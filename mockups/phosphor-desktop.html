@@ -1,0 +1,219 @@
+<!doctype html><html><head><meta charset="utf-8"><title>desk</title></head><body style="margin:20px;width:680px;font-family:sans-serif">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+#jd{--dith:color-mix(in srgb,var(--fg) 20%,var(--bg));position:relative;height:480px;border-radius:22px;overflow:hidden;background:var(--bg);color:var(--fg);font:18px/1.1 VT323,monospace;font-variant-ligatures:none;user-select:none;cursor:default;text-align:left}
+#jd.glow{text-shadow:0 0 2px var(--dim)}
+#jd.scan::after{content:"";position:absolute;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6) 100%)}
+#jd.flick::before{content:"";position:absolute;inset:0;z-index:9998;pointer-events:none;background:var(--fg);opacity:0;animation:fl 4s infinite}
+@keyframes fl{0%,100%{opacity:0}48%{opacity:.03}50%{opacity:0}53%{opacity:.02}}
+@media (prefers-reduced-motion:reduce){#jd.flick::before{animation:none}}
+#jd [hidden]{display:none!important}
+#jd p{margin:0}
+#jd a{color:inherit}
+#jd img{image-rendering:pixelated;flex:none}
+#jd button{all:unset;box-sizing:border-box;display:inline-block;text-align:center;min-width:72px;height:24px;padding:0 12px;border:1px solid var(--fg);background:var(--bg);color:var(--fg);font:inherit;line-height:22px;cursor:default;white-space:nowrap}
+#jd button:active:not(:disabled),#jd button.in{background:var(--fg);color:var(--bg);text-shadow:none}
+#jd button.dflt{outline:1px solid var(--fg);outline-offset:2px}
+#jd button:focus-visible{outline:1px dashed var(--fg);outline-offset:2px}
+#jd input[type=text],#jd textarea{all:unset;box-sizing:border-box;border:1px solid var(--fg);background:var(--bg);color:var(--fg);font:inherit;padding:2px 6px;user-select:text;caret-color:var(--fg)}
+#jd textarea{white-space:pre-wrap;overflow:hidden}
+#jd input[type=checkbox],#jd input[type=radio]{all:unset;box-sizing:border-box;flex:none;width:14px;height:14px;border:1px solid var(--fg);padding:2px;background-clip:content-box}
+#jd input[type=radio]{border-radius:50%}
+#jd input:checked{background-color:var(--fg)}
+#jd label{display:flex;align-items:center;gap:7px}
+.dim{color:var(--dim)}
+.mbar{position:absolute;top:0;left:0;right:0;height:24px;box-sizing:border-box;display:flex;align-items:stretch;padding:0 10px;border-bottom:1px solid var(--fg);background:var(--bg);z-index:9000}
+.mt{position:relative;display:flex;align-items:center;padding:0 9px}
+.mt.open{background:var(--fg);color:var(--bg);text-shadow:none}
+.clk{margin-left:auto;display:flex;align-items:center}
+.dd{position:absolute;top:23px;left:0;min-width:180px;padding:3px 0;background:var(--bg);color:var(--fg);border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim)}
+.mi{position:relative;height:21px;display:flex;align-items:center;padding:0 24px;white-space:nowrap}
+.mi:hover:not(.off){background:var(--fg);color:var(--bg)}
+.mi.off{color:var(--dim)}
+.mi.chk::before{content:"";position:absolute;left:9px;top:8px;width:6px;height:6px;background:currentColor}
+.msep{border-top:1px dashed var(--dim);margin:3px 0}
+.desk{position:absolute;inset:24px 0 0 0;background-image:repeating-conic-gradient(var(--dith) 0 25%,transparent 0 50%);background-size:2px 2px}
+#jd.plain .desk{background-image:none}
+.dicons{position:absolute;right:8px;top:10px;bottom:10px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ic{width:88px;display:flex;flex-direction:column;align-items:center;gap:2px;outline:none}
+.ic span{background:var(--bg);padding:0 4px;line-height:18px;text-align:center}
+.ic.on span{background:var(--fg);color:var(--bg);text-shadow:none}
+.win{position:absolute;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim)}
+.win.dlg{border:3px double var(--fg)}
+.tb{flex:none;height:22px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 3px 0 7px;border-bottom:1px solid var(--fg);touch-action:none}
+.win.act .tb{background:var(--fg);color:var(--bg);text-shadow:none}
+.tt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbc{display:flex;gap:3px}
+#jd .tbc button{min-width:0;width:16px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.win.act .tbc button{border-color:var(--bg)}
+#jd .tbc button:active img{transform:translate(1px,1px)}
+.info{flex:none;display:flex;justify-content:space-between;padding:0 8px;border-bottom:1px solid var(--fg);color:var(--dim)}
+.wb{flex:1;min-height:0;overflow:hidden;padding:10px;display:flex;flex-direction:column}
+.grip{position:absolute;right:1px;bottom:1px;width:12px;height:12px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 0 45%,var(--fg) 45% 55%,transparent 55% 70%,var(--fg) 70% 80%,transparent 80%)}
+.win.shaded .wb,.win.shaded .info,.win.shaded .grip{display:none}
+.grid{display:flex;flex-wrap:wrap;gap:10px 2px;align-content:flex-start}
+.win .ic{width:92px}
+.list{width:100%;border-collapse:collapse}
+.list th{text-align:left;font-weight:400;padding:0 6px;border-bottom:1px solid var(--fg)}
+.list td{padding:1px 6px;white-space:nowrap}
+.list img{vertical-align:-3px;margin-right:6px}
+.lr.on td{background:var(--fg);color:var(--bg);text-shadow:none}
+.ihead{display:flex;gap:12px;align-items:center}
+.rule{border-top:1px solid var(--fg);margin:8px 0}
+.kv{display:grid;grid-template-columns:64px 1fr;gap:2px 10px}
+.kv2{display:grid;grid-template-columns:64px 1fr;gap:6px 8px;align-items:center}
+.cp{display:grid;grid-template-columns:84px 1fr;gap:12px 10px}
+.opts{display:flex;gap:16px;flex-wrap:wrap}
+.btns{display:flex;justify-content:flex-end;gap:12px;margin-top:auto;padding-top:10px}
+.al{flex:1;display:flex;gap:16px;align-items:center}
+.txt{white-space:pre-wrap;user-select:text}
+.tout{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;white-space:pre-wrap;word-break:break-word}
+.tin{display:flex;margin:0}
+#jd .tin input{all:unset;flex:1;color:var(--fg);font:inherit;caret-color:var(--fg)}
+.full{position:absolute;inset:0;z-index:9500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<h2 class="sr-only">Phosphor desktop mockup: a monochrome CRT desktop with a menu bar, icons, movable windows and dialogs.</h2>
+<div style="background:var(--surface-1);border-radius:12px;padding:14px">
+<div id="jd" class="scan glow" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="mbar" id="mbar"><div class="mt" data-m="0"><img data-i="cat" data-s="1" width="16" height="16" alt="Jelly menu"></div><div class="mt" data-m="1">File</div><div class="mt" data-m="2">Edit</div><div class="mt" data-m="3">View</div><div class="mt" data-m="4">Special</div><div class="mt" data-m="5">Window</div><div class="clk" id="clk"></div></div>
+<div class="desk" id="desk"><div class="dicons">
+<div class="ic" tabindex="0" data-a="hd"><img data-i="disk" data-s="2" width="32" height="32" alt=""><span>Jelly HD</span></div>
+<div class="ic" tabindex="0" data-a="projects"><img data-i="folder" data-s="2" width="32" height="32" alt=""><span>Projects</span></div>
+<div class="ic" tabindex="0" data-a="readme"><img data-i="doc" data-s="2" width="32" height="32" alt=""><span>Readme</span></div>
+<div class="ic" tabindex="0" data-a="term"><img data-i="term" data-s="2" width="32" height="32" alt=""><span>Terminal</span></div>
+<div class="ic" tabindex="0" data-a="mail"><img data-i="mail" data-s="2" width="32" height="32" alt=""><span>Mail</span></div>
+<div class="ic" tabindex="0" data-a="trash" style="margin-top:auto"><img data-i="trash" data-s="2" width="32" height="32" alt=""><span>Trash</span></div>
+</div></div>
+<div class="full" id="boot"><img data-i="cat" data-s="4" width="64" height="64" alt=""><p style="margin-top:10px">Jelly-OS 1.0</p><p class="dim">Starting up</p></div>
+<div class="full" id="off" hidden><p>Jelly-OS has shut down.</p><p class="dim">Click to restart.</p></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;font-size:13px;color:var(--text-secondary)">
+<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><button id="rb" style="margin-left:auto">Restart</button>
+</div>
+</div>
+<script>
+const P={green:['#33ff66','#1a9c40','#031208'],amber:['#ffb000','#a86f00','#140b00'],white:['#e8eef8','#8a93a6','#0b0d12']};
+const PJ=[
+['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest'],
+['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker',''],
+['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1',''],
+['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app'],
+['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua',''],
+['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua',''],
+['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua',''],
+['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua',''],
+['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua',''],
+['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://github.com/salty-max/gero'],
+['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig',''],
+['opus','Opus','engines','Game engine','A 2D game engine in C++23, built RTS-first: deterministic lockstep, SDL3 GPU rendering, Lua scripting.','C++23, SDL3, Lua','']];
+const KIND={web:'Web',addons:'Addons',engines:'Engines'};
+const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons,\nand game engines and tools.\n\nOpen Projects to see each one.\nContact: hello@your-domain (placeholder)';
+const CONTACT='Email   hello@your-domain (placeholder)\nGitHub  github.com/salty-max';
+const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}}}}};
+PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]+'.txt']={p}});
+const IC={
+disk:['','','','','################','#oooooooooooooo#','#o############o#','#oooooooooooooo#','#oooooooooooooo#','#o##ooooooooooo#','#oooooooooooooo#','################','.##..........##.'],
+folder:['','','.#####..........','#ooooo#.........','################','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','################'],
+doc:['','..#########.....','..#ooooooo##....','..#ooooooo#o#...','..#ooooooo####..','..#oooooooooo#..','..#o######ooo#..','..#oooooooooo#..','..#o########o#..','..#oooooooooo#..','..#o#######oo#..','..#oooooooooo#..','..#o########o#..','..#oooooooooo#..','..############..'],
+term:['','################','#oooooooooooooo#','#o############o#','#o#o##########o#','#o##o#########o#','#o#o###oooo###o#','#o############o#','#o############o#','#o############o#','#oooooooooooooo#','################','....########....','...##########...'],
+mail:['','','','################','##oooooooooooo##','#o#oooooooooo#o#','#oo#oooooooo#oo#','#ooo#oooooo#ooo#','#oooo#oooo#oooo#','#ooooo####ooooo#','#oooooooooooooo#','#oooooooooooooo#','################'],
+trash:['','......####......','..############..','..#oooooooooo#..','..############..','...#oooooooo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oooooooo#...','...##########...'],
+panel:['','','################','#oooooooooooooo#','#oo#ooo#ooo#ooo#','#o###oo#ooo#ooo#','#oo#ooo#ooo#ooo#','#oo#ooo#oo###oo#','#oo#ooo#ooo#ooo#','#oo#oo###oo#ooo#','#oo#ooo#ooo#ooo#','#oooooooooooooo#','################'],
+cat:['','..#..........#..','.#o#........#o#.','.#oo########oo#.','.#oooooooooooo#.','#oooooooooooooo#','#oo##oooooo##oo#','#oo##oooooo##oo#','#oooooo##oooooo#','#oooooooooooooo#','.#ooo#oooo#ooo#.','..#ooo####ooo#..','...##oooooo##...','.....######.....'],
+app:['','','################','################','#oooooooooooooo#','#o###o#######oo#','#o###oooooooooo#','#o###o######ooo#','#oooooooooooooo#','#o###########oo#','#o########ooooo#','#oooooooooooooo#','################']};
+const GL={x:['##....##','###..###','.######.','..####..','..####..','.######.','###..###','##....##'],min:['','','','########','########','','',''],max:['########','########','#......#','#......#','#......#','#......#','#......#','########']};
+const $=id=>document.getElementById(id),root=$('jd'),desk=$('desk');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+let theme='green',fx={scan:true,glow:true,flick:false},dith=true,z=10,cur=null,sel=null,openM=null,ac=0,booting=true,bt;const W={},cache={};
+function src(n,s,v){const k=theme+n+s+(v?1:0);if(cache[k])return cache[k];const m=IC[n]||GL[n],sz=IC[n]?16:8,[f,,b]=P[theme],F=v?b:f,B=v?f:b,c=document.createElement('canvas');c.width=c.height=sz*s;const g=c.getContext('2d');m.forEach((r,y)=>{for(let x=0;x<r.length;x++){const ch=r[x];if(ch==='.')continue;g.fillStyle=ch==='#'?F:B;g.fillRect(x*s,y*s,s,s)}});return cache[k]=c.toDataURL()}
+const im=(n,s,v)=>{const d=(IC[n]?16:8)*s;return `<img data-i="${n}" data-s="${s}"${v?' data-v="1"':''} src="${src(n,s,v)}" width="${d}" height="${d}" alt="">`};
+function refresh(){root.querySelectorAll('img[data-i]').forEach(e=>{e.src=src(e.dataset.i,+e.dataset.s,!!e.dataset.v)})}
+function inv(el,on){el.querySelectorAll('img[data-i]').forEach(m=>{if(on)m.dataset.v='1';else delete m.dataset.v;m.src=src(m.dataset.i,+m.dataset.s,on)})}
+function select(it){if(sel&&sel.isConnected){sel.classList.remove('on');inv(sel,false)}sel=it;if(it){it.classList.add('on');inv(it,true)}}
+function setTheme(t){if(!P[t])return;theme=t;const [f,d,b]=P[t];root.style.setProperty('--fg',f);root.style.setProperty('--dim',d);root.style.setProperty('--bg',b);refresh();root.querySelectorAll('input[name=ph]').forEach(r=>{r.checked=r.value===t})}
+function setFx(k,v){fx[k]=v;root.classList.toggle(k,v)}
+function setDith(v){dith=v;root.classList.toggle('plain',!v)}
+function focus(id){const w=W[id];if(!w)return;Object.values(W).forEach(o=>o.el.classList.remove('act'));w.el.classList.add('act');w.el.style.zIndex=++z;cur=id}
+function close(id){if(!W[id])return;W[id].el.remove();delete W[id];if(cur===id){cur=null;const top=Object.keys(W).sort((a,b)=>W[b].el.style.zIndex-W[a].el.style.zIndex)[0];if(top)focus(top)}}
+function shade(id){const w=W[id],el=w.el;if(el.classList.toggle('shaded')){w.hh=el.style.height;el.style.height='auto'}else el.style.height=w.hh}
+function zoom(id){const w=W[id],s=w.el.style;if(w.zr){Object.assign(s,w.zr);w.zr=null}else{w.zr={left:s.left,top:s.top,width:s.width,height:s.height};Object.assign(s,{left:'8px',top:'8px',width:desk.clientWidth-112+'px',height:desk.clientHeight-16+'px'})}}
+function drag(el,h){h.onpointerdown=e=>{if(e.target.closest('button'))return;h.setPointerCapture(e.pointerId);const sx=e.clientX-el.offsetLeft,sy=e.clientY-el.offsetTop;h.onpointermove=m=>{el.style.left=Math.max(60-el.offsetWidth,Math.min(desk.clientWidth-60,m.clientX-sx))+'px';el.style.top=Math.max(0,Math.min(desk.clientHeight-22,m.clientY-sy))+'px'};h.onpointerup=()=>{h.onpointermove=null}}}
+function grip(el,h){h.onpointerdown=e=>{e.stopPropagation();h.setPointerCapture(e.pointerId);const sx=e.clientX,sy=e.clientY,w=el.offsetWidth,ht=el.offsetHeight;h.onpointermove=m=>{el.style.width=Math.max(220,w+m.clientX-sx)+'px';el.style.height=Math.max(120,ht+m.clientY-sy)+'px'};h.onpointerup=()=>{h.onpointermove=null}}}
+function win(id,t,body,w,h,o={}){if(W[id]){focus(id);return W[id].el}const n=Object.keys(W).length,el=document.createElement('div');el.className='win'+(o.dlg?' dlg':'');
+const dw=desk.clientWidth,dh=desk.clientHeight,x=o.center?Math.round((dw-w)/2):Math.max(8,Math.min(16+n*26,dw-w-104)),y=o.center?Math.round((dh-h)/2.5):Math.max(8,Math.min(10+n*24,dh-h-8));
+el.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+el.innerHTML=(o.dlg?'':`<div class="tb"><span class="tt">${esc(t)}</span><span class="tbc"><button data-c="shade" aria-label="Collapse">${im('min',1)}</button><button data-c="zoom" aria-label="Zoom">${im('max',1)}</button><button data-c="x" aria-label="Close">${im('x',1)}</button></span></div>`)+(o.info?'<div class="info"></div>':'')+`<div class="wb">${body}</div>`+(o.dlg?'':'<div class="grip"></div>');
+el.addEventListener('pointerdown',()=>focus(id));el.addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(!c)return;e.stopPropagation();({shade,zoom,x:close})[c.dataset.c](id)});
+if(!o.dlg){drag(el,el.querySelector('.tb'));grip(el,el.querySelector('.grip'))}
+desk.appendChild(el);W[id]={el,t:o.dlg?'':t,...o};focus(id);return el}
+function folder(id,t,items){const fresh=!W[id];win(id,t,'',380,232,{info:1});if(fresh){W[id].items=items;W[id].view='icon';fdraw(id)}}
+function fdraw(id){const w=W[id],it=w.items;w.el.querySelector('.info').innerHTML=`<span>${it.length} item${it.length===1?'':'s'}</span><span>${w.view==='icon'?'by icon':'by name'}</span>`;
+w.el.querySelector('.wb').innerHTML=!it.length?'<p class="dim">No items</p>':w.view==='icon'?`<div class="grid">${it.map(x=>`<div class="ic" tabindex="0" data-a="${x.a}">${im(x.i,2)}<span>${esc(x.n)}</span></div>`).join('')}</div>`:`<table class="list"><tr><th>Name</th><th>Kind</th></tr>${it.map(x=>`<tr class="lr" data-a="${x.a}"><td>${im(x.i,1)}${esc(x.n)}</td><td>${x.k}</td></tr>`).join('')}</table>`}
+const HD=[{a:'projects',i:'folder',n:'Projects',k:'Folder'},{a:'readme',i:'doc',n:'Readme',k:'Text'},{a:'term',i:'term',n:'Terminal',k:'Application'},{a:'mail',i:'mail',n:'Mail',k:'Application'},{a:'panel',i:'panel',n:'Control Panel',k:'Application'}];
+const PRJ=Object.keys(KIND).map(k=>({a:'f:'+k,i:'folder',n:KIND[k],k:'Folder'}));
+const items=k=>PJ.filter(p=>p[2]===k).map(p=>({a:'p:'+p[0],i:'app',n:p[1],k:p[3]}));
+function info(id){const p=PJ.find(x=>x[0]===id);win('i'+id,p[1]+' Info',`<div class="ihead">${im('app',2)}<div><p>${esc(p[1])}</p><p class="dim">${p[3]}</p></div></div><div class="rule"></div><div class="kv"><span class="dim">Stack</span><span>${esc(p[5])}</span><span class="dim">Link</span><span>${p[6]?`<a href="${p[6]}" target="_blank" rel="noopener">${p[6].replace(/^https?:\/\//,'')}</a>`:'-'}</span></div><div class="rule"></div><p>${esc(p[4])}</p>`,340,250)}
+function alertBox(msg,btns){win('a'+(++ac),'',`<div class="al">${im('cat',2)}<p>${msg}</p></div><div class="btns">${btns||'<button class="dflt" data-c="x">OK</button>'}</div>`,320,140,{dlg:1,center:1})}
+function resolve(cwd,p){const s=/^[~\/]/.test(p)?[]:[...cwd];p.replace(/^~\/?|^\//,'').split('/').forEach(x=>{if(!x||x==='.')return;if(x==='..')s.pop();else s.push(x)});return s}
+function node(s){let n={d:HOME};for(const x of s){if(!n.d||!n.d[x])return null;n=n.d[x]}return n}
+const ptext=p=>`${p[1]}\n${p[3]}\n\n${p[4]}\n\nStack  ${p[5]}\nLink   ${p[6]||'-'}`;
+const findP=q=>q&&PJ.find(p=>p[0].startsWith(q.toLowerCase())||p[1].toLowerCase().startsWith(q.toLowerCase()));
+const isF=()=>cur&&W[cur]&&W[cur].items;
+const A={
+hd:()=>folder('hd','Jelly HD',HD),projects:()=>folder('projects','Projects',PRJ),f:k=>folder('f'+k,KIND[k],items(k)),p:id=>info(id),
+trash:()=>folder('trash','Trash',[]),
+readme:()=>win('readme','Readme',`<div class="txt">${esc(README)}</div>`,340,210),
+mail:()=>win('mail','New Message','<div class="kv2"><span class="dim">To</span><input type="text" value="hello@your-domain"><span class="dim">Subject</span><input type="text"></div><textarea style="flex:1;margin-top:8px;resize:none"></textarea><div class="btns"><button class="dflt" data-go="send">Send</button></div>',370,250),
+send:()=>alertBox('Sending is turned off in this mockup.'),
+panel:()=>{const el=win('panel','Control Panel',`<div class="cp"><span class="dim">Phosphor</span><div class="opts">${['green','amber','white'].map(t=>`<label><input type="radio" name="ph" value="${t}"${t===theme?' checked':''}>${t[0].toUpperCase()+t.slice(1)}</label>`).join('')}</div><span class="dim">Effects</span><div class="opts">${[['scan','Scanlines'],['glow','Glow'],['flick','Flicker']].map(([k,n])=>`<label><input type="checkbox" data-fx="${k}"${fx[k]?' checked':''}>${n}</label>`).join('')}</div><span class="dim">Desktop</span><div class="opts"><label><input type="checkbox" data-dith${dith?' checked':''}>Dither pattern</label></div></div>`,400,170);if(el.dataset.ok)return;el.dataset.ok=1;el.addEventListener('change',e=>{const t=e.target;if(t.name==='ph')setTheme(t.value);else if(t.dataset.fx)setFx(t.dataset.fx,t.checked);else if('dith' in t.dataset)setDith(t.checked)})},
+term:()=>{const el=win('term','Terminal','<div class="tout"></div><form class="tin"><span class="tps"></span><input aria-label="Command" autocomplete="off" spellcheck="false"></form>',410,240);const inp=el.querySelector('input');inp.focus({preventScroll:true});if(el.dataset.ok)return;el.dataset.ok=1;
+let cwd=[];const o=el.querySelector('.tout'),ps=el.querySelector('.tps'),pth=()=>'~'+(cwd.length?'/'+cwd.join('/'):''),pr=s=>{const d=document.createElement('div');d.textContent=s;o.appendChild(d);while(o.children.length>40)o.firstChild.remove()},upd=()=>{ps.textContent='guest@jellycat:'+pth()+'$ '};
+pr('Type help for the commands.');upd();el.querySelector('.wb').addEventListener('click',()=>inp.focus({preventScroll:true}));
+el.querySelector('form').onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';pr('guest@jellycat:'+pth()+'$ '+v);const [c,...a]=v.trim().split(/\s+/),arg=a.join(' ');
+if(!c);else if(c==='help')pr('ls [dir]  cd [dir]  cat <file>  open <project>  clear');
+else if(c==='clear')o.textContent='';
+else if(c==='ls'){const n=node(resolve(cwd,arg||'.'));pr(n&&n.d?Object.keys(n.d).map(k=>k+(n.d[k].d?'/':'')).join('  '):`ls: ${arg}: no such directory`)}
+else if(c==='cd'){const s=resolve(cwd,arg||'~'),n=node(s);if(n&&n.d)cwd=s;else pr(`cd: ${arg}: no such directory`)}
+else if(c==='cat'){const n=arg&&node(resolve(cwd,arg));if(!arg)pr('cat: name a file');else if(!n)pr(`cat: ${arg}: no such file`);else if(n.d)pr(`cat: ${arg}: is a directory`);else pr(n.p?ptext(n.p):n.f)}
+else if(c==='open'){const p=findP(arg);if(p){info(p[0]);pr('opened '+p[1])}else pr(arg?`open: no project matches ${arg}`:'open: name a project')}
+else pr(`jsh: ${c}: command not found`);upd()}},
+about:()=>alertBox('Jelly-OS 1.0<br>Jellycat Studio<br><span class="dim">Mockup</span>'),
+shutdown:()=>alertBox('Shut down Jelly-OS?','<button data-c="x">Cancel</button><button class="dflt" data-go="sdok">Shut Down</button>'),
+sdok:()=>{Object.keys(W).forEach(close);$('off').hidden=false},
+restart:()=>boot(),
+open:()=>{if(sel&&sel.isConnected)act(sel.dataset.a)},
+getinfo:()=>{if(sel&&sel.dataset.a.startsWith('p:'))info(sel.dataset.a.slice(2))},
+close:()=>{if(cur)close(cur)},
+vicon:()=>{if(isF()){W[cur].view='icon';fdraw(cur)}},vlist:()=>{if(isF()){W[cur].view='list';fdraw(cur)}},
+t:v=>setTheme(v),crt:()=>{const on=!(fx.scan||fx.glow||fx.flick);['scan','glow'].forEach(k=>setFx(k,on));if(!on)setFx('flick',false)},dith:()=>setDith(!dith),
+focus:id=>focus(id)};
+function act(a){const [k,v]=a.split(/:(.*)/);if(A[k])A[k](v)}
+const MENUS=[
+()=>[['About Jelly-OS','about'],['-'],['Control Panel','panel']],
+()=>[['Open',sel&&sel.isConnected?'open':null],['Get Info',sel&&sel.isConnected&&sel.dataset.a.startsWith('p:')?'getinfo':null],['-'],['Close Window',cur?'close':null]],
+()=>[['Undo'],['-'],['Cut'],['Copy'],['Paste']],
+()=>[['by Icon',isF()?'vicon':null,isF()&&W[cur].view==='icon'],['by Name',isF()?'vlist':null,isF()&&W[cur].view==='list']],
+()=>[['Green phosphor','t:green',theme==='green'],['Amber phosphor','t:amber',theme==='amber'],['White phosphor','t:white',theme==='white'],['-'],['CRT effects','crt',fx.scan||fx.glow||fx.flick],['Dither pattern','dith',dith],['-'],['Restart','restart'],['Shut Down...','shutdown']],
+()=>{const L=Object.keys(W).filter(k=>W[k].t).map(k=>[W[k].t,'focus:'+k,k===cur]);return L.length?L:[['No windows']]}];
+function openMenu(mt){closeMenu();const L=MENUS[+mt.dataset.m]();mt.classList.add('open');inv(mt,true);const dd=document.createElement('div');dd.className='dd';dd.innerHTML=L.map(x=>x[0]==='-'?'<div class="msep"></div>':`<div class="mi${x[1]?'':' off'}${x[2]?' chk':''}" data-a="${x[1]||''}">${esc(x[0])}</div>`).join('');mt.appendChild(dd);openM=mt}
+function closeMenu(){if(!openM)return;openM.classList.remove('open');inv(openM,false);const d=openM.querySelector('.dd');if(d)d.remove();openM=null}
+root.addEventListener('click',e=>{
+if(booting)return done();
+if(!$('off').hidden){$('off').hidden=true;return boot()}
+const mi=e.target.closest('.mi');if(mi){if(!mi.classList.contains('off')){closeMenu();act(mi.dataset.a)}return}
+const mt=e.target.closest('.mt');if(mt){if(openM===mt)closeMenu();else openMenu(mt);return}
+closeMenu();
+const g=e.target.closest('[data-go]');if(g)return act(g.dataset.go);
+const it=e.target.closest('.ic,.lr');if(!it)return select(null);
+if(sel===it)return act(it.dataset.a);select(it)});
+root.addEventListener('dblclick',e=>{const it=e.target.closest('.ic,.lr');if(it&&sel!==it)act(it.dataset.a)});
+root.addEventListener('mouseover',e=>{const mt=e.target.closest('.mt');if(openM&&mt&&mt!==openM)openMenu(mt)});
+root.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();const it=e.target.closest('.ic');if(it&&e.key==='Enter')act(it.dataset.a)});
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));$('rb').onclick=()=>boot();
+const tick=()=>{const d=new Date();$('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,1000);
+function done(){clearTimeout(bt);booting=false;$('boot').hidden=true;A.projects()}
+function boot(){clearTimeout(bt);closeMenu();Object.keys(W).forEach(close);select(null);booting=true;$('boot').hidden=false;bt=setTimeout(done,matchMedia('(prefers-reduced-motion: reduce)').matches?0:1300)}
+refresh();boot();
+</script>
+</body></html>

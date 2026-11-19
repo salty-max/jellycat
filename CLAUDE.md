@@ -1,3 +1,23 @@
+# Jellycat
+
+Jellycat Studio's portfolio: Jelly-OS on a phosphor CRT, a desktop on computers and a shell on phones. The README has the layout
+and the scripts, `docs/plan.md` the decisions and the phases, `docs/design.md` the design rules.
+
+## Rules
+
+- **The check**: `pnpm check` (lint, typecheck, unit tests, build), through the harness: `bun harness/q.ts check -- bun run check`.
+  A change to what the browser shows also runs `pnpm e2e`.
+- **Words on screen come from the projects' READMEs.** No taglines, jokes, invented numbers or statuses; an unknown fact is `-`;
+  a placeholder says so. System messages stay plain.
+- **Our own OS.** No Fallout, Vault-Tec, RobCo or Pip-Boy names or art; no Apple or Microsoft logos, fonts, icons or sounds.
+- **Text stays in the DOM.** The CRT layer is an overlay that takes no clicks and is hidden from screen readers; nothing on screen is
+  drawn into a canvas or warped.
+- **Look at it before calling it done.** A visual change is screenshotted in the real Chrome (Playwright, `channel: "chrome"`) at
+  1:1 and compared with the mockup or the reference, zoomed in. A difference from `docs/design.md` changes that file in the same
+  pull request.
+- **Versions**: the React Router packages move together, to one exact version. pnpm's minimum release age stays on: no
+  `minimumReleaseAgeExclude` entry without the user's go.
+
 <!-- harness:start -->
 
 ## Harness

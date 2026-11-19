@@ -1,0 +1,4 @@
+# Storybook pulls in esbuild, whose install script only swaps in its binary for speed (the binary itself comes from a platform
+# package), so it isn't run: an unanswered build script makes `pnpm install --frozen-lockfile` exit 1, here and on Vercel.
+allowBuilds:
+  esbuild: false

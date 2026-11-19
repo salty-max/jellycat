@@ -1,0 +1,151 @@
+<!doctype html><html><head><meta charset="utf-8"><title>shell</title></head><body style="margin:20px;width:680px;font-family:sans-serif">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+#sh{position:relative;height:480px;border-radius:22px;overflow:hidden;background:var(--bg);color:var(--fg);font:20px/1.15 VT323,monospace;font-variant-ligatures:none;cursor:text;text-align:left}
+#sh.glow{text-shadow:0 0 3px}
+#sh.scan::after{content:"";position:absolute;inset:0;z-index:50;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.3) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.65) 100%)}
+#sh.flick::before{content:"";position:absolute;inset:0;z-index:49;pointer-events:none;background:var(--fg);opacity:0;animation:fl 4s infinite}
+@keyframes fl{0%,100%{opacity:0}48%{opacity:.03}50%{opacity:0}53%{opacity:.02}}
+@media (prefers-reduced-motion:reduce){#sh.flick::before{animation:none}}
+#sh [hidden]{display:none!important}
+#sh a{color:inherit}
+.term{position:absolute;inset:0 0 24px 0;padding:14px 20px 6px;overflow-y:auto;scrollbar-width:none;white-space:pre-wrap;word-break:break-word}
+.term::-webkit-scrollbar{display:none}
+.dim{color:var(--dim)}
+.lk{cursor:pointer}.lk:hover{background:var(--fg);color:var(--bg);text-shadow:none}
+.cur{background:var(--fg);color:var(--bg);text-shadow:none}
+#sh:not(.focus) .cur{background:none;color:inherit;box-shadow:inset 0 0 0 1px var(--fg)}
+.kb{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;margin:0}
+.bar{position:absolute;left:0;right:0;bottom:0;height:24px;display:flex;align-items:center;gap:18px;padding:0 20px;background:var(--fg);color:var(--bg);text-shadow:none;white-space:nowrap}
+.bar .sp{margin-left:auto}
+.tui{position:absolute;inset:0 0 24px 0;padding:22px 16px 8px;display:flex;flex-direction:column;gap:10px;cursor:default}
+.panes{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:10px}
+.pane{position:relative;border:4px double var(--fg);padding:10px 8px 4px;min-height:0;white-space:pre-wrap}
+.pc{height:100%;overflow:hidden}
+.pt{position:absolute;top:-15px;left:10px;background:var(--bg);padding:0 6px;white-space:nowrap}
+.row{cursor:pointer;padding:0 6px;white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.row.on{background:var(--fg);color:var(--bg);text-shadow:none}
+.keys{display:flex;gap:16px;flex-wrap:wrap}.keys span{cursor:pointer}.keys b{font-weight:400;background:var(--fg);color:var(--bg);text-shadow:none;padding:0 5px;margin-right:6px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<h2 class="sr-only">Phosphor shell mockup: a terminal with a login, a prompt, commands over a small file system, and a two-pane file browser.</h2>
+<div style="background:var(--surface-1);border-radius:12px;padding:14px">
+<div id="sh" class="scan glow" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="term" id="term"><div id="out"></div><div id="line" hidden><span id="ps"></span><span id="cmd"></span></div></div>
+<div class="tui" id="tui" hidden><div class="panes"><div class="pane" id="tl"></div><div class="pane" id="tr"></div></div><div class="keys"><span data-k="ArrowDown"><b>j k</b>move</span><span data-k="Enter"><b>Enter</b>open</span><span data-k="Backspace"><b>Bksp</b>up</span><span data-k="q"><b>q</b>quit</span></div></div>
+<div class="bar"><span>[jellycat] <span id="wn">0:jsh*</span></span><span class="sp" id="bp"></span><span id="clk"></span></div>
+<input id="kb" class="kb" aria-label="Terminal input" autocomplete="off" autocapitalize="off" spellcheck="false">
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;font-size:13px;color:var(--text-secondary)">
+<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><button id="rb" style="margin-left:auto">Reboot</button>
+</div>
+</div>
+<script>
+const P={green:['#33ff66','#1a9c40','#031208'],amber:['#ffb000','#a86f00','#140b00'],white:['#e8eef8','#8a93a6','#0b0d12']};
+const PJ=[
+['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest'],
+['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker',''],
+['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1',''],
+['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app'],
+['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua',''],
+['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua',''],
+['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua',''],
+['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua',''],
+['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua',''],
+['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://github.com/salty-max/gero'],
+['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig',''],
+['opus','Opus','engines','Game engine','A 2D game engine in C++23, built RTS-first: deterministic lockstep, SDL3 GPU rendering, Lua scripting.','C++23, SDL3, Lua','']];
+const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons, and game engines and tools.\nEach project has a file in ~/projects. Contact details are in contact.txt.';
+const CONTACT='Email   hello@your-domain (placeholder)\nGitHub  github.com/salty-max';
+const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}}}},lab:{d:{'hello.gero':{f:'fn main()\n  print("hello")\nend'}}}};
+PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]+'.txt']={p}});
+const $=id=>document.getElementById(id),root=$('sh'),term=$('term'),out=$('out'),kb=$('kb');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const lk=(t,c,cls)=>`<span class="lk${cls?' '+cls:''}" data-c="${esc(c)}">${esc(t)}</span>`;
+let cwd=[],hist=[],hp=0,busy=true,skip=false,tuiOn=false,fx=true,T={s:[],i:0};
+const path=s=>'~'+(s.length?'/'+s.join('/'):''),promptStr=()=>`guest@jellycat:${path(cwd)}$ `;
+function say(h){const d=document.createElement('div');d.innerHTML=h===''?'&nbsp;':h;out.appendChild(d);while(out.children.length>300)out.firstChild.remove();term.scrollTop=term.scrollHeight}
+const sayT=t=>t.split('\n').forEach(l=>say(esc(l)));
+function resolve(p){const s=/^[~\/]/.test(p)?[]:[...cwd];p.replace(/^~\/?|^\//,'').split('/').forEach(x=>{if(!x||x==='.')return;if(x==='..')s.pop();else s.push(x)});return s}
+function node(s){let n={d:HOME};for(const x of s){if(!n.d||!n.d[x])return null;n=n.d[x]}return n}
+const sorted=d=>Object.keys(d).sort((a,b)=>(!!d[b].d-!!d[a].d)||a.localeCompare(b));
+function card(p){say(esc(p[1]));say(`<span class="dim">${esc(p[3])}</span>`);say('');say(esc(p[4]));say('');say(`<span class="dim">Stack</span>  ${esc(p[5])}`);say(`<span class="dim">Link </span>  ${p[6]?`<a href="${p[6]}" target="_blank" rel="noopener">${esc(p[6].replace(/^https?:\/\//,''))}</a>`:'-'}`)}
+const cardText=p=>`${p[1]}\n${p[3]}\n\n${p[4]}\n\nStack  ${p[5]}\nLink   ${p[6]?p[6].replace(/^https?:\/\//,''):'-'}`;
+const rel=(t,n)=>t==='.'?n:t.replace(/\/$/,'')+'/'+n;
+const C={
+help:()=>sayT(['ls [dir]          list a directory','cd [dir]          change directory','cat <file>        print a file','open <project>    show a project','tree              show ~/projects as a tree','browse            two-pane file browser (q to quit)','gero <file>       run a Gero program','theme <color>     green, amber or white','crt on|off        CRT effects','clear  history  pwd  whoami  date  uname  echo  logout'].join('\n')),
+ls:a=>{const t=a.find(x=>!x.startsWith('-'))||'.',n=node(resolve(t));if(!n)return say(esc(`ls: cannot access '${t}': No such file or directory`));if(!n.d)return say(lk(t,'cat '+t));say(sorted(n.d).map(k=>n.d[k].d?lk(k+'/',`cd ${rel(t,k)} && ls`):lk(k,'cat '+rel(t,k))).join('  ')||'')},
+cd:a=>{const t=a[0]||'~',s=resolve(t),n=node(s);if(!n)return say(esc(`cd: ${t}: No such file or directory`));if(!n.d)return say(esc(`cd: ${t}: Not a directory`));cwd=s},
+pwd:()=>say(esc('/home/guest'+(cwd.length?'/'+cwd.join('/'):''))),
+cat:a=>{if(!a[0])return say('cat: missing file operand');a.forEach(t=>{const n=node(resolve(t));if(!n)say(esc(`cat: ${t}: No such file or directory`));else if(n.d)say(esc(`cat: ${t}: Is a directory`));else if(n.p)card(n.p);else sayT(n.f)})},
+open:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('open: name a project, for example: '+lk('open hundo','open hundo'));const p=PJ.find(p=>p[0].startsWith(q)||p[1].toLowerCase().startsWith(q));if(!p)return say(esc(`open: no project matches '${q}'`));card(p)},
+tree:()=>{say('~/projects');const ks=sorted(HOME.projects.d);ks.forEach((k,i)=>{const last=i===ks.length-1,d=HOME.projects.d[k].d;say((last?'`-- ':'|-- ')+lk(k,`cd ~/projects/${k} && ls`));const fs=sorted(d);fs.forEach((f,j)=>say((last?'    ':'|   ')+(j===fs.length-1?'`-- ':'|-- ')+lk(f,`cat ~/projects/${k}/${f}`)))})},
+browse:()=>tuiStart(),
+gero:a=>{const t=a[0];if(!t)return say('gero: usage: gero <file>');const n=node(resolve(t));if(!n||n.d)return say(esc(`gero: ${t}: No such file`));const m=[...(n.f||'').matchAll(/print\("([^"]*)"\)/g)];m.forEach(x=>say(esc(x[1])))},
+theme:a=>{if(!P[a[0]])return say('theme: use green, amber or white');setTheme(a[0])},
+crt:a=>{if(a[0]!=='on'&&a[0]!=='off')return say('crt: use on or off');setCrt(a[0]==='on')},
+clear:()=>{out.innerHTML=''},
+history:()=>hist.forEach((h,i)=>say(esc(String(i+1).padStart(4)+'  '+h))),
+whoami:()=>say('guest'),
+date:()=>say(esc(new Date().toString().slice(0,24))),
+uname:a=>say(a.includes('-a')?'Jelly-OS 1.0 jellycat tty1':'Jelly-OS'),
+echo:a=>say(esc(a.join(' '))),
+logout:()=>login(),exit:()=>login()};
+function exec(v,silent){if(!silent)say(esc(promptStr())+esc(v));const t=v.trim();if(t){hist.push(t);hp=hist.length}
+for(const part of t.split('&&')){const [c,...a]=part.trim().split(/\s+/);if(!c)continue;if(C[c]){C[c](a);if(c==='logout'||c==='exit'||c==='browse')return}else say(esc(`jsh: ${c}: command not found`))}draw()}
+function draw(){if(busy||tuiOn)return;$('line').hidden=false;$('ps').textContent=promptStr();const v=kb.value,c=kb.selectionStart==null?v.length:kb.selectionStart;$('cmd').innerHTML=esc(v.slice(0,c))+`<span class="cur">${v[c]?esc(v[c]):' '}</span>`+esc(v.slice(c+1));$('bp').textContent=path(cwd);term.scrollTop=term.scrollHeight}
+function complete(){const v=kb.value,parts=v.split(' '),last=parts[parts.length-1];let ms;
+if(parts.length===1)ms=Object.keys(C).filter(k=>k.startsWith(last));
+else{const i=last.lastIndexOf('/'),dir=i>=0?last.slice(0,i+1):'',pre=last.slice(i+1),n=node(resolve(dir||'.'));ms=n&&n.d?Object.keys(n.d).filter(k=>k.startsWith(pre)).map(k=>dir+k+(n.d[k].d?'/':'')):[]}
+if(!ms.length)return;let pre=ms[0];ms.forEach(m=>{while(!m.startsWith(pre))pre=pre.slice(0,-1)});
+if(ms.length===1)parts[parts.length-1]=ms[0]+(ms[0].endsWith('/')?'':' ');else if(pre.length>last.length)parts[parts.length-1]=pre;else{say(esc(promptStr()+v));say(ms.map(m=>esc(m.split('/').filter(Boolean).pop()+(m.endsWith('/')?'/':''))).join('  '))}
+kb.value=parts.join(' ');kb.setSelectionRange(kb.value.length,kb.value.length)}
+function tents(){const n=node(T.s);return (T.s.length?['..']:[]).concat(sorted(n.d))}
+function tdraw(){const E=tents(),n=node(T.s);T.i=Math.max(0,Math.min(T.i,E.length-1));
+$('tl').innerHTML=`<span class="pt">${esc(path(T.s))}</span><div class="pc">`+E.map((k,i)=>`<div class="row${i===T.i?' on':''}" data-r="${i}">${esc(k==='..'?'..':k+(n.d[k].d?'/':''))}</div>`).join('')+'</div>';
+const k=E[T.i],c=k==='..'?null:n.d[k];let title=k,body='';
+if(!c){title='..';body='Parent directory'}else if(c.d){title=k+'/';body=sorted(c.d).map(x=>x+(c.d[x].d?'/':'')).join('\n')||'Empty'}else body=c.p?cardText(c.p):c.f;
+$('tr').innerHTML=`<span class="pt">${esc(title)}</span><div class="pc">${esc(body)}</div>`;$('bp').textContent=path(T.s)}
+function tkey(k){const E=tents(),cur=E[T.i];
+if(k==='ArrowUp'||k==='k')T.i=(T.i-1+E.length)%E.length;else if(k==='ArrowDown'||k==='j')T.i=(T.i+1)%E.length;
+else if(k==='Enter'||k==='ArrowRight'||k==='l'){if(cur==='..'){T.s.pop();T.i=0}else if(node(T.s).d[cur].d){T.s.push(cur);T.i=0}}
+else if(k==='Backspace'||k==='ArrowLeft'||k==='h'){if(T.s.length){const up=T.s.pop();T.i=tents().indexOf(up)}}
+else if(k==='q'||k==='Escape')return tuiQuit();else return false;tdraw();return true}
+function tuiStart(){tuiOn=true;T={s:[...cwd],i:0};$('term').hidden=true;$('tui').hidden=false;$('wn').textContent='0:browse*';tdraw();kb.focus({preventScroll:true})}
+function tuiQuit(){tuiOn=false;$('tui').hidden=true;$('term').hidden=false;$('wn').textContent='0:jsh*';draw();return true}
+function setTheme(t){const [f,d,b]=P[t];root.style.setProperty('--fg',f);root.style.setProperty('--dim',d);root.style.setProperty('--bg',b)}
+function setCrt(on){fx=on;root.classList.toggle('scan',on);root.classList.toggle('glow',on)}
+kb.addEventListener('keydown',e=>{
+if(busy){skip=true;e.preventDefault();return}
+if(tuiOn){if(tkey(e.key))e.preventDefault();return}
+const k=e.key;
+if(k==='Enter'){e.preventDefault();const v=kb.value;kb.value='';exec(v);return}
+if(k==='Tab'){e.preventDefault();complete();draw();return}
+if(k==='ArrowUp'){e.preventDefault();if(hp>0){hp--;kb.value=hist[hp]}}
+else if(k==='ArrowDown'){e.preventDefault();if(hp<hist.length){hp++;kb.value=hist[hp]||''}}
+else if(e.ctrlKey&&k==='l'){e.preventDefault();out.innerHTML=''}
+else if(e.ctrlKey&&k==='c'){e.preventDefault();say(esc(promptStr()+kb.value)+'^C');kb.value=''}
+else if(e.ctrlKey&&k==='u'){e.preventDefault();kb.value=''}
+setTimeout(draw)});
+kb.addEventListener('input',draw);
+kb.addEventListener('focus',()=>{root.classList.add('focus');draw()});kb.addEventListener('blur',()=>root.classList.remove('focus'));
+root.addEventListener('click',e=>{
+if(busy){skip=true;return}
+const r=e.target.closest('[data-r]');if(r&&tuiOn){const i=+r.dataset.r;if(i===T.i)tkey('Enter');else{T.i=i;tdraw()}kb.focus({preventScroll:true});return}
+const key=e.target.closest('[data-k]');if(key&&tuiOn){tkey(key.dataset.k);kb.focus({preventScroll:true});return}
+const l=e.target.closest('.lk');if(l&&!tuiOn){exec(l.dataset.c);kb.focus({preventScroll:true});return}
+if(e.target.closest('a'))return;
+if(!String(window.getSelection())) kb.focus({preventScroll:true})});
+const wait=ms=>new Promise(r=>setTimeout(r,skip?0:ms));
+async function login(){busy=true;skip=matchMedia('(prefers-reduced-motion: reduce)').matches;tuiOn=false;$('tui').hidden=true;$('term').hidden=false;$('line').hidden=true;out.innerHTML='';cwd=[];kb.value='';$('bp').textContent='~';
+say('Jelly-OS 1.0 tty1');say('');await wait(500);
+const d=document.createElement('div');d.textContent='jellycat login: ';out.appendChild(d);await wait(400);
+for(const ch of 'guest'){d.textContent+=ch;await wait(90)}await wait(250);
+const now=new Date();say(esc('Last login: '+now.toString().slice(0,16)+now.toTimeString().slice(0,5)+' on tty1'));say('');await wait(200);
+say('Jellycat Studio. Type help for the commands, or click a name.');say('Try: '+lk('ls','ls')+'  '+lk('tree','tree')+'  '+lk('open hundo','open hundo')+'  '+lk('browse','browse'));say('');
+busy=false;skip=false;draw()}
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));$('rb').onclick=()=>{hist=[];hp=0;login()};
+const tick=()=>{const d=new Date();$('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,1000);
+login();
+</script>
+</body></html>

@@ -1,3 +1,18 @@
 # the harness's local state
 .harness/
 .cache/
+
+# dependencies and builds
+node_modules/
+build/
+.react-router/
+storybook-static/
+*.tsbuildinfo
+
+# test output
+test-results/
+playwright-report/
+coverage/
+
+.DS_Store
+.lighthouseci/

@@ -1,0 +1,215 @@
+<!doctype html><html><head><meta charset="utf-8"><title>w95</title></head><body style="margin:20px;width:680px;font-family:sans-serif">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"JC Sans";src:url(https://cdn.jsdelivr.net/npm/98.css@0.1.21/dist/ms_sans_serif.woff2) format("woff2");font-weight:400}
+@font-face{font-family:"JC Sans";src:url(https://cdn.jsdelivr.net/npm/98.css@0.1.21/dist/ms_sans_serif_bold.woff2) format("woff2");font-weight:700}
+#w95{position:relative;height:480px;background-color:#008080;color:#000;overflow:hidden;user-select:none;cursor:default;font:11px "JC Sans",Arial,sans-serif;-webkit-font-smoothing:none;line-height:normal;text-align:left}
+#w95.fx::after{content:"";position:absolute;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.14) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 65%,rgba(0,0,0,.4) 100%)}
+#w95 [hidden]{display:none!important}
+#w95 p{margin:0}
+#w95 img{image-rendering:pixelated;flex:none}
+.bev{background:#c0c0c0;box-shadow:inset -1px -1px #000,inset 1px 1px #dfdfdf,inset -2px -2px #808080,inset 2px 2px #fff}
+.sunk{background:#fff;box-shadow:inset -1px -1px #fff,inset 1px 1px #808080,inset -2px -2px #dfdfdf,inset 2px 2px #000}
+#w95 button{all:unset;box-sizing:border-box;display:inline-block;text-align:center;min-width:75px;height:23px;padding:0 12px;background:#c0c0c0;color:#000;font:inherit;line-height:21px;-webkit-font-smoothing:none;white-space:nowrap;cursor:default;box-shadow:inset -1px -1px #000,inset 1px 1px #fff,inset -2px -2px #808080,inset 2px 2px #dfdfdf}
+#w95 button:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+#w95 button:active:not(:disabled),#w95 button.in{box-shadow:inset -1px -1px #fff,inset 1px 1px #000,inset -2px -2px #dfdfdf,inset 2px 2px #808080;padding:1px 11px 0 13px}
+#w95 button:disabled{color:#808080;text-shadow:1px 1px 0 #fff}
+#w95 .tbc button{min-width:0;width:16px;height:14px;padding:0;display:block}
+#w95 .tbc img{display:block}
+#w95 .tbc button:active:not(:disabled){padding:0}
+#w95 .tbc button:active img{transform:translate(1px,1px)}
+#w95 .tbc button[data-c=x]{margin-left:2px}
+#w95 .task button{min-width:0;height:22px;padding:0 3px;display:flex;align-items:center;justify-content:flex-start;gap:3px;line-height:normal}
+#w95 .task button:active:not(:disabled),#w95 .task button.in{padding:1px 2px 0 4px}
+#w95 #st{flex:none;font-weight:700;padding:0 4px 0 2px}
+#w95 #st.in{padding:1px 3px 0 3px;outline:1px dotted #000;outline-offset:-4px}
+#w95 input[type=text],#w95 textarea,#w95 select{all:unset;box-sizing:border-box;background:#fff;color:#000;font:11px "JC Sans",Arial,sans-serif;-webkit-font-smoothing:none;user-select:text;box-shadow:inset -1px -1px #fff,inset 1px 1px #808080,inset -2px -2px #dfdfdf,inset 2px 2px #000}
+#w95 input[type=text],#w95 select{height:21px;padding:3px 4px}
+#w95 select{padding-right:22px;background-repeat:no-repeat;background-position:right 2px center}
+#w95 textarea{display:block;padding:3px 4px;white-space:pre-wrap;overflow:hidden}
+#w95 input[type=checkbox]{all:unset;flex:none;width:13px;height:13px;background:#fff no-repeat 3px 3px;box-shadow:inset -1px -1px #fff,inset 1px 1px #808080,inset -2px -2px #dfdfdf,inset 2px 2px #000}
+#w95 input[type=radio]{all:unset;flex:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:inset 1px 1px #808080,inset 2px 2px #000,inset -1px -1px #fff,inset -2px -2px #dfdfdf}
+#w95 input[type=radio]:checked{background:radial-gradient(circle,#000 0 1.6px,#fff 2.2px)}
+#w95 label{display:flex;align-items:center;gap:6px}
+.fr{display:flex;align-items:center;gap:6px}.fr+.fr{margin-top:6px}
+.desk{position:absolute;inset:0 0 28px 0}
+.icons{position:absolute;left:4px;top:6px;display:grid;gap:8px}
+.ic{width:74px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;text-align:center;outline:none}
+.ic img{width:32px;height:32px}.ic span{padding:0 2px;line-height:13px}
+.ic.on span{background:#000080;color:#fff;outline:1px dotted #fff}
+.ic.on img{filter:sepia(1) hue-rotate(190deg) saturate(5) brightness(.6)}
+.win .ic{color:#000}
+.win{position:absolute;display:flex;flex-direction:column;box-sizing:border-box;padding:3px;background:#c0c0c0;box-shadow:inset -1px -1px #000,inset 1px 1px #dfdfdf,inset -2px -2px #808080,inset 2px 2px #fff}
+.tb{display:flex;align-items:center;gap:3px;height:18px;box-sizing:border-box;padding:0 2px;background:#000080;color:#fff;font-weight:700;touch-action:none;flex:none}
+.win:not(.act) .tb{background:#808080;color:#c0c0c0}
+.tt{flex:1;min-width:0;display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden}
+.tbc{display:flex;flex:none}
+.mbar{display:flex;padding:1px 0;flex:none}.mbar span{padding:2px 6px}
+.wb{flex:1;min-height:0;display:flex;flex-direction:column;margin:8px}
+.wb.tight{margin:2px 0 0}
+.sbar{display:flex;gap:2px;margin-top:2px;flex:none}.sbar span{flex:1;padding:2px 4px;box-shadow:inset -1px -1px #dfdfdf,inset 1px 1px #808080}
+.ex{flex:1;padding:6px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;overflow:hidden}
+.btns{display:flex;justify-content:flex-end;gap:6px;margin-top:10px}
+.etch{border-top:1px solid #808080;border-bottom:1px solid #fff;margin-top:10px}
+.tabs{display:flex;padding-left:2px;position:relative;z-index:1;flex:none;align-items:flex-end}
+.tab{padding:3px 8px;background:#c0c0c0;border-radius:3px 3px 0 0;box-shadow:inset 1px 1px #fff,inset 2px 2px #dfdfdf,inset -1px 0 #000,inset -2px 0 #808080}
+.tab.sel{margin:0 -2px -2px;padding:4px 10px 6px;position:relative;z-index:2}
+.tpanel{flex:1;padding:12px;background:#c0c0c0;box-shadow:inset -1px -1px #000,inset 1px 1px #fff,inset -2px -2px #808080,inset 2px 2px #dfdfdf}
+.task{position:absolute;left:0;right:0;bottom:0;height:28px;box-sizing:border-box;padding:4px 2px 2px;display:flex;gap:4px;align-items:stretch;background:#c0c0c0;box-shadow:inset 0 1px #dfdfdf,inset 0 2px #fff;z-index:8000}
+#tks{display:flex;gap:3px;flex:1;min-width:0}
+#w95 .tk{flex:0 1 160px;overflow:hidden}
+#w95 .tk span{overflow:hidden;text-overflow:ellipsis}
+#w95 .tk.on{font-weight:700;background:repeating-conic-gradient(#c0c0c0 0 25%,#fff 0 50%) 0 0/2px 2px}
+#w95.menu .tk.in{font-weight:400;background:#c0c0c0;padding:0 3px;box-shadow:inset -1px -1px #000,inset 1px 1px #fff,inset -2px -2px #808080,inset 2px 2px #dfdfdf}
+#w95.menu .win .tb{background:#808080;color:#c0c0c0}
+.tray{margin-left:auto;flex:none;display:flex;align-items:center;padding:0 9px;box-shadow:inset 1px 1px #808080,inset -1px -1px #fff;white-space:nowrap}
+.sm{position:absolute;left:2px;bottom:25px;display:flex;padding:3px;z-index:9000}
+.banner{width:22px;background:#808080;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.banner span{writing-mode:vertical-rl;transform:rotate(180deg);font:20px Arial,sans-serif;color:#fff;white-space:nowrap}.banner b{color:#c0c0c0;font-weight:900}
+.mn{list-style:none;margin:0;padding:0;min-width:150px}
+.mn li{position:relative;display:flex;align-items:center;gap:8px;height:32px;padding:0 22px 0 4px;white-space:nowrap}
+.mn li img{width:32px;height:32px}
+.mn .s{display:none;position:absolute;left:calc(100% - 4px);top:-3px;padding:3px;color:#000;min-width:140px;z-index:1}
+.mn .s li{height:22px}.mn .s li img{width:16px;height:16px}
+.mn li:hover>.s,.mn li.open>.s{display:block}
+.mn li:not(.sep):hover{background:#000080;color:#fff}
+.ar{position:absolute;right:7px;border:4px solid transparent;border-left-color:currentColor;border-right:0}
+.mn .sep{height:0;padding:0;margin:3px 2px;border-top:1px solid #808080;border-bottom:1px solid #fff}
+.full{position:absolute;inset:0;z-index:9500;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-family:VT323,monospace;font-size:22px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<h2 class="sr-only">Sample 4, take three: a Windows 95-style desktop with pixel icons, true bevelled buttons, a cascading start menu, wizards and dialogs.</h2>
+<div style="background:var(--surface-1);border-radius:12px;padding:14px">
+<div id="w95">
+<div class="desk" id="desk"><div class="icons">
+<div class="ic" tabindex="0" data-a="projects"><img data-i="computer" alt=""><span>My Projects</span></div>
+<div class="ic" tabindex="0" data-a="readme"><img data-i="note" alt=""><span>Readme</span></div>
+<div class="ic" tabindex="0" data-a="dos"><img data-i="dos" alt=""><span>JC-DOS Prompt</span></div>
+<div class="ic" tabindex="0" data-a="mail"><img data-i="mail" alt=""><span>Inbox</span></div>
+<div class="ic" tabindex="0" data-a="bin"><img data-i="bin" alt=""><span>Recycle Bin</span></div>
+</div></div>
+<div class="sm bev" id="sm" hidden><div class="banner"><span><b>Jellycat</b>95</span></div><ul class="mn">
+<li class="sub"><img data-i="folder" alt=""><span><u>P</u>rojects</span><i class="ar"></i><ul class="mn s bev">
+<li class="sub"><img data-i="folder" alt=""><span>Web</span><i class="ar"></i><ul class="mn s bev" id="sub-web"></ul></li>
+<li class="sub"><img data-i="folder" alt=""><span>Addons</span><i class="ar"></i><ul class="mn s bev" id="sub-addons"></ul></li>
+<li class="sub"><img data-i="folder" alt=""><span>Engines</span><i class="ar"></i><ul class="mn s bev" id="sub-engines"></ul></li>
+<li data-m="dos"><img data-i="dos" alt=""><span>JC-DOS Prompt</span></li>
+<li data-m="projects"><img data-i="computer" alt=""><span>My Projects</span></li></ul></li>
+<li class="sub"><img data-i="note" alt=""><span><u>D</u>ocuments</span><i class="ar"></i><ul class="mn s bev"><li data-m="readme"><img data-i="note" alt=""><span>Readme</span></li><li data-m="mail"><img data-i="mail" alt=""><span>Contact</span></li></ul></li>
+<li class="sub"><img data-i="computer" alt=""><span><u>S</u>ettings</span><i class="ar"></i><ul class="mn s bev"><li data-m="display"><img data-i="computer" alt=""><span>Display...</span></li></ul></li>
+<li class="sub"><img data-i="find" alt=""><span><u>F</u>ind</span><i class="ar"></i><ul class="mn s bev"><li data-m="run"><img data-i="find" alt=""><span>Projects...</span></li></ul></li>
+<li data-m="help"><img data-i="book" alt=""><span><u>H</u>elp</span></li>
+<li data-m="run"><img data-i="dos" alt=""><span><u>R</u>un...</span></li>
+<li class="sep"></li>
+<li data-m="shutdown"><img data-i="computer" alt=""><span>Sh<u>u</u>t Down...</span></li></ul></div>
+<div class="task"><button id="st"><img data-i="cat" alt="" width="16" height="16"><span>Start</span></button><div id="tks"></div><div class="tray" id="clk"></div></div>
+<div class="full" id="boot" style="color:#c0c0c0">Starting Jellycat 95...</div>
+<div class="full" id="off" hidden style="color:#ff9a1f"><span>It's now safe to close this tab.</span><span style="font-size:17px;color:#a0a0a0">(click to start again)</span></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;font-size:13px;color:var(--text-secondary)">
+<span>Effects</span><button id="fxb">CRT off</button><button id="rb" style="margin-left:auto">Reboot</button>
+</div>
+</div>
+<script>
+const PAL={k:'#000000',w:'#ffffff',g:'#c0c0c0',d:'#808080',y:'#ffff00',o:'#808000',b:'#0000ff',n:'#000080',t:'#008080',c:'#00ffff',l:'#00ff00',m:'#800000',v:'#800080',P:'#ff9ad5',V:'#d0559f'};
+const IC={
+folder:['','','..kkkkk.........','.kwyyyyk........','kwyyyyyykkkkkkk.','kwwwwwwwwwwwwwyk','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kwyyyyyyyyyyyyok','kooooooooooooook','kkkkkkkkkkkkkkkk'],
+computer:['','..kkkkkkkkkkkkk.','..kwwwwwwwwwwdk.','..kwkkkkkkkkgdk.','..kwkttttttkgdk.','..kwkctttttkgdk.','..kwkttttttkgdk.','..kwkttttttkgdk.','..kwkkkkkkkkgdk.','..kwggggggglgdk.','..kdddddddddddk.','..kkkkkkkkkkkkk.','....kwwwwwwdk...','...kwggggggggdk.','...kkkkkkkkkkkk.'],
+note:['','...kkkkkkkk.....','...kwwwwwwkk....','...kwwwwwwkwk...','...kwwwwwwkkkk..','...kwdddddwwwk..','...kwwwwwwwwwk..','...kwddddddwwk..','...kwwwwwwwwwk..','...kwdddddwwwk..','...kwwwwwwwwwk..','...kwddddddwwk..','...kwwwwwwwwwk..','...kkkkkkkkkkk..'],
+dos:['','.gggggggggggggg.','.gnnnnnnnnnnnng.','.gkkkkkkkkkkkkg.','.gkkkkkkkkkkkkg.','.gkkggkkkkkkkkg.','.gkgkkkkgkkkkkg.','.gkgkkkkkkkkkkg.','.gkkggkkgkggkkg.','.gkkkkkkkkkkkkg.','.gkkkkkkkkkkkkg.','.gkkkkkkkkkkkkg.','.gggggggggggggg.'],
+mail:['','','.kkkkkkkkkkkkkk.','.kkwwwwwwwwwwkk.','.kwkwwwwwwwwkwk.','.kwwkwwwwwwkwwk.','.kwwwkwwwwkwwwk.','.kwwwwkwwkwwwwk.','.kwwwwwkkwwwwwk.','.kwwwwwwwwwwwwk.','.kwwwwwwwwwwwwk.','.kwwwwwwwwwwwwk.','.kkkkkkkkkkkkkk.'],
+bin:['','....kkkkkkkk....','...kwggggggdk...','...kkkkkkkkkk...','...kwgdgdgdgk...','...kgdgdgdgdk...','...kwgdgdgdgk...','...kgdgdgdgdk...','...kwgdgdgdgk...','...kgdgdgdgdk...','...kwgdgdgdgk...','....kgdgdgdk....','....kkkkkkkk....'],
+cat:['','..k..........k..','.kPk........kPk.','.kPPkkkkkkkkPPk.','.kPPPPPPPPPPPPk.','kPPPPPPPPPPPPPPk','kPPkkPPPPPPkkPPk','kPPkkPPPPPPkkPPk','kPPPPPPkkPPPPPPk','kVVPPPPPPPPPPVVk','.kPPPkPPPPkPPPk.','..kPPPkkkkPPPk..','...kkPPPPPPkk...','.....kkkkkk.....'],
+app:['','.kkkkkkkkkkkkkk.','.knnnnnnnnnnnnk.','.kkkkkkkkkkkkkk.','.kwwwwwwwwwwwwk.','.kwXXXwwddddwwk.','.kwXXXwwwwwwwwk.','.kwXXXwwdddwwwk.','.kwwwwwwwwwwwwk.','.kwddddddddddwk.','.kwdddddddwwwwk.','.kwwwwwwwwwwwwk.','.kkkkkkkkkkkkkk.'],
+find:['','...kkkk.........','..kccwwk........','.kccwwwwk.......','.kcwwwwwk.......','.kwwwwwwk.......','..kwwwwk........','...kkkkdk.......','........kmk.....','.........kmmk...','..........kmmk..','...........kmmk.','............kk..'],
+book:['','','...kkkkkkkkk....','..kvvvvvvvvvk...','..kvvvvvvvvvk...','..kvvvwwwvvvk...','..kvvvvvvwvvk...','..kvvvvvwwvvk...','..kvvvvwvvvvk...','..kvvvvvvvvvk...','..kvvvvwvvvvk...','..kvvvvvvvvvk...','..kwwwwwwwwwk...','..kkkkkkkkkkk...'],
+bulb:['','.....kkkkk......','....kyyyyyk.....','...kyywyyyyk....','...kywyyyyyk....','...kyyyyyyyk....','...kyyyyyyyk....','....kyyyyyk.....','.....kyyyk......','.....kgggk......','.....kdddk......','.....kgggk......','......kkk.......']};
+const cache={};
+function paint(w,h,parts,x){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');parts.forEach(([rows,ox,oy])=>rows.forEach((r,y)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='X'?(x||'#0000ff'):PAL[ch];g.fillRect(ox+i,oy+y,1,1)}}));return c.toDataURL()}
+function ico(n,x){const key=n+(x||'');return cache[key]||(cache[key]=paint(16,16,[[IC[n],0,0]],x))}
+const im=(n,s,x)=>`<img src="${ico(n,x)}" width="${s}" height="${s}" alt="">`;
+const BOX=['kkkkkkkkk','kkkkkkkkk','k.......k','k.......k','k.......k','k.......k','k.......k','k.......k','kkkkkkkkk'];
+const GL={min:paint(16,14,[[['kkkkkk','kkkkkk'],4,9]]),max:paint(16,14,[[BOX,3,2]]),res:paint(16,14,[[['kkkkkk','kkkkkk','k....k','k....k','k....k','kkkkkk'],5,2],[['kkkkkk','kkkkkk','kggggk','kggggk','kggggk','kkkkkk'],3,5]]),x:paint(16,14,[[['kk....kk','.kk..kk.','..kkkk..','...kk...','..kkkk..','.kk..kk.','kk....kk'],4,3]])};
+const gi=n=>`<img src="${GL[n]}" width="16" height="14" alt="">`;
+const CHK=paint(7,7,[[['......k','.....kk','k...kkk','kk.kkk.','kkkkk..','.kkk...','..k....'],0,0]]);
+const COMBO=(()=>{const c=document.createElement('canvas');c.width=16;c.height=17;const g=c.getContext('2d'),L=(col,x,y,w,h)=>{g.fillStyle=col;g.fillRect(x,y,w,h)};L('#c0c0c0',0,0,16,17);L('#dfdfdf',0,0,15,1);L('#dfdfdf',0,0,1,16);L('#fff',1,1,13,1);L('#fff',1,1,1,14);L('#808080',1,15,14,1);L('#808080',14,1,1,15);L('#000',0,16,16,1);L('#000',15,0,1,17);[[4,7,7],[5,8,5],[6,9,3],[7,10,1]].forEach(([x,y,w])=>L('#000',x,y,w,1));return c.toDataURL()})();
+const xs=document.createElement('style');xs.textContent=`#w95 input[type=checkbox]:checked{background-image:url(${CHK})}#w95 select{background-image:url(${COMBO})}`;document.body.appendChild(xs);
+const D={web:[['Hundo','Spoiler-aware 100% completion guides: six installable apps that work offline and sync between devices with a code.','React 19, Vite, Tailwind, Vercel','Live','hundo.quest'],['Farseer','Every World of Warcraft blue post from the US and EU forums in one app, with filters and push notifications.','PWA, Node, Docker','Live','farseer'],['Lucarne','Every football fixture and the French channel showing it, as a faithful teletext revival.','Cloudflare Workers, D1','Live','lucarne']],
+addons:[['Ravenpost','The addon family\'s companion app for macOS and Windows.','Go','Live','ravenpost'],['Hearthtale','A journal your character writes as you play.','Lua','WoW addon','CurseForge'],['Mealbook','A cookbook that fills in on the road to 300.','Lua','WoW addon','CurseForge'],['Second Wind','A debrief after a close call or a death.','Lua','WoW addon','CurseForge']],
+engines:[['Gero','A 16-bit virtual machine, assembler and Lua-style language, in pure Zig.','Zig, WebAssembly','Open source','GitHub'],['gtx-16','A 16-bit fantasy console on the Gero VM. Carts are source.','Zig','In development','-'],['Opus','A 2D engine built RTS-first: lockstep simulation, SDL3 GPU, Lua.','C++23, SDL3','In development','-']]};
+const CAT={web:['Web','#0000ff'],addons:['Addons','#800000'],engines:['Engines','#008000']};
+const $=id=>document.getElementById(id),root=$('w95'),desk=$('desk');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+document.querySelectorAll('img[data-i]').forEach(e=>{e.src=ico(e.dataset.i)});
+Object.keys(D).forEach(k=>{$('sub-'+k).innerHTML=D[k].map((p,i)=>`<li data-m="proj:${k}:${i}">${im('app',16,CAT[k][1])}<span>${p[0]}</span></li>`).join('')});
+const W={};let z=10,cur=null,sel=null,mc=0,booting=true,fx=false,wall='none',tipn=0;
+function tasks(){$('tks').innerHTML=Object.keys(W).map(k=>`<button class="tk ${k===cur?'in on':''}" data-t="${k}">${im(W[k].i,16,W[k].x)}<span>${W[k].t}</span></button>`).join('')}
+function focus(id){const w=W[id];if(!w)return;w.el.style.display='';Object.values(W).forEach(o=>o.el.classList.remove('act'));w.el.classList.add('act');w.el.style.zIndex=++z;cur=id;tasks()}
+function close(id){if(!W[id])return;W[id].el.remove();delete W[id];if(cur===id)cur=null;tasks()}
+function min(id){W[id].el.style.display='none';W[id].el.classList.remove('act');cur=null;tasks()}
+function max(id){const w=W[id],s=w.el.style,b=w.el.querySelector('[data-c=max] img');if(w.prev){Object.assign(s,w.prev);w.prev=null;b.src=GL.max}else{w.prev={left:s.left,top:s.top,width:s.width,height:s.height};Object.assign(s,{left:'0px',top:'0px',width:desk.clientWidth+'px',height:desk.clientHeight+'px'});b.src=GL.res}}
+function drag(id,el,h){h.onpointerdown=e=>{if(e.target.closest('button')||W[id].prev)return;h.setPointerCapture(e.pointerId);const sx=e.clientX-el.offsetLeft,sy=e.clientY-el.offsetTop;h.onpointermove=m=>{el.style.left=Math.max(60-el.offsetWidth,Math.min(desk.clientWidth-60,m.clientX-sx))+'px';el.style.top=Math.max(0,Math.min(desk.clientHeight-20,m.clientY-sy))+'px'};h.onpointerup=()=>{h.onpointermove=null}}}
+function win(id,t,i,body,w,h,o={}){if(W[id]){focus(id);return W[id].el}const n=Object.keys(W).length,el=document.createElement('div');el.className='win';
+const x=o.center?Math.round((desk.clientWidth-w)/2):Math.max(4,Math.min(90+n*24,desk.clientWidth-w-4)),y=o.center?Math.round((desk.clientHeight-h)/2):Math.max(4,Math.min(6+n*22,desk.clientHeight-h-4));
+el.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+const ctr=o.dialog?`<button data-c="x" aria-label="Close">${gi('x')}</button>`:`<button data-c="min" aria-label="Minimize">${gi('min')}</button><button data-c="max" aria-label="Maximize">${gi('max')}</button><button data-c="x" aria-label="Close">${gi('x')}</button>`;
+el.innerHTML=`<div class="tb"><div class="tt">${o.dialog?'':im(i,16,o.x)}<span>${t}</span></div><div class="tbc">${ctr}</div></div>${o.menu?`<div class="mbar">${o.menu.map(m=>`<span><u>${m[0]}</u>${m.slice(1)}</span>`).join('')}</div>`:''}<div class="wb${o.tight?' tight':''}">${body}</div>${o.status?`<div class="sbar"><span>${o.status}</span><span>&nbsp;</span></div>`:''}`;
+el.addEventListener('pointerdown',()=>focus(id));el.addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(!c)return;e.stopPropagation();({min,max,x:close})[c.dataset.c](id)});
+drag(id,el,el.querySelector('.tb'));desk.appendChild(el);W[id]={el,t,i,x:o.x};focus(id);return el}
+function exp(id,t,i,items,w,h){win(id,t,i,`<div class="sunk ex">${items.map(it=>`<div class="ic" tabindex="0" data-a="${it.a}">${im(it.i,32,it.x)}<span>${it.n}</span></div>`).join('')}</div>`,w,h,{menu:['File','Edit','View','Help'],status:`${items.length} object(s)`,tight:true})}
+function msg(t){win('m'+(++mc),'Jellycat','bulb',`<div style="display:flex;gap:12px;align-items:center;flex:1">${im('bulb',32)}<p>${t}</p></div><div class="btns" style="justify-content:center"><button data-c="x">OK</button></div>`,300,130,{dialog:true,center:true})}
+function wizard(k,i){const p=D[k][i],id='wz'+k+i;if(W[id])return focus(id);
+const pages=[['Welcome to '+p[0],p[1],'Click Next to continue.'],['What\'s inside','Built with '+p[2]+'.','Status: '+p[3]+'.'],['Ready to take a look?','Click Finish to open '+p[4]+'.','']];
+const el=win(id,'Welcome to '+p[0],'app',`<div style="display:flex;gap:14px;flex:1"><div class="sunk" style="width:150px;background:#008080;display:flex;align-items:center;justify-content:center;gap:2px">${im('computer',48)}${im('app',48,CAT[k][1])}</div><div class="wt" style="flex:1;display:flex;flex-direction:column;gap:10px"></div></div><div class="etch"></div><div class="btns" style="gap:0"><button data-wz="-1">&lt; <u>B</u>ack</button><button data-wz="1"></button><button data-c="x" style="margin-left:10px">Cancel</button></div>`,470,290,{dialog:true,center:true});
+let pg=0;const draw=()=>{const P=pages[pg];el.querySelector('.wt').innerHTML=`<p style="font-weight:700">${P[0]}</p><p>${P[1]}</p><p>${P[2]}</p>`;el.querySelector('[data-wz="-1"]').disabled=pg===0;el.querySelector('[data-wz="1"]').innerHTML=pg===2?'Finish':'<u>N</u>ext &gt;'};
+el.addEventListener('click',e=>{const b=e.target.closest('[data-wz]');if(!b)return;const d=+b.dataset.wz;if(d>0&&pg===2){close(id);return msg('On the real site this opens '+p[4]+'.')}pg=Math.max(0,Math.min(2,pg+d));draw()});draw()}
+function open(v){v=v.trim().toLowerCase();if(!v)return false;const al={readme:'readme','readme.txt':'readme',notepad:'readme',dos:'dos',command:'dos',inbox:'mail',mail:'mail',contact:'mail',projects:'projects','my projects':'projects',bin:'bin',help:'help',display:'display'};if(al[v]){A[al[v]]();return true}if(D[v]){A.folder(v);return true}for(const k in D){const i=D[k].findIndex(p=>p[0].toLowerCase().startsWith(v));if(i>=0){wizard(k,i);return true}}return false}
+function setFx(v){fx=v;root.classList.toggle('fx',v);$('fxb').textContent=v?'CRT on':'CRT off'}
+function setWall(v){wall=v;root.style.backgroundImage=v==='cat'?`url(${ico('cat')})`:'none';root.style.backgroundSize='32px'}
+const TIPS=['Every project here is live, released or open source. Double-click My Projects to look inside.','Type a project\'s name in Start, Run... to jump straight to it.','Prefer typing? Open JC-DOS Prompt and type HELP.','Try Start, Settings, Display... for a CRT and a very tasteful wallpaper.'];
+const A={
+projects:()=>exp('projects','My Projects','computer',Object.keys(D).map(k=>({a:'folder:'+k,i:'folder',n:CAT[k][0]})).concat([{a:'readme',i:'note',n:'Readme'}]),330,210),
+folder:k=>exp('f'+k,CAT[k][0],'folder',D[k].map((p,i)=>({a:`proj:${k}:${i}`,i:'app',x:CAT[k][1],n:p[0]})),350,210),
+proj:(k,i)=>wizard(k,+i),
+readme:()=>win('readme','Readme - Notepad','note','<textarea readonly style="flex:1;resize:none;font-family:VT323,monospace;font-size:17px;line-height:1.1">Jellycat Studio\n===============\n\nWeb apps, game tools, engines and\nWoW addons. Built small, built to last.\n\nDouble-click My Projects to browse,\nor open JC-DOS Prompt if you\'d rather\ntype.\n\nContact: hello@your-domain</textarea>',370,240,{menu:['File','Edit','Search','Help'],tight:true}),
+dos:()=>{if(W.dos)return focus('dos');const el=win('dos','JC-DOS Prompt','dos','<div class="db" style="flex:1;background:#000;color:#c0c0c0;font-family:VT323,monospace;font-size:17px;line-height:1.05;padding:4px 6px;overflow:hidden;white-space:pre-wrap;user-select:text"><span class="o">JC-DOS Version 6.22\n(C) Jellycat Studio\n\n</span><form style="display:flex;margin:0"><span>C:\\JELLYCAT&gt;</span><input aria-label="DOS command" autocomplete="off" style="all:unset;flex:1;color:#c0c0c0;caret-color:#c0c0c0;font:inherit"></form></div>',400,230,{tight:true});
+const o=el.querySelector('.o'),f=el.querySelector('form'),inp=f.querySelector('input');inp.focus({preventScroll:true});el.querySelector('.db').addEventListener('click',()=>inp.focus({preventScroll:true}));
+f.onsubmit=e=>{e.preventDefault();const v=inp.value,[c,...a]=v.trim().toLowerCase().split(/\s+/),arg=a.join(' ');inp.value='';let r=[];
+if(c==='help')r=['DIR  OPEN <NAME>  VER  CLS  EXIT'];else if(c==='ver')r=['JC-DOS Version 6.22'];else if(c==='dir')r=Object.keys(D).flatMap(k=>D[k].map(p=>(p[0].toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)+'         ').slice(0,10)+'<APP>  '+CAT[k][0]));else if(c==='cls'){o.textContent='';return}else if(c==='exit')return close('dos');else if(c==='open')r=open(arg)?['Opening '+arg+'...']:['File not found'];else if(c)r=['Bad command or file name'];
+o.textContent=(o.textContent+'C:\\JELLYCAT>'+v+'\n'+r.map(x=>x+'\n').join('')).split('\n').slice(-12).join('\n')}},
+mail:()=>win('mail','New Message','mail','<div class="fr"><span style="width:52px">To:</span><input type="text" value="hello@your-domain" style="flex:1"></div><div class="fr"><span style="width:52px">Subject:</span><input type="text" value="Let\'s build something" style="flex:1"></div><textarea style="flex:1;margin-top:6px;resize:none">Hi Jellycat,\n\n</textarea><div class="btns"><button data-go="send">Send</button></div>',360,250,{menu:['File','Edit','View','Insert','Format','Help']}),
+send:()=>msg('On the real site this relays to your inbox.'),
+bin:()=>exp('bin','Recycle Bin','bin',[{a:'gone',i:'note',n:'portfolio-v1.htm'},{a:'gone',i:'note',n:'todo-final3.txt'}],320,200),
+gone:()=>msg('Some things are better left in the bin.'),
+help:()=>win('help','Jellycat Help','book','<div class="sunk" style="flex:1;padding:10px;line-height:1.6"><p style="font-weight:700;margin-bottom:6px">How to use Jellycat 95</p><p>Double-click an icon to open it.<br>Drag a window by its title bar.<br>Click Start for everything else.<br>Type a project\'s name in Run... to jump to it.</p></div><div class="btns"><button data-c="x">Close</button></div>',330,220),
+run:()=>{const el=win('run','Run','dos',`<div style="display:flex;gap:12px;margin-bottom:12px">${im('dos',32)}<p>Type the name of a project, folder or document, and Jellycat will open it for you.</p></div><div class="fr"><span><u>O</u>pen:</span><input id="runi" type="text" style="flex:1"></div><div class="btns"><button data-go="runok">OK</button><button data-c="x">Cancel</button><button disabled>Browse...</button></div>`,360,170,{dialog:true,center:true});const i=el.querySelector('#runi');i.focus({preventScroll:true});i.onkeydown=e=>{if(e.key==='Enter')A.runok()}},
+runok:()=>{const v=$('runi')?$('runi').value:'';close('run');if(v.trim()&&!open(v))msg(`Cannot find '${esc(v)}'. Check the name and try again.`)},
+display:()=>{const el=win('display','Display Properties','computer',`<div class="tabs"><span class="tab sel">Background</span><span class="tab">Screen Saver</span><span class="tab">Appearance</span></div><div class="tpanel"><div style="display:flex;justify-content:center;margin-bottom:12px"><div class="sunk" id="dprev" style="width:120px;height:76px;background-color:#008080;background-size:16px"></div></div><div class="fr"><span style="width:60px">Wallpaper:</span><select id="wp"><option value="none">(None)</option><option value="cat">Jelly tile</option></select></div><div class="fr"><label><input type="checkbox" id="crtc">CRT effect</label></div></div><div class="btns"><button data-go="dispok">OK</button><button data-c="x">Cancel</button></div>`,330,300,{dialog:true,center:true});
+const wp=el.querySelector('#wp'),pv=el.querySelector('#dprev');el.querySelector('#crtc').checked=fx;wp.value=wall;const upd=()=>{pv.style.backgroundImage=wp.value==='cat'?`url(${ico('cat')})`:'none'};wp.onchange=upd;upd()},
+dispok:()=>{setWall($('wp').value);setFx($('crtc').checked);close('display')},
+shutdown:()=>win('sd','Shut Down Jellycat','computer',`<div style="display:flex;gap:14px">${im('computer',32)}<div><p style="margin-bottom:8px">Are you sure you want to:</p><div class="fr"><label><input type="radio" id="sd1" name="sd" checked><span><u>S</u>hut down the computer?</span></label></div><div class="fr"><label><input type="radio" id="sd2" name="sd"><span><u>R</u>estart the computer?</span></label></div></div></div><div class="btns"><button data-go="sdok"><u>Y</u>es</button><button data-c="x"><u>N</u>o</button><button disabled><u>H</u>elp</button></div>`,330,140,{dialog:true,center:true}),
+sdok:()=>{const r=$('sd2').checked;Object.keys(W).forEach(close);if(r)boot();else $('off').hidden=false},
+welcome:()=>{const el=win('welcome','Welcome','bulb',`<div style="display:flex;gap:10px;flex:1"><div style="flex:1;display:flex;flex-direction:column"><p style="font:20px Arial,sans-serif;margin-bottom:10px"><b>Welcome to Jellycat</b> 95</p><div class="sunk" style="flex:1;padding:10px;display:flex;gap:10px;background:#ffffe1">${im('bulb',32)}<div><p style="font-weight:700;margin-bottom:6px">Did you know...</p><p class="tip"></p></div></div><div class="fr" style="margin-top:8px"><label><input type="checkbox" id="wsc" checked>Show this Welcome Screen next time you start Jellycat</label></div></div><div style="display:flex;flex-direction:column;gap:6px"><button data-go="projects">My Projects</button><button data-go="readme">Readme</button><button data-go="tip"><u>N</u>ext Tip</button><div style="flex:1"></div><button data-c="x">Close</button></div></div>`,480,250,{dialog:true,center:true});tipn=0;el.querySelector('.tip').textContent=TIPS[0]},
+tip:()=>{const t=W.welcome&&W.welcome.el.querySelector('.tip');if(t)t.textContent=TIPS[tipn=(tipn+1)%TIPS.length]}};
+function act(a){const [k,...r]=a.split(':');if(A[k])A[k](...r)}
+function closeStart(){$('sm').hidden=true;$('st').classList.remove('in');root.classList.remove('menu');$('sm').querySelectorAll('.open').forEach(x=>x.classList.remove('open'))}
+root.addEventListener('click',e=>{
+if(booting)return done();
+if(!$('off').hidden){$('off').hidden=true;return boot()}
+if(e.target.closest('#st')){if($('sm').hidden){$('sm').hidden=false;$('st').classList.add('in');root.classList.add('menu')}else closeStart();return}
+const m=e.target.closest('[data-m]');
+if(e.target.closest('#sm')&&!m){const s=e.target.closest('li.sub');if(s){[...s.parentNode.children].forEach(x=>x!==s&&x.classList.remove('open'));s.classList.toggle('open')}return}
+closeStart();if(m)return act(m.dataset.m);
+const t=e.target.closest('[data-t]');if(t){const id=t.dataset.t;return cur===id?min(id):focus(id)}
+const g=e.target.closest('[data-go]');if(g)return act(g.dataset.go);
+const ic=e.target.closest('.ic');if(!ic){if(sel){sel.classList.remove('on');sel=null}return}
+if(sel===ic)return act(ic.dataset.a);if(sel)sel.classList.remove('on');sel=ic;ic.classList.add('on')});
+root.addEventListener('dblclick',e=>{const ic=e.target.closest('.ic');if(ic&&sel!==ic)act(ic.dataset.a)});
+root.addEventListener('keydown',e=>{const ic=e.target.closest('.ic');if(ic&&e.key==='Enter')act(ic.dataset.a)});
+const tick=()=>{$('clk').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}).replace(/\s/g,' ')};tick();setInterval(tick,1000);
+let bt;function done(){clearTimeout(bt);booting=false;$('boot').hidden=true;A.welcome()}
+function boot(){clearTimeout(bt);Object.keys(W).forEach(close);closeStart();booting=true;$('boot').hidden=false;bt=setTimeout(done,matchMedia('(prefers-reduced-motion: reduce)').matches?0:1200)}
+$('fxb').onclick=()=>setFx(!fx);$('rb').onclick=()=>boot();
+tasks();boot();
+</script>
+</body></html>

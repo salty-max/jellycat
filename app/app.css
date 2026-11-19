@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* The phosphors. One screen colour, its dimmer tone for secondary text, and the tube's black. Each dim tone keeps at least 4.5:1
+   against its black (WCAG AA for body text). A theme is picked with data-phosphor on <html>. */
+:root,
+:root[data-phosphor="green"] {
+  --phosphor-fg: #33ff66;
+  --phosphor-dim: #1a9c40;
+  --phosphor-bg: #031208;
+}
+:root[data-phosphor="amber"] {
+  --phosphor-fg: #ffb000;
+  --phosphor-dim: #a86f00;
+  --phosphor-bg: #140b00;
+}
+:root[data-phosphor="white"] {
+  --phosphor-fg: #e8eef8;
+  --phosphor-dim: #8a93a6;
+  --phosphor-bg: #0b0d12;
+}
+
+@theme inline {
+  --font-mono: "VT323", ui-monospace, monospace;
+  --color-phosphor: var(--phosphor-fg);
+  --color-phosphor-dim: var(--phosphor-dim);
+  --color-screen: var(--phosphor-bg);
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: var(--phosphor-fg);
+  font-family: var(--font-mono);
+  /* VT323 has no ligatures; a fallback font's "fi" and "ff" would slip in. */
+  font-variant-ligatures: none;
+}
+
+/* The CRT layer: scanlines and a vignette over the whole screen. It never takes a click and screen readers skip it. */
+@utility crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 60%, rgb(0 0 0 / 0.6) 100%);
+}
+
+/* A soft phosphor bloom on text, in the text's own colour. */
+@utility crt-glow {
+  text-shadow: 0 0 3px;
+}
