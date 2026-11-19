@@ -12,14 +12,22 @@ was the alternative, kept for its record.
 
 - **Look**: a monochrome phosphor CRT (green by default, amber and white as settings). Our own OS: no Fallout, Vault-Tec, RobCo or
   Pip-Boy assets, no Apple or Microsoft logos, fonts, icons or sounds. [design.md](design.md) has the rules.
-- **Desktop on computers, shell on phones.** One layout per kind of screen, chosen by width, not two sites.
+- **Desktop on computers, shell on phones.** One layout per kind of screen, chosen by screen size, not two sites.
 - **Real pages**: every project has its own URL, prerendered to HTML at build time (React Router's `prerender` with `ssr: false`),
   so search engines and link previews read real text. The text on screen is HTML, never pixels in a canvas.
+- **Pages are shell-first.** Every page prerenders the shell's session as its text (on `/projects/<slug>`, `open <slug>` has
+  already run) and the desktop's boot screen. A screen at least 768px wide and 520px tall mounts the desktop on the client; phones
+  never download its code. First paint is the end state: the typed login plays on `logout` and `exit` only, and nothing that changes
+  between build and visit (the clock, "Last login", the date) is prerendered.
+- **The URL follows the project**: `/projects/<slug>` while a project is open, `/` once it's closed.
+- **CSP in the page**: the build hashes each page's inline scripts into a `<meta>` Content-Security-Policy; the header carries
+  what a meta tag can't (`frame-ancestors`). Inline styles are allowed, as in hundo.
 - **Screenshots stay in colour.** The phosphor look covers the OS; the work itself is shown as it is, in a viewer window, with the
   CRT layer still on top.
 - **Copy**: facts from each project's own README. No taglines, jokes, invented numbers or statuses. An unknown fact is written `-`.
 - **Stack**: hundo's tools in one package: React 19, React Router 8 (framework mode), Vite 8, Tailwind 4, Vitest, Testing Library,
-  Storybook 10, Playwright, Lighthouse CI, ESLint. Base UI and zustand come in with Phase 1's first components.
+  Storybook 10, Playwright, Lighthouse CI, ESLint. Base UI and zustand come in with Phase 1's first components. Vitest and its
+  browser packages move together to one exact version, as the React Router packages do.
 - **Hosting**: Vercel, team `jellycat`, a preview per pull request.
 
 ## Phases
@@ -30,6 +38,8 @@ The harness, the scaffold, CI, the Vercel config and these docs. The GitHub repo
 user's go.
 
 ### Phase 1: the OS (launchable)
+
+[phase-1.md](phase-1.md) splits it into tasks, with their order, files and checks.
 
 - The shared core: project data, the file system built from it, the shell's commands, the phosphor themes, the CRT layer.
 - The desktop: menu bar and menus, windows (move, resize, collapse, zoom), icons and folders (by icon, by name), each project's
@@ -52,7 +62,10 @@ A log fed from GitHub, gtx-16 carts if it gets a web build, a small original gam
 
 ## Still to decide
 
-- The domain.
+[phase-1.md](phase-1.md#questions-for-the-user) has each question with a recommendation and the task it blocks.
+
+- Which projects are on the site.
+- Each project's link and source (every repository is public except gtx-16's), and where the screenshots come from.
+- Whether the Phase 1 desktop has Mail before Phase 2's form.
+- The domain, and the contact address on it.
 - The OS's name: Jelly-OS is the working name.
-- Which projects' source repositories are public, so their pages can link to the code (Opus and gtx-16 are open questions; the
-  projects themselves are on the site either way), and each project's link and screenshots.
