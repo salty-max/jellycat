@@ -84,6 +84,24 @@
 #jd .nav button{min-width:0;width:32px;padding:0;display:flex;align-items:center;justify-content:center}
 #jd .nav button:active:not(:disabled){background:var(--bg)}
 #jd .nav button:active:not(:disabled) img{transform:translate(1px,1px)}
+.md{white-space:normal}
+.md>*{margin:0}
+#jd .md>*+*{margin-top:1lh}
+#jd .md>h2+*,#jd .md>h3+*{margin-top:0}
+.md h2,.md h3{font:inherit}
+.md ul{list-style:none;padding:0}
+.md li{display:grid;grid-template-columns:2ch minmax(0,1fr)}
+.md h2::before,.md h3::before,.md li::before{color:var(--dim)}
+.md h2::before{content:"# "/""}.md h3::before{content:"## "/""}.md li::before{content:"-"/""}
+.md code{font:inherit}.md code::before,.md code::after{content:"`"/"";color:var(--dim)}
+.md p,.md li>span{overflow-wrap:anywhere}
+#jd .wb.flush{padding:0}
+.doc{flex:1;min-height:0;overflow-y:auto;padding:10px;user-select:text;outline:none}
+#jd .wb.scr{overflow-y:auto}
+.doc::-webkit-scrollbar,.scr::-webkit-scrollbar{width:14px}
+.doc::-webkit-scrollbar-track,.scr::-webkit-scrollbar-track{border-left:1px solid var(--fg);background:repeating-conic-gradient(var(--dim) 0 25%,transparent 0 50%) 0 0/2px 2px}
+.doc::-webkit-scrollbar-thumb,.scr::-webkit-scrollbar-thumb{background:var(--bg);border:1px solid var(--fg);border-right:0}
+.doc::-webkit-scrollbar-button:end:increment,.scr::-webkit-scrollbar-button:end:increment{height:14px;display:block;background:var(--bg);border-left:1px solid var(--fg)}
 .full{position:absolute;inset:0;z-index:9500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
@@ -108,20 +126,29 @@
 <script>
 const P={green:['#33ff66','#1a9c40','#031208'],amber:['#ffb000','#a86f00','#140b00'],white:['#e8eef8','#8a93a6','#0b0d12']};
 // Stand-in pictures, each marked as a placeholder: [variant, width, height, kind]. Real ones come from E3.
-const SH={web:[['a',1440,900,'Desktop'],['b',1440,900,'Desktop'],['p',390,844,'Phone']],game:[['g',1920,1080,'In game']]}, GH='https://github.com/salty-max/';
+const SH={web:[['a',1440,900,'Desktop'],['b',1440,900,'Desktop'],['p',390,844,'Phone']],game:[['g',1920,1080,'In game']]};
 const shots=k=>SH[k].map(([v,w,h,kind])=>({v,w,h,alt:`Placeholder: the picture's alt text goes here. ${kind}, ${w} x ${h}.`}));
+// The projects as app/core/projects.ts holds them (an unknown link is '').
 const PJ=[
-['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest',GH+'hundo',shots('web')],
-['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker','https://farseer-mu.vercel.app',GH+'farseer',shots('web')],
-['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1','https://lucarne.fr',GH+'lucarne',shots('web')],
-['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app',GH+'ravenpost',[]],
-['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua','https://hearthtale.app',GH+'hearthtale',shots('game')],
-['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua','',GH+'lorekeepers-codex',[]],
-['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua','',GH+'mealbook',[]],
-['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua','',GH+'second-wind',[]],
-['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua','',GH+'keyring',[]],
-['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://gero-lab.vercel.app',GH+'gero',[]],
-['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig','','',[]]];
+["hundo","Hundo","web","Web app","Spoiler-aware, installable completion guides for single-player games: one app per game, all built on one shared core.","React 19, Vite, Vercel, Upstash Redis","https://hundo.quest","https://github.com/salty-max/hundo",shots('web')],
+["farseer","Farseer","web","Web app","Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.","React 19, Vite, Tailwind 4, Hono, Postgres","https://farseer-mu.vercel.app","https://github.com/salty-max/farseer",shots('web')],
+["lucarne","Lucarne","web","Web app","The schedule of football fixtures and the French TV channel showing each one, from Ligue 1 to the World Cup, with live scores and push alerts, in a revival of broadcast teletext.","React 19, Vite, Tailwind 4, Hono, Bun, SQLite","https://lucarne.fr","https://github.com/salty-max/lucarne",shots('web')],
+["wow-locker","WoWLocker","web","Web app","Your World of Warcraft Classic characters on your phone: gear and talents, what changed during a session, bags and mail, a Hardcore character's deaths and close calls. An installable web app with an addon, in an interface based on the game.","React 19, Vite, Tailwind 4, Hono, Postgres, Lua","https://wow-locker.app","https://github.com/salty-max/wow-locker",[]],
+["ravenpost","Ravenpost","addons","Desktop app","A small app for macOS and Windows, the addons' companion. A few seconds after you log out or reload, it carries what they saved: journals to Hearthtale's site, characters to WoWLocker's, and what you choose to share to the addons' database.","Go, Wails, React","https://ravenpost-site.vercel.app","https://github.com/salty-max/ravenpost",[]],
+["hearthtale","Hearthtale","addons","WoW addon","Keeps a journal for your World of Warcraft character as you play. Quests, close calls, new places and the people you travel with become entries in your character's voice, to read in game or on hearthtale.app.","Lua, React, Vite, Tailwind, Hono, Postgres","https://hearthtale.app","https://github.com/salty-max/hearthtale",shots('game')],
+["lorekeepers-codex","Lorekeeper's Codex","addons","WoW addon","A book of Azeroth's lore that fills in as you explore: a place, a person, a creature or a quest can reveal a page about the history behind it, each page an original text.","Lua","","https://github.com/salty-max/lorekeepers-codex",[]],
+["mealbook","Mealbook","addons","WoW addon","A chef's cookbook that fills in as you learn to cook, and the road from your cooking skill to 300: the surest recipe at each step, where to learn it, and what to buy or gather.","Lua","","https://github.com/salty-max/mealbook",[]],
+["second-wind","Second Wind","addons","WoW addon","A debrief after a close call or a death in World of Warcraft: the hits that hurt most, how your health fell, and which potions or abilities were ready but went unused.","Lua","","https://github.com/salty-max/second-wind",[]],
+["keyring","Keyring","addons","WoW addon","Gathers your addons' minimap buttons into a drawer, leaving one key on the minimap.","Lua","","https://github.com/salty-max/keyring",[]],
+["goodwill","Goodwill","addons","WoW addon","Every faction's road to Exalted from where you stand, and a chapter of its story at each standing you reach.","Lua","","https://github.com/salty-max/goodwill",[]],
+["palaver","Palaver","addons","WoW addon","Quests and conversations with NPCs in a panel beside them, read and answered from the keyboard.","Lua","","https://github.com/salty-max/palaver",[]],
+["primer","Primer","addons","WoW addon","A class guide to read out of combat: the opening and the order to press your spells in for your level and build, and the next talent points to take, each with its reason.","Lua","","https://github.com/salty-max/primer",[]],
+["yonder","Yonder","addons","WoW addon","Riddles to solve, rare creatures to hunt and a record of what you find along the way, with notes from an Explorers' League naturalist.","Lua","","https://github.com/salty-max/yonder",[]],
+["yours-truly","Yours Truly","addons","WoW addon","Letters from the people you helped: finish a quest chain that changed someone's life, and they write to you. The letter waits at the next mailbox you open.","Lua","","https://github.com/salty-max/yours-truly",[]],
+["gero","Gero","engines","Virtual machine","A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, all in pure Zig. Gero Lab, its playground in the browser, runs it as WebAssembly.","Zig, WebAssembly","https://gero-lab.vercel.app","https://github.com/salty-max/gero",[]],
+["addon-kit","addon-kit","tools","Lua kit","The Lua code shared by most of the addons here, a copy in each: the books' windows and look, events, settings, achievements, the minimap button and the translations. Its scripts package, test and release them.","Lua, TypeScript, Bun","","https://github.com/salty-max/addon-kit",[]],
+["wow-data","wow-data","tools","Game data","The World of Warcraft game data the addons are built from: the game client's tables, QuestieDB and the Classic database, pinned in one place, downloaded once and built into one SQLite database per game, with an explorer in the browser.","TypeScript, Bun, SQLite, React","","https://github.com/salty-max/wow-data",[]],
+["harness","harness","tools","Dev tool","A small harness for working with Claude Code sessions on a project: a task board, a quiet runner for checks, a review packet and verdict before each commit, and git hooks that refuse to push an unchecked or unreviewed tree.","TypeScript, Bun","","https://github.com/salty-max/harness",[]]];
 // The stand-in images: flat colour blocks and PLACEHOLDER in a 5x7 pixel font, as SVG (no font needed).
 const F5={A:'0e11111f111111',C:'0e11101010110e',D:'1e11111111111e',E:'1f10101e10101f',G:'0e11101711110f',H:'1111111f111111',I:'0e04040404040e',K:'11121418141211',L:'1010101010101f',M:'111b1515111111',N:'11191513111111',O:'0e11111111110e',P:'1e11111e101010',R:'1e11111e141211',S:'0f10100e01011e',T:'1f040404040404',X:'11110a040a1111','-':'0000001f000000',0:'0e11131519110e',1:'040c040404040e',2:'0e11010204081f',3:'1f02040201110e',4:'02060a121f0202',5:'1f101e0101110e',6:'0608101e11110e',7:'1f010204080808',8:'0e11110e11110e',9:'0e11110f01020c'};
 function ptxt(s,x,y,q){let d='';[...s].forEach((ch,i)=>{const g=F5[ch];if(g)for(let r=0;r<7;r++){const b=parseInt(g.substr(r*2,2),16);for(let c=0;c<5;c++)if(b&16>>c)d+=`M${x+(i*6+c)*q} ${y+r*q}h${q}v${q}h-${q}z`}});return d}
@@ -133,11 +160,30 @@ b:()=>`<rect width="1440" height="900" fill="#161b26"/><rect width="1440" height
 p:()=>`<rect width="390" height="844" fill="#efe9dc"/><rect width="390" height="96" fill="#24345c"/>${R(16,48,120,28,'#f2c14e')}${R(16,116,358,180,'#e07a5f')}${['#f2c14e','#7fb7e6','#b48ead','#e07a5f','#f2c14e'].map((c,i)=>R(16,316+i*84,358,68,'#fff')+`<circle cx="52" cy="${350+i*84}" r="18" fill="${c}"/>`+R(84,336+i*84,200,14,'#24345c',' fill-opacity=".7"')+R(84,360+i*84,150,10,'#24345c',' fill-opacity=".3"')).join('')}<rect y="784" width="390" height="60" fill="#24345c"/>${[0,1,2,3].map(i=>`<circle cx="${60+i*90}" cy="814" r="10" fill="#7fb7e6"/>`).join('')}${plate(390,844,'PHONE 390 X 844',5,'#fff','#24345c')}`,
 g:()=>`<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f4d8a"/><stop offset="1" stop-color="#f0a35e"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#s)"/><circle cx="1450" cy="560" r="110" fill="#ffd27a"/><path d="M0 700L260 430L520 640L820 360L1120 620L1400 450L1700 650L1920 520V1080H0Z" fill="#6a5a9e"/><path d="M0 820L380 600L700 780L1040 560L1380 800L1680 640L1920 760V1080H0Z" fill="#3e3570"/><rect y="880" width="1920" height="200" fill="#5b4a2e"/><path d="M860 1080L940 880H1000L1120 1080Z" fill="#a88a5a"/>${plate(1920,1080,'IN-GAME 1920 X 1080',16,'#1b1530','#ffd27a')}`};
 const SC={},shotSrc=s=>SC[s.v]||(SC[s.v]='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s.w}" height="${s.h}" viewBox="0 0 ${s.w} ${s.h}">${STAND[s.v]()}</svg>`));
-const KIND={web:'Web',addons:'Addons',engines:'Engines'};
-const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons,\nand game engines and tools.\n\nOpen Projects to see each one.\nContact: hello@your-domain (placeholder)';
-const CONTACT='Email   hello@your-domain (placeholder)\nGitHub  github.com/salty-max';
-const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}}}}};
-PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]+'.txt']={p}});
+const KIND={web:'Web',addons:'Addons',engines:'Engines',tools:'Tools'};
+const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons,\nengines and tools.\n\nEach project has a file in the projects folder.\nContact: max@jellycat.fr';
+const CONTACT='Email   max@jellycat.fr\nGitHub  github.com/salty-max';
+const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}},tools:{d:{}}}}};
+// A project is a directory holding its README.
+PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]]={p,d:{README:{r:p}}}});
+const host=u=>u.replace(/^https?:\/\//,'');
+// A link to another project opens its Info window.
+const plk=(s,t)=>`<a href="/projects/${s}" data-go="p:${s}">${t}</a>`;
+// Each project's README: a stand-in marked PLACEHOLDER until A5 writes the real one, in its shape: a title, '## ' headings,
+// paragraphs on one line each, '- ' items, `code` spans, and links (https:// or another project's /projects/<slug>).
+const readme=p=>{const o=p[0]==='harness'?'hundo':'harness',on=PJ.find(x=>x[0]===o)[1];return [`# ${p[1]}`,
+`PLACEHOLDER: A5 writes this README from ${p[1]}'s own repository, 250 to 450 words. This first paragraph says what the project is, who it is for and where it runs, in three or four plain sentences.`,
+'## How it\'s built','Placeholder. A paragraph on how the parts fit together, naming each folder or file in code as the repository names it, like `a/folder`, and saying what it holds.',
+'- Placeholder: one part of the system and what it does, with its name in code, like `a-file.ts`.','- Placeholder: another part, and how it talks to the first.','- Placeholder: a rule the code keeps, and the test that holds it.',
+'Placeholder. A second paragraph on the piece of engineering most worth a look: a shared library, a data pipeline, a sync service or a tool, whatever this project has.',
+'## How it\'s checked','- Placeholder: the project\'s check, like `the check`, and what it runs.','- Placeholder: what CI runs on each pull request.','- Placeholder: the tests that matter most, and what they pin.',
+`Placeholder: a closing line that can link another project, like [${on}](/projects/${o}).`]};
+// A README as HTML: real headings, lists and code. The markers (# and ## before a heading, - before an item, the backticks around
+// code) are drawn by CSS, dim, so the text a crawler or a screen reader gets is the words alone. A link is an https:// address or
+// a project that exists; anything else stays plain text.
+const inl=(s,live)=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,t,u)=>{const s=u.startsWith('/projects/')&&u.slice(10);return !live?t:s&&PJ.some(x=>x[0]===s)?plk(s,t):/^https:\/\//.test(u)?`<a href="${u}" target="_blank" rel="noopener">${t}</a>`:t});
+function md(L,live){let h='',ul=false;L.forEach(l=>{if(l.startsWith('- ')){if(!ul)h+='<ul>';ul=true;h+=`<li><span>${inl(l.slice(2),live)}</span></li>`;return}if(ul)h+='</ul>';ul=false;
+const m=/^(#{1,2}) (.*)/.exec(l),n=m&&m[1].length+1;h+=m?`<h${n}>${inl(m[2],live)}</h${n}>`:`<p>${inl(l,live)}</p>`});return `<div class="md">${h}${ul?'</ul>':''}</div>`}
 const IC={
 disk:['','','','','################','#oooooooooooooo#','#o############o#','#oooooooooooooo#','#oooooooooooooo#','#o##ooooooooooo#','#oooooooooooooo#','################','.##..........##.'],
 folder:['','','.#####..........','#ooooo#.........','################','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','################'],
@@ -159,7 +205,7 @@ function select(it){if(sel&&sel.isConnected){sel.classList.remove('on');inv(sel,
 function setTheme(t){if(!P[t])return;theme=t;const [f,d,b]=P[t];root.style.setProperty('--fg',f);root.style.setProperty('--dim',d);root.style.setProperty('--bg',b);refresh();root.querySelectorAll('input[name=ph]').forEach(r=>{r.checked=r.value===t})}
 function setFx(k,v){fx[k]=v;root.classList.toggle(k,v)}
 function setDith(v){dith=v;root.classList.toggle('plain',!v)}
-function focus(id){const w=W[id];if(!w)return;Object.values(W).forEach(o=>o.el.classList.remove('act'));w.el.classList.add('act');w.el.style.zIndex=++z;cur=id;if(w.S&&!w.el.contains(document.activeElement))w.el.focus({preventScroll:true})}
+function focus(id){const w=W[id];if(!w)return;Object.values(W).forEach(o=>o.el.classList.remove('act'));w.el.classList.add('act');w.el.style.zIndex=++z;cur=id;if((w.S||w.K)&&!w.el.contains(document.activeElement))(w.el.querySelector('.doc')||w.el).focus({preventScroll:true})}
 function close(id){if(!W[id])return;W[id].el.remove();delete W[id];if(cur===id){cur=null;const top=Object.keys(W).sort((a,b)=>W[b].el.style.zIndex-W[a].el.style.zIndex)[0];if(top)focus(top)}}
 function shade(id){const w=W[id],el=w.el;if(el.classList.toggle('shaded')){w.hh=el.style.height;el.style.height='auto'}else el.style.height=w.hh}
 function zoom(id){const w=W[id],s=w.el.style;if(w.zr){Object.assign(s,w.zr);w.zr=null}else{w.zr={left:s.left,top:s.top,width:s.width,height:s.height};Object.assign(s,{left:'8px',top:'8px',width:desk.clientWidth-112+'px',height:desk.clientHeight-16+'px'})}}
@@ -172,14 +218,17 @@ el.innerHTML=(o.dlg?'':`<div class="tb"><span class="tt">${esc(t)}</span><span c
 el.addEventListener('pointerdown',()=>focus(id));el.addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(!c)return;e.stopPropagation();({shade,zoom,x:close})[c.dataset.c](id)});
 if(!o.dlg){drag(el,el.querySelector('.tb'));grip(el,el.querySelector('.grip'))}
 desk.appendChild(el);W[id]={el,t:o.dlg?'':t,...o};focus(id);return el}
-function folder(id,t,items){const fresh=!W[id];win(id,t,'',380,232,{info:1});if(fresh){W[id].items=items;W[id].view='icon';fdraw(id)}}
+function folder(id,t,items){const fresh=!W[id];win(id,t,'',380,232,{info:1});if(fresh){W[id].items=items;W[id].view='icon';W[id].el.querySelector('.wb').classList.add('scr');fdraw(id)}}
 function fdraw(id){const w=W[id],it=w.items;w.el.querySelector('.info').innerHTML=`<span>${it.length} item${it.length===1?'':'s'}</span><span>${w.view==='icon'?'by icon':'by name'}</span>`;
 w.el.querySelector('.wb').innerHTML=!it.length?'<p class="dim">No items</p>':w.view==='icon'?`<div class="grid">${it.map(x=>`<div class="ic" tabindex="0" data-a="${x.a}">${im(x.i,2)}<span>${esc(x.n)}</span></div>`).join('')}</div>`:`<table class="list"><tr><th>Name</th><th>Kind</th></tr>${it.map(x=>`<tr class="lr" data-a="${x.a}"><td>${im(x.i,1)}${esc(x.n)}</td><td>${x.k}</td></tr>`).join('')}</table>`}
 const HD=[{a:'projects',i:'folder',n:'Projects',k:'Folder'},{a:'readme',i:'doc',n:'Readme',k:'Text'},{a:'term',i:'term',n:'Terminal',k:'Application'},{a:'panel',i:'panel',n:'Control Panel',k:'Application'}];
 const PRJ=Object.keys(KIND).map(k=>({a:'f:'+k,i:'folder',n:KIND[k],k:'Folder'}));
 const items=k=>PJ.filter(p=>p[2]===k).map(p=>({a:'p:'+p[0],i:'app',n:p[1],k:p[3]}));
-const host=u=>u.replace(/^https?:\/\//,''),lnk=u=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(host(u))}</a>`:'-',pics=p=>p[8].length+' picture'+(p[8].length===1?'':'s');
-function info(id){const p=PJ.find(x=>x[0]===id),n=p[8].length;win('i'+id,p[1]+' Info',`<div class="ihead">${im('app',2)}<div><p>${esc(p[1])}</p><p class="dim">${p[3]}</p></div></div><div class="rule"></div><div class="kv"><span class="dim">Stack</span><span>${esc(p[5])}</span><span class="dim">Link</span><span>${lnk(p[6])}</span><span class="dim">Source</span><span>${lnk(p[7])}</span>${n?`<span class="dim pl">Screenshots</span><span class="pics">${pics(p)}<button data-go="v:${p[0]}">View</button></span>`:''}</div><div class="rule"></div><p>${esc(p[4])}</p>`,380,n?296:270)}
+const lnk=u=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(host(u))}</a>`:'-',pics=p=>p[8].length+' picture'+(p[8].length===1?'':'s');
+function info(id){const p=PJ.find(x=>x[0]===id),n=p[8].length,fresh=!W['i'+id];win('i'+id,p[1]+' Info',`<div class="ihead">${im('app',2)}<div><p>${esc(p[1])}</p><p class="dim">${p[3]}</p></div></div><div class="rule"></div><div class="kv"><span class="dim">Stack</span><span>${esc(p[5])}</span><span class="dim">Link</span><span>${lnk(p[6])}</span><span class="dim">Source</span><span>${lnk(p[7])}</span>${n?`<span class="dim pl">Screenshots</span><span class="pics">${pics(p)}<button data-go="v:${p[0]}">View</button></span>`:''}</div><div class="rule"></div><p>${esc(p[4])}</p><div class="btns"><button class="dflt" data-go="r:${p[0]}">Open Readme</button></div>`,380,300);const w=W['i'+id];if(fresh){w.K=1;w.el.tabIndex=-1;w.el.style.height='auto';const dh=desk.clientHeight,h=w.el.offsetHeight;if(w.el.offsetTop+h>dh-8)w.el.style.top=Math.max(0,dh-h-8)+'px'}focus('i'+id)}
+// A project's README in a text window that scrolls (its own 1-bit scroll bar). Esc closes it, as it closes the viewer.
+function readmeWin(id){const p=PJ.find(x=>x[0]===id);if(!p)return;const wid='r'+id,fresh=!W[wid];
+const el=win(wid,p[1]+' Readme',`<div class="doc" tabindex="0">${md(readme(p),true)}</div>`,460,380);if(fresh){el.querySelector('.wb').classList.add('flush');W[wid].K=1}el.querySelector('.doc').focus({preventScroll:true})}
 // The viewer: the picture in its own colours (the CRT layer still on top), its count in the info line, its caption, previous and next.
 function viewer(id,i){const p=PJ.find(x=>x[0]===id);if(!p||!p[8].length)return;const wid='v'+id,fresh=!W[wid];
 const el=win(wid,p[1]+' Screenshots',`<figure class="shot"><div class="sbox"><img alt="" decoding="async"></div><div class="sbar"><figcaption class="cap" aria-hidden="true"></figcaption><span class="nav"><button data-n="-1" aria-label="Previous picture">${im('prev',1)}</button><button data-n="1" aria-label="Next picture">${im('next',1)}</button></span></div></figure>`,470,384,{info:1});
@@ -191,23 +240,24 @@ el.querySelectorAll('[data-n]').forEach(b=>{const j=w.i+ +b.dataset.n,off=j<0||j
 function alertBox(msg,btns){win('a'+(++ac),'',`<div class="al">${im('cat',2)}<p>${msg}</p></div><div class="btns">${btns||'<button class="dflt" data-c="x">OK</button>'}</div>`,320,140,{dlg:1,center:1})}
 function resolve(cwd,p){const s=/^[~\/]/.test(p)?[]:[...cwd];p.replace(/^~\/?|^\//,'').split('/').forEach(x=>{if(!x||x==='.')return;if(x==='..')s.pop();else s.push(x)});return s}
 function node(s){let n={d:HOME};for(const x of s){if(!n.d||!n.d[x])return null;n=n.d[x]}return n}
-const ptext=p=>`${p[1]}\n${p[3]}\n\n${p[4]}\n\nStack        ${p[5]}\nLink         ${host(p[6])||'-'}\nSource       ${host(p[7])||'-'}`+(p[8].length?`\nScreenshots  ${pics(p)}`:'');
 const findP=q=>q&&PJ.find(p=>p[0].startsWith(q.toLowerCase())||p[1].toLowerCase().startsWith(q.toLowerCase()));
 const isF=()=>cur&&W[cur]&&W[cur].items;
 const A={
-hd:()=>folder('hd','Jelly HD',HD),projects:()=>folder('projects','Projects',PRJ),f:k=>folder('f'+k,KIND[k],items(k)),p:id=>info(id),v:id=>viewer(id),
+hd:()=>folder('hd','Jelly HD',HD),projects:()=>folder('projects','Projects',PRJ),f:k=>folder('f'+k,KIND[k],items(k)),p:id=>info(id),v:id=>viewer(id),r:id=>readmeWin(id),
 trash:()=>folder('trash','Trash',[]),
 readme:()=>win('readme','Readme',`<div class="txt">${esc(README)}</div>`,340,210),
 panel:()=>{const el=win('panel','Control Panel',`<div class="cp"><span class="dim">Phosphor</span><div class="opts">${['green','amber','white'].map(t=>`<label><input type="radio" name="ph" value="${t}"${t===theme?' checked':''}>${t[0].toUpperCase()+t.slice(1)}</label>`).join('')}</div><span class="dim">Effects</span><div class="opts">${[['scan','Scanlines'],['glow','Glow'],['flick','Flicker']].map(([k,n])=>`<label><input type="checkbox" data-fx="${k}"${fx[k]?' checked':''}>${n}</label>`).join('')}</div><span class="dim">Desktop</span><div class="opts"><label><input type="checkbox" data-dith${dith?' checked':''}>Dither pattern</label></div></div>`,400,170);if(el.dataset.ok)return;el.dataset.ok=1;el.addEventListener('change',e=>{const t=e.target;if(t.name==='ph')setTheme(t.value);else if(t.dataset.fx)setFx(t.dataset.fx,t.checked);else if('dith' in t.dataset)setDith(t.checked)})},
 term:()=>{const el=win('term','Terminal','<div class="tout"></div><form class="tin"><span class="tps"></span><input aria-label="Command" autocomplete="off" spellcheck="false"></form>',410,240);const inp=el.querySelector('input');inp.focus({preventScroll:true});if(el.dataset.ok)return;el.dataset.ok=1;
-let cwd=[];const o=el.querySelector('.tout'),ps=el.querySelector('.tps'),pth=()=>'~'+(cwd.length?'/'+cwd.join('/'):''),pr=s=>{const d=document.createElement('div');d.textContent=s;o.appendChild(d);while(o.children.length>40)o.firstChild.remove()},upd=()=>{ps.textContent='guest@jellycat:'+pth()+'$ '};
+let cwd=[];const o=el.querySelector('.tout'),ps=el.querySelector('.tps'),pth=()=>'~'+(cwd.length?'/'+cwd.join('/'):''),pr=(s,h)=>{const d=document.createElement('div');if(h)d.innerHTML=s;else d.textContent=s;o.appendChild(d);while(o.children.length>40)o.firstChild.remove()},upd=()=>{ps.textContent='guest@jellycat:'+pth()+'$ '};
 pr('Type help for the commands.');upd();el.querySelector('.wb').addEventListener('click',()=>inp.focus({preventScroll:true}));
 el.querySelector('form').onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';pr('guest@jellycat:'+pth()+'$ '+v);const [c,...a]=v.trim().split(/\s+/),arg=a.join(' ');
-if(!c);else if(c==='help')pr('ls [dir]  cd [dir]  cat <file>  open <project>  view <project>  clear');
+if(!c);else if(c==='help')pr('ls [dir]  cd [dir]  cat <file>  less <file>  open <project>  view <project>  clear');
 else if(c==='clear')o.textContent='';
 else if(c==='ls'){const n=node(resolve(cwd,arg||'.'));pr(n&&n.d?Object.keys(n.d).map(k=>k+(n.d[k].d?'/':'')).join('  '):`ls: ${arg}: no such directory`)}
 else if(c==='cd'){const s=resolve(cwd,arg||'~'),n=node(s);if(n&&n.d)cwd=s;else pr(`cd: ${arg}: no such directory`)}
-else if(c==='cat'){const n=arg&&node(resolve(cwd,arg));if(!arg)pr('cat: name a file');else if(!n)pr(`cat: ${arg}: no such file`);else if(n.d)pr(`cat: ${arg}: is a directory`);else pr(n.p?ptext(n.p):n.f)}
+else if(c==='cat'){const n=arg&&node(resolve(cwd,arg));if(!arg)pr('cat: name a file');else if(!n)pr(`cat: ${arg}: no such file`);else if(n.d)pr(`cat: ${arg}: is a directory`);else if(n.r)pr(md(readme(n.r),true),1);else pr(n.f)}
+// On the desktop, less opens a project's README in its window; a file that fits on the screen is printed, as more prints it.
+else if(c==='less'||c==='more'){const n=arg&&node(resolve(cwd,arg));if(!arg)pr(c+': name a file');else if(!n)pr(`${c}: ${arg}: no such file`);else if(n.d)pr(`${c}: ${arg}: is a directory`);else if(n.r){readmeWin(n.r[0]);pr('opened '+n.r[1]+' Readme')}else pr(n.f)}
 else if(c==='open'){const p=findP(arg);if(p){info(p[0]);pr('opened '+p[1])}else pr(arg?`open: no project matches ${arg}`:'open: name a project')}
 else if(c==='view'){const p=findP(arg);if(!arg)pr('view: name a project');else if(!p)pr(`view: no project matches ${arg}`);else if(!p[8].length)pr(`view: ${p[0]}: no screenshots`);else{viewer(p[0]);pr('opened '+p[1]+' Screenshots')}}
 else pr(`jsh: ${c}: command not found`);upd()}},
@@ -237,13 +287,17 @@ if(!$('off').hidden){$('off').hidden=true;return boot()}
 const mi=e.target.closest('.mi');if(mi){if(!mi.classList.contains('off')){closeMenu();act(mi.dataset.a)}return}
 const mt=e.target.closest('.mt');if(mt){if(openM===mt)closeMenu();else openMenu(mt);return}
 closeMenu();
-const g=e.target.closest('[data-go]');if(g)return act(g.dataset.go);
+const g=e.target.closest('[data-go]');if(g){e.preventDefault();return act(g.dataset.go)}
 const it=e.target.closest('.ic,.lr');if(!it)return select(null);
 if(sel===it)return act(it.dataset.a);select(it)});
 root.addEventListener('dblclick',e=>{const it=e.target.closest('.ic,.lr');if(it&&sel!==it)act(it.dataset.a)});
 root.addEventListener('mouseover',e=>{const mt=e.target.closest('.mt');if(openM&&mt&&mt!==openM)openMenu(mt)});
 root.addEventListener('keydown',e=>{if(e.key==='Escape'&&openM)return closeMenu();const it=e.target.closest('.ic');if(it&&e.key==='Enter')return act(it.dataset.a);
-const vw=e.target.closest('.win'),wid=vw&&Object.keys(W).find(k=>W[k].el===vw);if(!wid||!W[wid].S)return;
+const vw=e.target.closest('.win'),wid=vw&&Object.keys(W).find(k=>W[k].el===vw);if(!wid)return;
+// The Info window's default button answers Enter; Esc closes the README's window and the viewer.
+if(e.key==='Enter'&&wid[0]==='i'&&!e.target.closest('button,a'))return act('r:'+wid.slice(1));
+if(e.key==='Escape'&&W[wid].K&&wid[0]==='r')return close(wid);
+if(!W[wid].S)return;
 if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();vgo(wid,W[wid].i+(e.key==='ArrowLeft'?-1:1))}else if(e.key==='Escape')close(wid)});
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));$('rb').onclick=()=>boot();
 const tick=()=>{const d=new Date();$('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,1000);

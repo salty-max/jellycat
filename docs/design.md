@@ -34,7 +34,8 @@ rules changes this file in the same pull request.
   the right; Trash at the bottom.
 - Windows: a 1px phosphor frame, a hard 3px shadow in the dim tone, a 22px title bar. The window in front has an inverse title bar.
   Three boxes on the right: collapse to the title bar, zoom, close. A grip in the bottom-right corner resizes.
-- Folder windows have an info line (item count, view) and show their items by icon or by name (View menu).
+- Folder windows have an info line (item count, view) and show their items by icon or by name (View menu). A folder holding more
+  than it shows scrolls, with the 1-bit scroll bar (see Readme).
 - Dialogs have a 3px double border and no title bar. The default button has a second outline.
 - Selection: one click selects, a second click or a double click opens, Enter opens the focused icon.
 
@@ -42,7 +43,8 @@ rules changes this file in the same pull request.
 
 - Prompt `guest@jellycat:<path>$`, a block cursor (hollow when the shell isn't focused), a status bar in inverse video:
   `[jellycat] 0:jsh*` on the left, the path and the clock on the right.
-- Every name in the output is clickable and runs the command it stands for, so the shell works without typing.
+- Every name in the output is clickable and runs the command it stands for, so the shell works without typing. A project's name
+  (in `ls` and `tree`) opens it; a README's name pages it.
 - Messages read like a Unix shell's (`jsh: foo: command not found`), never chatty.
 - `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. `q` returns to the
   prompt as it was.
@@ -57,8 +59,30 @@ rules changes this file in the same pull request.
   kept to two lines.
 - Previous and next are buttons with pixel arrows on the desktop and `h`/`l` in the shell's key bar; ← and → work in both. At the
   first or last picture the control is dim. Esc closes the window; `q` or Esc returns the shell to the prompt as it was.
-- The Info window and the `open` card list Stack, Link, Source and Screenshots. An unknown Link or Source is `-`; a project with no
-  pictures has no Screenshots row.
+- The Info window and the `open` card list Stack, Link, Source and Screenshots, and the card a README row after them. An unknown
+  Link or Source is `-`; a project with no pictures has no Screenshots row.
+
+## Readme
+
+- Every project has a README, 250 to 450 words: one `#` title, `##` headings, paragraphs, one-level lists, code spans and links.
+  In the file system a project is a directory holding it, `~/projects/<folder>/<slug>/README`.
+- It reads the same everywhere. A heading keeps its `#` or `##`, a list item its `-` and a code span its backticks, drawn dim by
+  CSS so the HTML holds only the words, in real headings, lists and `code`. A blank line comes before each heading and between
+  blocks; an item's text hangs. An https link opens in a new tab; a link to `/projects/<slug>` opens that project, as its name
+  does elsewhere.
+- Desktop: the Info window, sized to its content, ends with a default button, Open Readme (Enter works too). It opens
+  `<Name> Readme`, a text window that scrolls. Its scroll bar is 1-bit: a track dithered in the dim tone, a hollow thumb, a box at
+  the bottom for the grip. Esc closes it. The window takes the focus, shown by its inverse title bar, so the text has no focus
+  ring of its own.
+- Shell: `cat` prints it. `less` (or `more`) pages it full screen, like `browse`: the path in the top border (cut with `…` when
+  long), the position on the right (`top`, a percentage, `end`), the key bar `j k` scroll, `Space b` page, `q` quit; the arrows,
+  Page Up/Down, `g` and `G` work too. `q` goes back to where it was opened, the prompt or `browse`.
+- The `open` card's README row shows the path and runs `less`. In `browse`, a project's directory shows its card and its README
+  the text; Enter on the README pages it.
+- In the desktop's Terminal, `less` opens the README's window; any other file is printed, as `more` prints a file that fits.
+- `/projects/<slug>` prerenders the session with `open <slug>` and `cat ~/projects/<folder>/<slug>/README` already run, scrolled
+  to the `open` line. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the
+  README's headings its `h2` and `h3`.
 
 ## Words
 

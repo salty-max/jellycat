@@ -34,6 +34,22 @@
 .vbox img{flex:0 1 auto;min-height:0;width:100%;height:auto;object-fit:contain}
 .vcap{flex:none;height:2.3em;overflow:hidden}
 .keys .off{color:var(--dim)}.keys .off b{background:var(--dim)}
+.md{white-space:normal}
+.md>*{margin:0}
+.md>*+*{margin-top:1lh}
+.md>h2+*,.md>h3+*{margin-top:0}
+.md h2,.md h3{font:inherit}
+.hl{font:inherit;margin:0}
+.md ul{list-style:none;padding:0}
+.md li{display:grid;grid-template-columns:2ch minmax(0,1fr)}
+.md h2::before,.md h3::before,.md li::before{color:var(--dim)}
+.md h2::before{content:"# "/""}.md h3::before{content:"## "/""}.md li::before{content:"-"/""}
+.md code{font:inherit}.md code::before,.md code::after{content:"`"/"";color:var(--dim)}
+.md p,.md li>span{overflow-wrap:anywhere}
+.pgp{flex:1;min-height:0;padding:12px 4px 4px 10px}
+.pgp .pt:first-child{max-width:calc(100% - 100px);overflow:hidden;text-overflow:ellipsis}
+.pgc{height:100%;overflow-y:auto;scrollbar-width:none;padding-right:6px}
+.pgc::-webkit-scrollbar{display:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 <h2 class="sr-only">Phosphor shell mockup: a terminal with a login, a prompt, commands over a small file system, and a two-pane file browser.</h2>
@@ -42,30 +58,40 @@
 <div class="term" id="term"><div id="out"></div><div id="line" hidden><span id="ps"></span><span id="cmd"></span></div></div>
 <div class="tui" id="tui" hidden><div class="panes"><div class="pane" id="tl"></div><div class="pane" id="tr"></div></div><div class="keys"><span data-k="ArrowDown"><b>j k</b>move</span><span data-k="Enter"><b>Enter</b>open</span><span data-k="Backspace"><b>Bksp</b>up</span><span data-k="q"><b>q</b>quit</span></div></div>
 <div class="tui" id="vw" hidden><div class="pane vp"><span class="pt" id="vt"></span><span class="pt r" id="vn"></span><div class="vbox"><img id="vi" alt="" decoding="async"><div class="vcap" id="vc" aria-hidden="true"></div></div></div><div class="keys"><span data-k="h" id="kp"><b>h</b>prev</span><span data-k="l" id="kn"><b>l</b>next</span><span data-k="q"><b>q</b>quit</span></div></div>
+<div class="tui" id="pg" hidden><div class="pane pgp"><span class="pt" id="pgt"></span><span class="pt r" id="pgn"></span><div class="pgc" id="pgc"></div></div><div class="keys"><span data-k="j"><b>j k</b>scroll</span><span data-k=" "><b>Space b</b>page</span><span data-k="q"><b>q</b>quit</span></div></div>
 <div class="bar"><span>[jellycat] <span id="wn">0:jsh*</span></span><span class="sp" id="bp"></span><span id="clk"></span></div>
 <input id="kb" class="kb" aria-label="Terminal input" autocomplete="off" autocapitalize="off" spellcheck="false">
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;font-size:13px;color:var(--text-secondary)">
-<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><span style="margin-left:16px">Frame</span><button data-z="0">652 x 480</button><button data-z="1">Phone 412 x 839</button><button id="rb" style="margin-left:auto">Reboot</button>
+<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><span style="margin-left:16px">Frame</span><button data-z="0">652 x 480</button><button data-z="1">Phone 412 x 839</button><button id="pgb">Page /projects/hundo</button><button id="rb" style="margin-left:auto">Reboot</button>
 </div>
 </div>
 <script>
 const P={green:['#33ff66','#1a9c40','#031208'],amber:['#ffb000','#a86f00','#140b00'],white:['#e8eef8','#8a93a6','#0b0d12']};
 // Stand-in pictures, each marked as a placeholder: [variant, width, height, kind]. Real ones come from E3.
-const SH={web:[['a',1440,900,'Desktop'],['b',1440,900,'Desktop'],['p',390,844,'Phone']],game:[['g',1920,1080,'In game']]}, GH='https://github.com/salty-max/';
+const SH={web:[['a',1440,900,'Desktop'],['b',1440,900,'Desktop'],['p',390,844,'Phone']],game:[['g',1920,1080,'In game']]};
 const shots=k=>SH[k].map(([v,w,h,kind])=>({v,w,h,alt:`Placeholder: the picture's alt text goes here. ${kind}, ${w} x ${h}.`}));
+// The projects as app/core/projects.ts holds them (an unknown link is '').
 const PJ=[
-['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest',GH+'hundo',shots('web')],
-['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker','https://farseer-mu.vercel.app',GH+'farseer',shots('web')],
-['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1','https://lucarne.fr',GH+'lucarne',shots('web')],
-['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app',GH+'ravenpost',[]],
-['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua','https://hearthtale.app',GH+'hearthtale',shots('game')],
-['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua','',GH+'lorekeepers-codex',[]],
-['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua','',GH+'mealbook',[]],
-['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua','',GH+'second-wind',[]],
-['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua','',GH+'keyring',[]],
-['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://gero-lab.vercel.app',GH+'gero',[]],
-['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig','','',[]]];
+["hundo","Hundo","web","Web app","Spoiler-aware, installable completion guides for single-player games: one app per game, all built on one shared core.","React 19, Vite, Vercel, Upstash Redis","https://hundo.quest","https://github.com/salty-max/hundo",shots('web')],
+["farseer","Farseer","web","Web app","Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.","React 19, Vite, Tailwind 4, Hono, Postgres","https://farseer-mu.vercel.app","https://github.com/salty-max/farseer",shots('web')],
+["lucarne","Lucarne","web","Web app","The schedule of football fixtures and the French TV channel showing each one, from Ligue 1 to the World Cup, with live scores and push alerts, in a revival of broadcast teletext.","React 19, Vite, Tailwind 4, Hono, Bun, SQLite","https://lucarne.fr","https://github.com/salty-max/lucarne",shots('web')],
+["wow-locker","WoWLocker","web","Web app","Your World of Warcraft Classic characters on your phone: gear and talents, what changed during a session, bags and mail, a Hardcore character's deaths and close calls. An installable web app with an addon, in an interface based on the game.","React 19, Vite, Tailwind 4, Hono, Postgres, Lua","https://wow-locker.app","https://github.com/salty-max/wow-locker",[]],
+["ravenpost","Ravenpost","addons","Desktop app","A small app for macOS and Windows, the addons' companion. A few seconds after you log out or reload, it carries what they saved: journals to Hearthtale's site, characters to WoWLocker's, and what you choose to share to the addons' database.","Go, Wails, React","https://ravenpost-site.vercel.app","https://github.com/salty-max/ravenpost",[]],
+["hearthtale","Hearthtale","addons","WoW addon","Keeps a journal for your World of Warcraft character as you play. Quests, close calls, new places and the people you travel with become entries in your character's voice, to read in game or on hearthtale.app.","Lua, React, Vite, Tailwind, Hono, Postgres","https://hearthtale.app","https://github.com/salty-max/hearthtale",shots('game')],
+["lorekeepers-codex","Lorekeeper's Codex","addons","WoW addon","A book of Azeroth's lore that fills in as you explore: a place, a person, a creature or a quest can reveal a page about the history behind it, each page an original text.","Lua","","https://github.com/salty-max/lorekeepers-codex",[]],
+["mealbook","Mealbook","addons","WoW addon","A chef's cookbook that fills in as you learn to cook, and the road from your cooking skill to 300: the surest recipe at each step, where to learn it, and what to buy or gather.","Lua","","https://github.com/salty-max/mealbook",[]],
+["second-wind","Second Wind","addons","WoW addon","A debrief after a close call or a death in World of Warcraft: the hits that hurt most, how your health fell, and which potions or abilities were ready but went unused.","Lua","","https://github.com/salty-max/second-wind",[]],
+["keyring","Keyring","addons","WoW addon","Gathers your addons' minimap buttons into a drawer, leaving one key on the minimap.","Lua","","https://github.com/salty-max/keyring",[]],
+["goodwill","Goodwill","addons","WoW addon","Every faction's road to Exalted from where you stand, and a chapter of its story at each standing you reach.","Lua","","https://github.com/salty-max/goodwill",[]],
+["palaver","Palaver","addons","WoW addon","Quests and conversations with NPCs in a panel beside them, read and answered from the keyboard.","Lua","","https://github.com/salty-max/palaver",[]],
+["primer","Primer","addons","WoW addon","A class guide to read out of combat: the opening and the order to press your spells in for your level and build, and the next talent points to take, each with its reason.","Lua","","https://github.com/salty-max/primer",[]],
+["yonder","Yonder","addons","WoW addon","Riddles to solve, rare creatures to hunt and a record of what you find along the way, with notes from an Explorers' League naturalist.","Lua","","https://github.com/salty-max/yonder",[]],
+["yours-truly","Yours Truly","addons","WoW addon","Letters from the people you helped: finish a quest chain that changed someone's life, and they write to you. The letter waits at the next mailbox you open.","Lua","","https://github.com/salty-max/yours-truly",[]],
+["gero","Gero","engines","Virtual machine","A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, all in pure Zig. Gero Lab, its playground in the browser, runs it as WebAssembly.","Zig, WebAssembly","https://gero-lab.vercel.app","https://github.com/salty-max/gero",[]],
+["addon-kit","addon-kit","tools","Lua kit","The Lua code shared by most of the addons here, a copy in each: the books' windows and look, events, settings, achievements, the minimap button and the translations. Its scripts package, test and release them.","Lua, TypeScript, Bun","","https://github.com/salty-max/addon-kit",[]],
+["wow-data","wow-data","tools","Game data","The World of Warcraft game data the addons are built from: the game client's tables, QuestieDB and the Classic database, pinned in one place, downloaded once and built into one SQLite database per game, with an explorer in the browser.","TypeScript, Bun, SQLite, React","","https://github.com/salty-max/wow-data",[]],
+["harness","harness","tools","Dev tool","A small harness for working with Claude Code sessions on a project: a task board, a quiet runner for checks, a review packet and verdict before each commit, and git hooks that refuse to push an unchecked or unreviewed tree.","TypeScript, Bun","","https://github.com/salty-max/harness",[]]];
 // The stand-in images: flat colour blocks and PLACEHOLDER in a 5x7 pixel font, as SVG (no font needed).
 const F5={A:'0e11111f111111',C:'0e11101010110e',D:'1e11111111111e',E:'1f10101e10101f',G:'0e11101711110f',H:'1111111f111111',I:'0e04040404040e',K:'11121418141211',L:'1010101010101f',M:'111b1515111111',N:'11191513111111',O:'0e11111111110e',P:'1e11111e101010',R:'1e11111e141211',S:'0f10100e01011e',T:'1f040404040404',X:'11110a040a1111','-':'0000001f000000',0:'0e11131519110e',1:'040c040404040e',2:'0e11010204081f',3:'1f02040201110e',4:'02060a121f0202',5:'1f101e0101110e',6:'0608101e11110e',7:'1f010204080808',8:'0e11110e11110e',9:'0e11110f01020c'};
 function ptxt(s,x,y,q){let d='';[...s].forEach((ch,i)=>{const g=F5[ch];if(g)for(let r=0;r<7;r++){const b=parseInt(g.substr(r*2,2),16);for(let c=0;c<5;c++)if(b&16>>c)d+=`M${x+(i*6+c)*q} ${y+r*q}h${q}v${q}h-${q}z`}});return d}
@@ -77,14 +103,15 @@ b:()=>`<rect width="1440" height="900" fill="#161b26"/><rect width="1440" height
 p:()=>`<rect width="390" height="844" fill="#efe9dc"/><rect width="390" height="96" fill="#24345c"/>${R(16,48,120,28,'#f2c14e')}${R(16,116,358,180,'#e07a5f')}${['#f2c14e','#7fb7e6','#b48ead','#e07a5f','#f2c14e'].map((c,i)=>R(16,316+i*84,358,68,'#fff')+`<circle cx="52" cy="${350+i*84}" r="18" fill="${c}"/>`+R(84,336+i*84,200,14,'#24345c',' fill-opacity=".7"')+R(84,360+i*84,150,10,'#24345c',' fill-opacity=".3"')).join('')}<rect y="784" width="390" height="60" fill="#24345c"/>${[0,1,2,3].map(i=>`<circle cx="${60+i*90}" cy="814" r="10" fill="#7fb7e6"/>`).join('')}${plate(390,844,'PHONE 390 X 844',5,'#fff','#24345c')}`,
 g:()=>`<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f4d8a"/><stop offset="1" stop-color="#f0a35e"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#s)"/><circle cx="1450" cy="560" r="110" fill="#ffd27a"/><path d="M0 700L260 430L520 640L820 360L1120 620L1400 450L1700 650L1920 520V1080H0Z" fill="#6a5a9e"/><path d="M0 820L380 600L700 780L1040 560L1380 800L1680 640L1920 760V1080H0Z" fill="#3e3570"/><rect y="880" width="1920" height="200" fill="#5b4a2e"/><path d="M860 1080L940 880H1000L1120 1080Z" fill="#a88a5a"/>${plate(1920,1080,'IN-GAME 1920 X 1080',16,'#1b1530','#ffd27a')}`};
 const SC={},shotSrc=s=>SC[s.v]||(SC[s.v]='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s.w}" height="${s.h}" viewBox="0 0 ${s.w} ${s.h}">${STAND[s.v]()}</svg>`));
-const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons, and game engines and tools.\nEach project has a file in ~/projects. Contact details are in contact.txt.';
-const CONTACT='Email   hello@your-domain (placeholder)\nGitHub  github.com/salty-max';
-const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}}}},lab:{d:{'hello.gero':{f:'fn main()\n  print("hello")\nend'}}}};
-PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]+'.txt']={p}});
+const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons, engines and tools.\n\nEach project has a file in the projects folder.\nContact: max@jellycat.fr';
+const CONTACT='Email   max@jellycat.fr\nGitHub  github.com/salty-max';
+const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}},tools:{d:{}}}},lab:{d:{'hello.gero':{f:'fn main()\n  print("hello")\nend'}}}};
+// A project is a directory holding its README.
+PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]]={p,d:{README:{r:p}}}});
 const $=id=>document.getElementById(id),root=$('sh'),term=$('term'),out=$('out'),kb=$('kb');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const lk=(t,c,cls)=>`<span class="lk${cls?' '+cls:''}" data-c="${esc(c)}">${esc(t)}</span>`;
-let cwd=[],hist=[],hp=0,busy=true,skip=false,tuiOn=false,vwOn=false,fx=true,T={s:[],i:0},V={p:null,i:0};
+let cwd=[],hist=[],hp=0,busy=true,skip=false,tuiOn=false,vwOn=false,pgOn=false,fx=true,T={s:[],i:0},V={p:null,i:0},PG={back:'jsh'};
 const path=s=>'~'+(s.length?'/'+s.join('/'):''),promptStr=()=>`guest@jellycat:${path(cwd)}$ `;
 function say(h){const d=document.createElement('div');d.innerHTML=h===''?'&nbsp;':h;out.appendChild(d);while(out.children.length>300)out.firstChild.remove();term.scrollTop=term.scrollHeight}
 const sayT=t=>t.split('\n').forEach(l=>say(esc(l)));
@@ -92,21 +119,41 @@ function resolve(p){const s=/^[~\/]/.test(p)?[]:[...cwd];p.replace(/^~\/?|^\//,'
 function node(s){let n={d:HOME};for(const x of s){if(!n.d||!n.d[x])return null;n=n.d[x]}return n}
 const sorted=d=>Object.keys(d).sort((a,b)=>(!!d[b].d-!!d[a].d)||a.localeCompare(b));
 const host=u=>u.replace(/^https?:\/\//,''),lnk=u=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(host(u))}</a>`:'-',pics=p=>p[8].length+' picture'+(p[8].length===1?'':'s');
+const rpath=p=>`~/projects/${p[2]}/${p[0]}/README`;
+// A link to another project is a project name: it runs open.
+const plk=(s,t)=>`<a href="/projects/${s}" class="lk" data-c="open ${s}">${t}</a>`;
+// Each project's README: a stand-in marked PLACEHOLDER until A5 writes the real one, in its shape: a title, '## ' headings,
+// paragraphs on one line each, '- ' items, `code` spans, and links (https:// or another project's /projects/<slug>).
+const readme=p=>{const o=p[0]==='harness'?'hundo':'harness',on=PJ.find(x=>x[0]===o)[1];return [`# ${p[1]}`,
+`PLACEHOLDER: A5 writes this README from ${p[1]}'s own repository, 250 to 450 words. This first paragraph says what the project is, who it is for and where it runs, in three or four plain sentences.`,
+'## How it\'s built','Placeholder. A paragraph on how the parts fit together, naming each folder or file in code as the repository names it, like `a/folder`, and saying what it holds.',
+'- Placeholder: one part of the system and what it does, with its name in code, like `a-file.ts`.','- Placeholder: another part, and how it talks to the first.','- Placeholder: a rule the code keeps, and the test that holds it.',
+'Placeholder. A second paragraph on the piece of engineering most worth a look: a shared library, a data pipeline, a sync service or a tool, whatever this project has.',
+'## How it\'s checked','- Placeholder: the project\'s check, like `the check`, and what it runs.','- Placeholder: what CI runs on each pull request.','- Placeholder: the tests that matter most, and what they pin.',
+`Placeholder: a closing line that can link another project, like [${on}](/projects/${o}).`]};
+// A README as HTML: real headings, lists and code. The markers (# and ## before a heading, - before an item, the backticks around
+// code) are drawn by CSS, dim, so the text a crawler or a screen reader gets is the words alone. A link is an https:// address or
+// a project that exists; anything else stays plain text.
+const inl=(s,live)=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,t,u)=>{const s=u.startsWith('/projects/')&&u.slice(10);return !live?t:s&&PJ.some(x=>x[0]===s)?plk(s,t):/^https:\/\//.test(u)?`<a href="${u}" target="_blank" rel="noopener">${t}</a>`:t});
+function md(L,live){let h='',ul=false;L.forEach(l=>{if(l.startsWith('- ')){if(!ul)h+='<ul>';ul=true;h+=`<li><span>${inl(l.slice(2),live)}</span></li>`;return}if(ul)h+='</ul>';ul=false;
+const m=/^(#{1,2}) (.*)/.exec(l),n=m&&m[1].length+1;h+=m?`<h${n}>${inl(m[2],live)}</h${n}>`:`<p>${inl(l,live)}</p>`});return `<div class="md">${h}${ul?'</ul>':''}</div>`}
 const findP=q=>PJ.find(p=>p[0].startsWith(q)||p[1].toLowerCase().startsWith(q));
 const kr=(k,v)=>`<div class="kr"><span class="dim">${k}</span><span>${v}</span></div>`;
 // A project's card, one line per entry. live: the prompt's card (links and names you can click); else browse's right pane (text).
-const cardRows=(p,live)=>[esc(p[1]),`<span class="dim">${esc(p[3])}</span>`,'',esc(p[4]),'',kr('Stack',esc(p[5])),kr('Link',live?lnk(p[6]):esc(host(p[6])||'-')),kr('Source',live?lnk(p[7]):esc(host(p[7])||'-'))].concat(p[8].length?[kr('Screenshots',live?lk(pics(p),'view '+p[0]):pics(p))]:[]);
+const cardRows=(p,live,h1)=>[h1?`<h1 class="hl">${esc(p[1])}</h1>`:esc(p[1]),`<span class="dim">${esc(p[3])}</span>`,'',esc(p[4]),'',kr('Stack',esc(p[5])),kr('Link',live?lnk(p[6]):esc(host(p[6])||'-')),kr('Source',live?lnk(p[7]):esc(host(p[7])||'-'))].concat(p[8].length?[kr('Screenshots',live?lk(pics(p),'view '+p[0]):pics(p))]:[],[kr('README',live?lk(rpath(p),'less '+rpath(p)):esc(rpath(p)))]);
 function card(p){cardRows(p,true).forEach(say)}
 const rel=(t,n)=>t==='.'?n:t.replace(/\/$/,'')+'/'+n;
 const C={
-help:()=>sayT(['ls [dir]          list a directory','cd [dir]          change directory','cat <file>        print a file','open <project>    show a project','view <project>    screenshot viewer (q to quit)','tree              show ~/projects as a tree','browse            two-pane file browser (q to quit)','gero <file>       run a Gero program','theme <color>     green, amber or white','crt on|off        CRT effects','clear  history  pwd  whoami  date  uname  echo  logout'].join('\n')),
-ls:a=>{const t=a.find(x=>!x.startsWith('-'))||'.',n=node(resolve(t));if(!n)return say(esc(`ls: cannot access '${t}': No such file or directory`));if(!n.d)return say(lk(t,'cat '+t));say(sorted(n.d).map(k=>n.d[k].d?lk(k+'/',`cd ${rel(t,k)} && ls`):lk(k,'cat '+rel(t,k))).join('  ')||'')},
+help:()=>sayT(['ls [dir]          list a directory','cd [dir]          change directory','cat <file>        print a file','less <file>       page through a file (q to quit)','open <project>    show a project','view <project>    screenshot viewer (q to quit)','tree              show ~/projects as a tree','browse            two-pane file browser (q to quit)','gero <file>       run a Gero program','theme <color>     green, amber or white','crt on|off        CRT effects','clear  history  pwd  whoami  date  uname  echo  logout'].join('\n')),
+ls:a=>{const t=a.find(x=>!x.startsWith('-'))||'.',n=node(resolve(t));if(!n)return say(esc(`ls: cannot access '${t}': No such file or directory`));if(!n.d)return say(lk(t,(n.r?'less ':'cat ')+t));say(sorted(n.d).map(k=>{const c=n.d[k];return c.p?lk(k+'/','open '+k):c.d?lk(k+'/',`cd ${rel(t,k)} && ls`):lk(k,(c.r?'less ':'cat ')+rel(t,k))}).join('  ')||'')},
 cd:a=>{const t=a[0]||'~',s=resolve(t),n=node(s);if(!n)return say(esc(`cd: ${t}: No such file or directory`));if(!n.d)return say(esc(`cd: ${t}: Not a directory`));cwd=s},
 pwd:()=>say(esc('/home/guest'+(cwd.length?'/'+cwd.join('/'):''))),
-cat:a=>{if(!a[0])return say('cat: missing file operand');a.forEach(t=>{const n=node(resolve(t));if(!n)say(esc(`cat: ${t}: No such file or directory`));else if(n.d)say(esc(`cat: ${t}: Is a directory`));else if(n.p)card(n.p);else sayT(n.f)})},
+cat:a=>{if(!a[0])return say('cat: missing file operand');a.forEach(t=>{const n=node(resolve(t));if(!n)say(esc(`cat: ${t}: No such file or directory`));else if(n.d)say(esc(`cat: ${t}: Is a directory`));else if(n.r)say(md(readme(n.r),true));else sayT(n.f)})},
+less:(a,c='less')=>{const t=a[0];if(!t)return say(c+': missing file operand');const s=resolve(t),n=node(s);if(!n)return say(esc(`${c}: ${t}: No such file or directory`));if(n.d)return say(esc(`${c}: ${t}: Is a directory`));pgStart(n,path(s),'jsh')},
+more:a=>C.less(a,'more'),
 open:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('open: name a project, for example: '+lk('open hundo','open hundo'));const p=findP(q);if(!p)return say(esc(`open: no project matches '${q}'`));card(p)},
 view:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('view: name a project, for example: '+lk('view hundo','view hundo'));const p=findP(q);if(!p)return say(esc(`view: no project matches '${q}'`));if(!p[8].length)return say(esc(`view: ${p[0]}: no screenshots`));vwStart(p)},
-tree:()=>{say('~/projects');const ks=sorted(HOME.projects.d);ks.forEach((k,i)=>{const last=i===ks.length-1,d=HOME.projects.d[k].d;say((last?'`-- ':'|-- ')+lk(k,`cd ~/projects/${k} && ls`));const fs=sorted(d);fs.forEach((f,j)=>say((last?'    ':'|   ')+(j===fs.length-1?'`-- ':'|-- ')+lk(f,`cat ~/projects/${k}/${f}`)))})},
+tree:()=>{say('~/projects');const ks=sorted(HOME.projects.d);ks.forEach((k,i)=>{const last=i===ks.length-1,d=HOME.projects.d[k].d;say((last?'`-- ':'|-- ')+lk(k,`cd ~/projects/${k} && ls`));const fs=sorted(d);fs.forEach((f,j)=>say((last?'    ':'|   ')+(j===fs.length-1?'`-- ':'|-- ')+lk(f,'open '+f)))})},
 browse:()=>tuiStart(),
 gero:a=>{const t=a[0];if(!t)return say('gero: usage: gero <file>');const n=node(resolve(t));if(!n||n.d)return say(esc(`gero: ${t}: No such file`));const m=[...(n.f||'').matchAll(/print\("([^"]*)"\)/g)];m.forEach(x=>say(esc(x[1])))},
 theme:a=>{if(!P[a[0]])return say('theme: use green, amber or white');setTheme(a[0])},
@@ -119,8 +166,8 @@ uname:a=>say(a.includes('-a')?'Jelly-OS 1.0 jellycat tty1':'Jelly-OS'),
 echo:a=>say(esc(a.join(' '))),
 logout:()=>login(),exit:()=>login()};
 function exec(v,silent){if(!silent)say(esc(promptStr())+esc(v));const t=v.trim();if(t){hist.push(t);hp=hist.length}
-for(const part of t.split('&&')){const [c,...a]=part.trim().split(/\s+/);if(!c)continue;if(C[c]){C[c](a);if(c==='logout'||c==='exit'||tuiOn||vwOn)return}else say(esc(`jsh: ${c}: command not found`))}draw()}
-function draw(){if(busy||tuiOn||vwOn)return;$('line').hidden=false;$('ps').textContent=promptStr();const v=kb.value,c=kb.selectionStart==null?v.length:kb.selectionStart;$('cmd').innerHTML=esc(v.slice(0,c))+`<span class="cur">${v[c]?esc(v[c]):' '}</span>`+esc(v.slice(c+1));$('bp').textContent=path(cwd);term.scrollTop=term.scrollHeight}
+for(const part of t.split('&&')){const [c,...a]=part.trim().split(/\s+/);if(!c)continue;if(C[c]){C[c](a);if(c==='logout'||c==='exit'||tuiOn||vwOn||pgOn)return}else say(esc(`jsh: ${c}: command not found`))}draw()}
+function draw(){if(busy||tuiOn||vwOn||pgOn)return;$('line').hidden=false;$('ps').textContent=promptStr();const v=kb.value,c=kb.selectionStart==null?v.length:kb.selectionStart;$('cmd').innerHTML=esc(v.slice(0,c))+`<span class="cur">${v[c]?esc(v[c]):' '}</span>`+esc(v.slice(c+1));$('bp').textContent=path(cwd);term.scrollTop=term.scrollHeight}
 function complete(){const v=kb.value,parts=v.split(' '),last=parts[parts.length-1];let ms;
 if(parts.length===1)ms=Object.keys(C).filter(k=>k.startsWith(last));
 else{const i=last.lastIndexOf('/'),dir=i>=0?last.slice(0,i+1):'',pre=last.slice(i+1),n=node(resolve(dir||'.'));ms=n&&n.d?Object.keys(n.d).filter(k=>k.startsWith(pre)).map(k=>dir+k+(n.d[k].d?'/':'')):[]}
@@ -130,12 +177,13 @@ kb.value=parts.join(' ');kb.setSelectionRange(kb.value.length,kb.value.length)}
 function tents(){const n=node(T.s);return (T.s.length?['..']:[]).concat(sorted(n.d))}
 function tdraw(){const E=tents(),n=node(T.s);T.i=Math.max(0,Math.min(T.i,E.length-1));
 $('tl').innerHTML=`<span class="pt">${esc(path(T.s))}</span><div class="pc">`+E.map((k,i)=>`<div class="row${i===T.i?' on':''}" data-r="${i}">${esc(k==='..'?'..':k+(n.d[k].d?'/':''))}</div>`).join('')+'</div>';
-const k=E[T.i],c=k==='..'?null:n.d[k];let title=k,body='';
-if(!c){title='..';body='Parent directory'}else if(c.d){title=k+'/';body=sorted(c.d).map(x=>x+(c.d[x].d?'/':'')).join('\n')||'Empty'}else body=c.p?null:c.f;
-$('tr').innerHTML=`<span class="pt">${esc(title)}</span><div class="pc">${body===null?cardRows(c.p,false).map(h=>`<div>${h||'&nbsp;'}</div>`).join(''):esc(body)}</div>`;$('bp').textContent=path(T.s)}
+const k=E[T.i],c=k==='..'?null:n.d[k];let title=k,body;
+// A project's directory shows its card, its README the text.
+if(!c){title='..';body=esc('Parent directory')}else if(c.p){title=k+'/';body=cardRows(c.p,false).map(h=>`<div>${h||'&nbsp;'}</div>`).join('')}else if(c.d){title=k+'/';body=esc(sorted(c.d).map(x=>x+(c.d[x].d?'/':'')).join('\n')||'Empty')}else body=c.r?md(readme(c.r),false):esc(c.f);
+$('tr').innerHTML=`<span class="pt">${esc(title)}</span><div class="pc">${body}</div>`;$('bp').textContent=path(T.s)}
 function tkey(k){const E=tents(),cur=E[T.i];
 if(k==='ArrowUp'||k==='k')T.i=(T.i-1+E.length)%E.length;else if(k==='ArrowDown'||k==='j')T.i=(T.i+1)%E.length;
-else if(k==='Enter'||k==='ArrowRight'||k==='l'){if(cur==='..'){T.s.pop();T.i=0}else if(node(T.s).d[cur].d){T.s.push(cur);T.i=0}}
+else if(k==='Enter'||k==='ArrowRight'||k==='l'){const c=cur==='..'?null:node(T.s).d[cur];if(!c){T.s.pop();T.i=0}else if(c.d){T.s.push(cur);T.i=0}else if(k==='Enter'){pgStart(c,path([...T.s,cur]),'browse');return true}}
 else if(k==='Backspace'||k==='ArrowLeft'||k==='h'){if(T.s.length){const up=T.s.pop();T.i=tents().indexOf(up)}}
 else if(k==='q'||k==='Escape')return tuiQuit();else return false;tdraw();return true}
 function tuiStart(){tuiOn=true;T={s:[...cwd],i:0};$('term').hidden=true;$('tui').hidden=false;$('wn').textContent='0:browse*';tdraw();kb.focus({preventScroll:true})}
@@ -145,12 +193,29 @@ function vdraw(){const S=V.p[8],s=S[V.i],im=$('vi');im.width=s.w;im.height=s.h;i
 function vkey(k){const n=V.p[8].length;if(k==='ArrowLeft'||k==='h'){if(V.i>0)V.i--}else if(k==='ArrowRight'||k==='l'){if(V.i<n-1)V.i++}else if(k==='q'||k==='Escape')return vwQuit();else return false;vdraw();return true}
 function vwStart(p){vwOn=true;V={p,i:0};$('term').hidden=true;$('vw').hidden=false;$('wn').textContent='0:view*';vdraw();kb.focus({preventScroll:true})}
 function vwQuit(){vwOn=false;$('vw').hidden=true;$('term').hidden=false;$('wn').textContent='0:jsh*';draw();return true}
+// The pager (less, more): full screen like browse, the path in the top border and the position on the right; q goes back to
+// where it came from, the prompt or browse.
+function pgPos(){const c=$('pgc'),max=c.scrollHeight-c.clientHeight;$('pgn').textContent=c.scrollTop>=max-1?'end':c.scrollTop<1?'top':Math.round(c.scrollTop/max*100)+'%'}
+function pkey(k){const c=$('pgc'),L=parseFloat(getComputedStyle(c).lineHeight),P=Math.max(1,Math.floor(c.clientHeight/L)-1)*L;
+if(k==='j'||k==='ArrowDown'||k==='Enter')c.scrollTop+=L;else if(k==='k'||k==='ArrowUp')c.scrollTop-=L;
+else if(k===' '||k==='PageDown'||k==='f')c.scrollTop+=P;else if(k==='b'||k==='PageUp')c.scrollTop-=P;
+else if(k==='g'||k==='Home')c.scrollTop=0;else if(k==='G'||k==='End')c.scrollTop=c.scrollHeight;
+else if(k==='q'||k==='Escape')return pgQuit();else return false;pgPos();return true}
+function pgStart(n,title,back){pgOn=true;PG={back};$('term').hidden=true;$('tui').hidden=true;$('pg').hidden=false;$('pgt').textContent=title;
+$('pgc').innerHTML=n.r?md(readme(n.r),true):`<div>${esc(n.f)}</div>`;$('pgc').scrollTop=0;$('wn').textContent='0:less*';pgPos();kb.focus({preventScroll:true})}
+function pgQuit(){pgOn=false;$('pg').hidden=true;if(PG.back==='browse'){$('tui').hidden=false;$('wn').textContent='0:browse*';tdraw()}else{$('term').hidden=false;$('wn').textContent='0:jsh*';draw()}return true}
+$('pgc').addEventListener('scroll',pgPos);
+// The project page, /projects/<slug>: first paint is the session with open and the README's cat already run, scrolled to open.
+function page(slug){const p=PJ.find(x=>x[0]===slug);run++;busy=false;skip=false;tuiOn=vwOn=pgOn=false;['tui','vw','pg'].forEach(i=>$(i).hidden=true);$('term').hidden=false;$('wn').textContent='0:jsh*';out.innerHTML='';cwd=[];kb.value='';
+say('Jellycat Studio. Type help for the commands, or click a name.');say('Try: '+lk('ls','ls')+'  '+lk('tree','tree')+'  '+lk('open hundo','open hundo')+'  '+lk('browse','browse'));say('');
+say(esc(promptStr()+'open '+slug));const top=out.lastChild;cardRows(p,true,true).forEach(say);say(esc(promptStr()+'cat '+rpath(p)));say(md(readme(p),true));
+draw();term.scrollTop=top.offsetTop-parseFloat(getComputedStyle(term).paddingTop)}
 function setTheme(t){const [f,d,b]=P[t];root.style.setProperty('--fg',f);root.style.setProperty('--dim',d);root.style.setProperty('--bg',b)}
 function setCrt(on){fx=on;root.classList.toggle('scan',on);root.classList.toggle('glow',on)}
 kb.addEventListener('keydown',e=>{
 if(busy){skip=true;e.preventDefault();return}
 // Full screen, every key belongs to the viewer or browse: none reaches the prompt behind it.
-if(vwOn||tuiOn){if(vwOn)vkey(e.key);else tkey(e.key);if(!e.metaKey&&!e.ctrlKey&&e.key!=='Tab')e.preventDefault();return}
+if(vwOn||tuiOn||pgOn){if(pgOn)pkey(e.key);else if(vwOn)vkey(e.key);else tkey(e.key);if(!e.metaKey&&!e.ctrlKey&&e.key!=='Tab')e.preventDefault();return}
 const k=e.key;
 if(k==='Enter'){e.preventDefault();const v=kb.value;kb.value='';exec(v);return}
 if(k==='Tab'){e.preventDefault();complete();draw();return}
@@ -161,17 +226,23 @@ else if(e.ctrlKey&&k==='c'){e.preventDefault();say(esc(promptStr()+kb.value)+'^C
 else if(e.ctrlKey&&k==='u'){e.preventDefault();kb.value=''}
 setTimeout(draw)});
 kb.addEventListener('input',draw);
+// A key on anything else in a full-screen view (a link in the pager has the focus) still belongs to the view; Enter and Tab stay
+// the link's.
+root.addEventListener('keydown',e=>{if(e.target===kb||!(pgOn||vwOn||tuiOn)||e.key==='Enter'||e.key==='Tab'||e.metaKey||e.ctrlKey)return;e.preventDefault();if(pgOn)pkey(e.key);else if(vwOn)vkey(e.key);else tkey(e.key);kb.focus({preventScroll:true})});
 kb.addEventListener('focus',()=>{root.classList.add('focus');draw()});kb.addEventListener('blur',()=>root.classList.remove('focus'));
 root.addEventListener('click',e=>{
 if(busy){skip=true;return}
-const r=e.target.closest('[data-r]');if(r&&tuiOn){const i=+r.dataset.r;if(i===T.i)tkey('Enter');else{T.i=i;tdraw()}kb.focus({preventScroll:true});return}
-const key=e.target.closest('[data-k]');if(key&&tuiOn){tkey(key.dataset.k);kb.focus({preventScroll:true});return}
+const key=e.target.closest('[data-k]');if(key&&pgOn){pkey(key.dataset.k);kb.focus({preventScroll:true});return}
+const r=e.target.closest('[data-r]');if(r&&tuiOn&&!pgOn){const i=+r.dataset.r;if(i===T.i)tkey('Enter');else{T.i=i;tdraw()}kb.focus({preventScroll:true});return}
+if(key&&tuiOn){tkey(key.dataset.k);kb.focus({preventScroll:true});return}
 if(key&&vwOn){vkey(key.dataset.k);kb.focus({preventScroll:true});return}
-const l=e.target.closest('.lk');if(l&&!tuiOn){exec(l.dataset.c);kb.focus({preventScroll:true});return}
+const l=e.target.closest('.lk');if(l&&pgOn){e.preventDefault();pgOn=tuiOn=false;['pg','tui'].forEach(i=>$(i).hidden=true);$('term').hidden=false;$('wn').textContent='0:jsh*';exec(l.dataset.c);kb.focus({preventScroll:true});return}
+if(l&&!tuiOn){e.preventDefault();exec(l.dataset.c);kb.focus({preventScroll:true});return}
 if(e.target.closest('a'))return;
 if(!String(window.getSelection())) kb.focus({preventScroll:true})});
-const wait=ms=>new Promise(r=>setTimeout(r,skip?0:ms));
-async function login(){busy=true;skip=matchMedia('(prefers-reduced-motion: reduce)').matches;tuiOn=false;vwOn=false;$('tui').hidden=true;$('vw').hidden=true;$('term').hidden=false;$('line').hidden=true;out.innerHTML='';cwd=[];kb.value='';$('bp').textContent='~';
+// Each session start (login, the project page) takes a new run; a superseded login's waits never resolve, so it stops.
+let run=0;const wait=ms=>{const my=run;return new Promise(r=>setTimeout(()=>{if(my===run)r()},skip?0:ms))};
+async function login(){run++;busy=true;skip=matchMedia('(prefers-reduced-motion: reduce)').matches;tuiOn=false;vwOn=false;pgOn=false;$('tui').hidden=true;$('vw').hidden=true;$('pg').hidden=true;$('wn').textContent='0:jsh*';$('term').hidden=false;$('line').hidden=true;out.innerHTML='';cwd=[];kb.value='';$('bp').textContent='~';
 say('Jelly-OS 1.0 tty1');say('');await wait(500);
 const d=document.createElement('div');d.textContent='jellycat login: ';out.appendChild(d);await wait(400);
 for(const ch of 'guest'){d.textContent+=ch;await wait(90)}await wait(250);
@@ -179,7 +250,7 @@ const now=new Date();say(esc('Last login: '+now.toString().slice(0,16)+now.toTim
 say('Jellycat Studio. Type help for the commands, or click a name.');say('Try: '+lk('ls','ls')+'  '+lk('tree','tree')+'  '+lk('open hundo','open hundo')+'  '+lk('browse','browse'));say('');
 busy=false;skip=false;draw()}
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));
-document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const ph=b.dataset.z==='1';root.style.width=ph?'412px':'';root.style.height=ph?'839px':'';term.scrollTop=term.scrollHeight});$('rb').onclick=()=>{hist=[];hp=0;login()};
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const ph=b.dataset.z==='1';root.style.width=ph?'412px':'';root.style.height=ph?'839px':'';term.scrollTop=term.scrollHeight});$('rb').onclick=()=>{hist=[];hp=0;login()};$('pgb').onclick=()=>page('hundo');
 const tick=()=>{const d=new Date();$('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,1000);
 login();
 </script>
