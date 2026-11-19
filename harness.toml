@@ -1,0 +1,23 @@
+# The harness's config (docs: harness/docs/design.md in the harness repository).
+[project]
+name = "jellycat"
+
+[tools]
+dir = "harness"
+
+[defaults]
+check = "bun run check"
+rules = "CLAUDE.md"
+
+[hooks]
+# trailers = true   # refuse AI co-author / "generated with" trailers
+lock     = false    # every child works in its own worktree on its own branch, so the board is a list of who does what and nothing waits on it
+# stamp    = true   # a push wants a passing check on the tree
+# review   = true   # a push wants a recorded review
+
+[session]
+worktrees = true      # a child gets its own worktree: the child skill passes use_worktree for a desktop child
+decisions = "opener"  # a child asks the user nothing: every question and every go goes to its opener, which asks in its own session
+
+[checks]
+queue = true          # one `check` at a time on the machine, shared with hundo's (harness/queue.ts)
