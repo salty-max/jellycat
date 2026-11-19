@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// End-to-end tests against the production build, served the way Vercel serves it (static files, SPA fallback). They drive the
-// system Chrome, here and on GitHub's runner, so nothing downloads a browser.
+// End-to-end tests against the production build, served the way Vercel serves it (scripts/serve.mjs: static files, and 404.html
+// with a 404 status for anything else). They drive the system Chrome, here and on GitHub's runner, so nothing downloads a browser.
 export default defineConfig({
   testDir: "e2e",
   forbidOnly: !!process.env.CI,

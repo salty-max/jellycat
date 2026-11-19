@@ -17,7 +17,7 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 
 ## Scripts
 
-You need Node 22.22.2 or later on 22, 24.15 or later on 24, or Node 26 (the packages' own floor; CI and Vercel use 26), and pnpm
+You need Node 22.22.2 or later on 22, 24.15 or later on 24, or Node 26 (the packages' own floor; CI uses 26), and pnpm
 (the version is pinned in `package.json`). The harness's hooks need [bun](https://bun.sh).
 
 ```bash
@@ -45,7 +45,8 @@ pnpm check
 ## Build
 
 `pnpm build` writes a static site to `build/client`: an HTML file for each path listed in `react-router.config.ts`, and `404.html`,
-the not-found route prerendered once and moved there by the config's `buildEnd`. Vercel serves `404.html` with a 404 status at
+the not-found route prerendered once and moved there by the config's `buildEnd` (which also deletes React Router's unused SPA
+fallback). Vercel serves `404.html` with a 404 status at
 any address with no file, so a typo is a real 404 and not the app's shell. `build/server` is only used during the build.
 `vercel.json` serves `build/client` and sets the security headers. A Content-Security-Policy comes in Phase 1, once the inline
 hydration script's hash can be allowed.
