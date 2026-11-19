@@ -14,7 +14,8 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 - `e2e/`: Playwright tests against the production build.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
-- `scripts/`: `serve.mjs` (the preview server) and `look.mjs` (a mockup and a story side by side).
+- `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side) and `csp.ts` (the build step that
+  writes each page's Content-Security-Policy).
 - `mockups/`: the HTML mockups that settled the look. Not part of the build.
 - `docs/`: the plan and the design rules.
 - `harness/`, `harness.toml`, `.claude/`: the git hooks, the task board and the review helpers sessions work under
@@ -58,7 +59,19 @@ with axe failing the run on a violation. The others:
 the not-found route prerendered once and moved there by the config's `buildEnd` (which also deletes React Router's unused SPA
 fallback). Vercel serves `404.html` with a 404 status at any address with no file (except under `/api`, where Vercel's built-in
 error route answers in plain text; the site has no `/api`), so a typo is a real 404 and not the app's shell. `build/server` is
-only used during the build. A Content-Security-Policy comes in Phase 1, once the inline hydration script's hash can be allowed.
+only used during the build.
+
+Each page carries its Content-Security-Policy in a `<meta http-equiv>`, written by `scripts/csp.ts` as the last step of
+`buildEnd`, so `404.html` gets one too. React Router and React start each page with inline scripts (the hydration data, the module
+imports, scroll restoration, React's streaming code), a different set on each page, and a static site has no server to add a
+nonce. So the step hashes each inline script (the bytes between the tags) and lists the SHA-256s in `script-src`: those run, and
+no other inline script does. The meta goes right after `<meta charset>`, before the first `<script>`, since a policy only covers
+what the browser reads after it. The build fails when a page has no single place for it, or a script tag the step can't read. The
+policy allows scripts, fonts, fetches and form posts from the site only, plus those hashes; styles from the site and inline ones
+(a `style` prop needs nothing new); images from the site and `data:`; no plugins (`object-src 'none'`); `base-uri 'self'`.
+`pnpm dev` runs without it. `e2e/csp.spec.ts` opens every page of the build in Chrome and fails on a violation, on a page that
+doesn't hydrate, or on a policy that lets an inline script added after load run; it also feeds the step made-up pages that each of
+its checks has to refuse.
 
 The React Router packages are pinned to one exact version together: pnpm holds back releases under a day old, and the three
 packages have to match.
@@ -68,6 +81,13 @@ the year of cache: the year on hashed `/assets/*` is set in the `hit` phase, whi
 rule matches by path alone and would put that year on the 404
 ([hundo's deploy notes](https://github.com/salty-max/hundo/blob/main/docs/deploying.md#pitfalls) have the side-by-side test).
 `vercel build` writes the table Vercel will run to `.vercel/output/config.json`: Vercel adds its own error route to `/404.html`.
+
+The `Content-Security-Policy` header in `vercel.json` carries only what a meta tag can't: `frame-ancestors 'none'`, with
+`object-src 'none'` and `base-uri 'self'`. A browser applies both policies, so the header never names `default-src`, `script-src`
+or `style-src`: it would block the inline scripts and styles the meta allows. `scripts/serve.mjs` and Lighthouse CI don't send
+`vercel.json`'s headers, so only a deployed page shows it (`curl -sI`). On preview deployments Vercel adds its toolbar's script
+from `vercel.live`, which the policy doesn't allow: a preview's console should show one CSP error and no toolbar (not seen yet:
+every push so far went to `main`). Production has no toolbar. Allowing it would loosen every page's policy, production's included.
 
 What the first production deploy answered (19 Nov 2026, `899e915`, whose `vercel.json` still had an error-phase `no-store` route
 on `/assets`, removed since because it never showed): `/` 200; `/no/such/page` and `/assets/nope.js` 404 with the not-found page
