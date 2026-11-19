@@ -26,6 +26,14 @@
 .row{cursor:pointer;padding:0 6px;white-space:pre;overflow:hidden;text-overflow:ellipsis}
 .row.on{background:var(--fg);color:var(--bg);text-shadow:none}
 .keys{display:flex;gap:16px;flex-wrap:wrap}.keys span{cursor:pointer}.keys b{font-weight:400;background:var(--fg);color:var(--bg);text-shadow:none;padding:0 5px;margin-right:6px}
+.kr{display:grid;grid-template-columns:13ch minmax(0,1fr)}
+.kr>span{overflow-wrap:anywhere}
+.vp{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:14px 10px 8px;white-space:normal}
+.pt.r{left:auto;right:10px}
+.vbox{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.vbox img{flex:0 1 auto;min-height:0;width:100%;height:auto;object-fit:contain}
+.vcap{flex:none;height:2.3em;overflow:hidden}
+.keys .off{color:var(--dim)}.keys .off b{background:var(--dim)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 <h2 class="sr-only">Phosphor shell mockup: a terminal with a login, a prompt, commands over a small file system, and a two-pane file browser.</h2>
@@ -33,28 +41,42 @@
 <div id="sh" class="scan glow" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
 <div class="term" id="term"><div id="out"></div><div id="line" hidden><span id="ps"></span><span id="cmd"></span></div></div>
 <div class="tui" id="tui" hidden><div class="panes"><div class="pane" id="tl"></div><div class="pane" id="tr"></div></div><div class="keys"><span data-k="ArrowDown"><b>j k</b>move</span><span data-k="Enter"><b>Enter</b>open</span><span data-k="Backspace"><b>Bksp</b>up</span><span data-k="q"><b>q</b>quit</span></div></div>
+<div class="tui" id="vw" hidden><div class="pane vp"><span class="pt" id="vt"></span><span class="pt r" id="vn"></span><div class="vbox"><img id="vi" alt="" decoding="async"><div class="vcap" id="vc" aria-hidden="true"></div></div></div><div class="keys"><span data-k="h" id="kp"><b>h</b>prev</span><span data-k="l" id="kn"><b>l</b>next</span><span data-k="q"><b>q</b>quit</span></div></div>
 <div class="bar"><span>[jellycat] <span id="wn">0:jsh*</span></span><span class="sp" id="bp"></span><span id="clk"></span></div>
 <input id="kb" class="kb" aria-label="Terminal input" autocomplete="off" autocapitalize="off" spellcheck="false">
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;font-size:13px;color:var(--text-secondary)">
-<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><button id="rb" style="margin-left:auto">Reboot</button>
+<span>Phosphor</span><button data-q="green">Green</button><button data-q="amber">Amber</button><button data-q="white">White</button><span style="margin-left:16px">Frame</span><button data-z="0">652 x 480</button><button data-z="1">Phone 412 x 839</button><button id="rb" style="margin-left:auto">Reboot</button>
 </div>
 </div>
 <script>
 const P={green:['#33ff66','#1a9c40','#031208'],amber:['#ffb000','#a86f00','#140b00'],white:['#e8eef8','#8a93a6','#0b0d12']};
+// Stand-in pictures, each marked as a placeholder: [variant, width, height, kind]. Real ones come from E3.
+const SH={web:[['a',1440,900,'Desktop'],['b',1440,900,'Desktop'],['p',390,844,'Phone']],game:[['g',1920,1080,'In game']]}, GH='https://github.com/salty-max/';
+const shots=k=>SH[k].map(([v,w,h,kind])=>({v,w,h,alt:`Placeholder: the picture's alt text goes here. ${kind}, ${w} x ${h}.`}));
 const PJ=[
-['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest'],
-['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker',''],
-['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1',''],
-['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app'],
-['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua',''],
-['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua',''],
-['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua',''],
-['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua',''],
-['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua',''],
-['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://github.com/salty-max/gero'],
-['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig',''],
-['opus','Opus','engines','Game engine','A 2D game engine in C++23, built RTS-first: deterministic lockstep, SDL3 GPU rendering, Lua scripting.','C++23, SDL3, Lua','']];
+['hundo','Hundo','web','Web app','Spoiler-aware, installable completion guides for single-player games. One app per game, all built on one shared core.','React 19, Vite, Tailwind, Vercel','https://hundo.quest',GH+'hundo',shots('web')],
+['farseer','Farseer','web','Web app','Every World of Warcraft blue post from the US and EU forums in one installable app, with filters and push notifications.','PWA, Node, Docker','https://farseer-mu.vercel.app',GH+'farseer',shots('web')],
+['lucarne','Lucarne','web','Web app','The schedule of football fixtures and the French TV channel showing each one, in a broadcast teletext interface.','Cloudflare Workers, D1','https://lucarne.fr',GH+'lucarne',shots('web')],
+['ravenpost','Ravenpost','addons','Desktop app','A small app for macOS and Windows that carries what the addons save.','Go','https://ravenpost-site.vercel.app',GH+'ravenpost',[]],
+['hearthtale','Hearthtale','addons','WoW addon','Keeps a journal for your World of Warcraft character as you play.','Lua','https://hearthtale.app',GH+'hearthtale',shots('game')],
+['lorekeepers-codex','Lorekeeper\'s Codex','addons','WoW addon','A book of Azeroth\'s lore that fills in as you explore.','Lua','',GH+'lorekeepers-codex',[]],
+['mealbook','Mealbook','addons','WoW addon','A cookbook that fills in as you learn to cook, and the road to 300.','Lua','',GH+'mealbook',[]],
+['second-wind','Second Wind','addons','WoW addon','A debrief after a close call or a death in World of Warcraft.','Lua','',GH+'second-wind',[]],
+['keyring','Keyring','addons','WoW addon','Gathers your addons\' minimap buttons into a drawer.','Lua','',GH+'keyring',[]],
+['gero','Gero','engines','Virtual machine','A 16-bit virtual machine, assembler, disassembler and Lua-style language compiler, in Zig.','Zig, WebAssembly','https://gero-lab.vercel.app',GH+'gero',[]],
+['gtx-16','gtx-16','engines','Fantasy console','A 16-bit fantasy console built on the Gero VM. A cart is one file, and a cart is source.','Zig','','',[]]];
+// The stand-in images: flat colour blocks and PLACEHOLDER in a 5x7 pixel font, as SVG (no font needed).
+const F5={A:'0e11111f111111',C:'0e11101010110e',D:'1e11111111111e',E:'1f10101e10101f',G:'0e11101711110f',H:'1111111f111111',I:'0e04040404040e',K:'11121418141211',L:'1010101010101f',M:'111b1515111111',N:'11191513111111',O:'0e11111111110e',P:'1e11111e101010',R:'1e11111e141211',S:'0f10100e01011e',T:'1f040404040404',X:'11110a040a1111','-':'0000001f000000',0:'0e11131519110e',1:'040c040404040e',2:'0e11010204081f',3:'1f02040201110e',4:'02060a121f0202',5:'1f101e0101110e',6:'0608101e11110e',7:'1f010204080808',8:'0e11110e11110e',9:'0e11110f01020c'};
+function ptxt(s,x,y,q){let d='';[...s].forEach((ch,i)=>{const g=F5[ch];if(g)for(let r=0;r<7;r++){const b=parseInt(g.substr(r*2,2),16);for(let c=0;c<5;c++)if(b&16>>c)d+=`M${x+(i*6+c)*q} ${y+r*q}h${q}v${q}h-${q}z`}});return d}
+function plate(W,H,l2,q,bg,ink){const q2=Math.round(q/2),w1=65*q,w2=(l2.length*6-1)*q2,pw=Math.max(w1,w2)+q*6,ph=15*q+7*q2,px=(W-pw)/2,py=(H-ph)/2;return `<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${bg}" stroke="${ink}" stroke-width="${q}"/><path fill="${ink}" d="${ptxt('PLACEHOLDER',(W-w1)/2,py+3*q,q)}${ptxt(l2,(W-w2)/2,py+12*q,q2)}"/>`}
+const R=(x,y,w,h,f,o='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(14,h/2)}" fill="${f}"${o}/>`;
+const STAND={
+a:()=>`<rect width="1440" height="900" fill="#efe9dc"/><rect width="1440" height="72" fill="#24345c"/>${R(40,22,180,28,'#f2c14e')}${[0,1,2,3].map(i=>R(900+i*130,28,100,16,'#7fb7e6')).join('')}<rect y="72" width="280" height="828" fill="#e2d9c5"/>${[0,1,2,3,4,5,6,7,8,9].map(i=>R(40,120+i*56,200-i%3*40,16,'#c4b89c')).join('')}${R(330,112,1060,290,'#e07a5f')}${R(370,160,520,34,'#fff',' fill-opacity=".85"')}${R(370,214,380,20,'#fff',' fill-opacity=".6"')}${[['#f2c14e',330],['#7fb7e6',695],['#b48ead',1060]].map(([c,x])=>R(x,440,330,410,'#fff')+R(x,440,330,150,c)+R(x+24,620,240,18,'#24345c',' fill-opacity=".7"')+R(x+24,656,282,12,'#24345c',' fill-opacity=".3"')+R(x+24,680,250,12,'#24345c',' fill-opacity=".3"')).join('')}${plate(1440,900,'DESKTOP 1440 X 900',12,'#fff','#24345c')}`,
+b:()=>`<rect width="1440" height="900" fill="#161b26"/><rect width="1440" height="72" fill="#0f131b"/>${R(40,22,140,28,'#e07a5f')}${[0,1,2].map(i=>R(1000+i*130,28,100,16,'#3a4560')).join('')}${['#e07a5f','#f2c14e','#7fb7e6','#b48ead','#88c0d0','#ebcb8b'].map((c,i)=>{const x=60+i%3*450,y=112+Math.floor(i/3)*400;return R(x,y,420,370,'#232b3b')+`<rect x="${x}" y="${y}" width="420" height="10" fill="${c}"/>`+R(x+28,y+48,260,22,c)+R(x+28,y+92,360,12,'#3a4560')+R(x+28,y+116,320,12,'#3a4560')}).join('')}${plate(1440,900,'DESKTOP 1440 X 900',12,'#0f131b','#f2c14e')}`,
+p:()=>`<rect width="390" height="844" fill="#efe9dc"/><rect width="390" height="96" fill="#24345c"/>${R(16,48,120,28,'#f2c14e')}${R(16,116,358,180,'#e07a5f')}${['#f2c14e','#7fb7e6','#b48ead','#e07a5f','#f2c14e'].map((c,i)=>R(16,316+i*84,358,68,'#fff')+`<circle cx="52" cy="${350+i*84}" r="18" fill="${c}"/>`+R(84,336+i*84,200,14,'#24345c',' fill-opacity=".7"')+R(84,360+i*84,150,10,'#24345c',' fill-opacity=".3"')).join('')}<rect y="784" width="390" height="60" fill="#24345c"/>${[0,1,2,3].map(i=>`<circle cx="${60+i*90}" cy="814" r="10" fill="#7fb7e6"/>`).join('')}${plate(390,844,'PHONE 390 X 844',5,'#fff','#24345c')}`,
+g:()=>`<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f4d8a"/><stop offset="1" stop-color="#f0a35e"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#s)"/><circle cx="1450" cy="560" r="110" fill="#ffd27a"/><path d="M0 700L260 430L520 640L820 360L1120 620L1400 450L1700 650L1920 520V1080H0Z" fill="#6a5a9e"/><path d="M0 820L380 600L700 780L1040 560L1380 800L1680 640L1920 760V1080H0Z" fill="#3e3570"/><rect y="880" width="1920" height="200" fill="#5b4a2e"/><path d="M860 1080L940 880H1000L1120 1080Z" fill="#a88a5a"/>${plate(1920,1080,'IN-GAME 1920 X 1080',16,'#1b1530','#ffd27a')}`};
+const SC={},shotSrc=s=>SC[s.v]||(SC[s.v]='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s.w}" height="${s.h}" viewBox="0 0 ${s.w} ${s.h}">${STAND[s.v]()}</svg>`));
 const README='Jellycat Studio\n\nWeb apps, World of Warcraft addons, and game engines and tools.\nEach project has a file in ~/projects. Contact details are in contact.txt.';
 const CONTACT='Email   hello@your-domain (placeholder)\nGitHub  github.com/salty-max';
 const HOME={README:{f:README},'contact.txt':{f:CONTACT},projects:{d:{web:{d:{}},addons:{d:{}},engines:{d:{}}}},lab:{d:{'hello.gero':{f:'fn main()\n  print("hello")\nend'}}}};
@@ -62,23 +84,28 @@ PJ.forEach(p=>{HOME.projects.d[p[2]].d[p[0]+'.txt']={p}});
 const $=id=>document.getElementById(id),root=$('sh'),term=$('term'),out=$('out'),kb=$('kb');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const lk=(t,c,cls)=>`<span class="lk${cls?' '+cls:''}" data-c="${esc(c)}">${esc(t)}</span>`;
-let cwd=[],hist=[],hp=0,busy=true,skip=false,tuiOn=false,fx=true,T={s:[],i:0};
+let cwd=[],hist=[],hp=0,busy=true,skip=false,tuiOn=false,vwOn=false,fx=true,T={s:[],i:0},V={p:null,i:0};
 const path=s=>'~'+(s.length?'/'+s.join('/'):''),promptStr=()=>`guest@jellycat:${path(cwd)}$ `;
 function say(h){const d=document.createElement('div');d.innerHTML=h===''?'&nbsp;':h;out.appendChild(d);while(out.children.length>300)out.firstChild.remove();term.scrollTop=term.scrollHeight}
 const sayT=t=>t.split('\n').forEach(l=>say(esc(l)));
 function resolve(p){const s=/^[~\/]/.test(p)?[]:[...cwd];p.replace(/^~\/?|^\//,'').split('/').forEach(x=>{if(!x||x==='.')return;if(x==='..')s.pop();else s.push(x)});return s}
 function node(s){let n={d:HOME};for(const x of s){if(!n.d||!n.d[x])return null;n=n.d[x]}return n}
 const sorted=d=>Object.keys(d).sort((a,b)=>(!!d[b].d-!!d[a].d)||a.localeCompare(b));
-function card(p){say(esc(p[1]));say(`<span class="dim">${esc(p[3])}</span>`);say('');say(esc(p[4]));say('');say(`<span class="dim">Stack</span>  ${esc(p[5])}`);say(`<span class="dim">Link </span>  ${p[6]?`<a href="${p[6]}" target="_blank" rel="noopener">${esc(p[6].replace(/^https?:\/\//,''))}</a>`:'-'}`)}
-const cardText=p=>`${p[1]}\n${p[3]}\n\n${p[4]}\n\nStack  ${p[5]}\nLink   ${p[6]?p[6].replace(/^https?:\/\//,''):'-'}`;
+const host=u=>u.replace(/^https?:\/\//,''),lnk=u=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(host(u))}</a>`:'-',pics=p=>p[8].length+' picture'+(p[8].length===1?'':'s');
+const findP=q=>PJ.find(p=>p[0].startsWith(q)||p[1].toLowerCase().startsWith(q));
+const kr=(k,v)=>`<div class="kr"><span class="dim">${k}</span><span>${v}</span></div>`;
+// A project's card, one line per entry. live: the prompt's card (links and names you can click); else browse's right pane (text).
+const cardRows=(p,live)=>[esc(p[1]),`<span class="dim">${esc(p[3])}</span>`,'',esc(p[4]),'',kr('Stack',esc(p[5])),kr('Link',live?lnk(p[6]):esc(host(p[6])||'-')),kr('Source',live?lnk(p[7]):esc(host(p[7])||'-'))].concat(p[8].length?[kr('Screenshots',live?lk(pics(p),'view '+p[0]):pics(p))]:[]);
+function card(p){cardRows(p,true).forEach(say)}
 const rel=(t,n)=>t==='.'?n:t.replace(/\/$/,'')+'/'+n;
 const C={
-help:()=>sayT(['ls [dir]          list a directory','cd [dir]          change directory','cat <file>        print a file','open <project>    show a project','tree              show ~/projects as a tree','browse            two-pane file browser (q to quit)','gero <file>       run a Gero program','theme <color>     green, amber or white','crt on|off        CRT effects','clear  history  pwd  whoami  date  uname  echo  logout'].join('\n')),
+help:()=>sayT(['ls [dir]          list a directory','cd [dir]          change directory','cat <file>        print a file','open <project>    show a project','view <project>    screenshot viewer (q to quit)','tree              show ~/projects as a tree','browse            two-pane file browser (q to quit)','gero <file>       run a Gero program','theme <color>     green, amber or white','crt on|off        CRT effects','clear  history  pwd  whoami  date  uname  echo  logout'].join('\n')),
 ls:a=>{const t=a.find(x=>!x.startsWith('-'))||'.',n=node(resolve(t));if(!n)return say(esc(`ls: cannot access '${t}': No such file or directory`));if(!n.d)return say(lk(t,'cat '+t));say(sorted(n.d).map(k=>n.d[k].d?lk(k+'/',`cd ${rel(t,k)} && ls`):lk(k,'cat '+rel(t,k))).join('  ')||'')},
 cd:a=>{const t=a[0]||'~',s=resolve(t),n=node(s);if(!n)return say(esc(`cd: ${t}: No such file or directory`));if(!n.d)return say(esc(`cd: ${t}: Not a directory`));cwd=s},
 pwd:()=>say(esc('/home/guest'+(cwd.length?'/'+cwd.join('/'):''))),
 cat:a=>{if(!a[0])return say('cat: missing file operand');a.forEach(t=>{const n=node(resolve(t));if(!n)say(esc(`cat: ${t}: No such file or directory`));else if(n.d)say(esc(`cat: ${t}: Is a directory`));else if(n.p)card(n.p);else sayT(n.f)})},
-open:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('open: name a project, for example: '+lk('open hundo','open hundo'));const p=PJ.find(p=>p[0].startsWith(q)||p[1].toLowerCase().startsWith(q));if(!p)return say(esc(`open: no project matches '${q}'`));card(p)},
+open:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('open: name a project, for example: '+lk('open hundo','open hundo'));const p=findP(q);if(!p)return say(esc(`open: no project matches '${q}'`));card(p)},
+view:a=>{const q=a.join(' ').toLowerCase();if(!q)return say('view: name a project, for example: '+lk('view hundo','view hundo'));const p=findP(q);if(!p)return say(esc(`view: no project matches '${q}'`));if(!p[8].length)return say(esc(`view: ${p[0]}: no screenshots`));vwStart(p)},
 tree:()=>{say('~/projects');const ks=sorted(HOME.projects.d);ks.forEach((k,i)=>{const last=i===ks.length-1,d=HOME.projects.d[k].d;say((last?'`-- ':'|-- ')+lk(k,`cd ~/projects/${k} && ls`));const fs=sorted(d);fs.forEach((f,j)=>say((last?'    ':'|   ')+(j===fs.length-1?'`-- ':'|-- ')+lk(f,`cat ~/projects/${k}/${f}`)))})},
 browse:()=>tuiStart(),
 gero:a=>{const t=a[0];if(!t)return say('gero: usage: gero <file>');const n=node(resolve(t));if(!n||n.d)return say(esc(`gero: ${t}: No such file`));const m=[...(n.f||'').matchAll(/print\("([^"]*)"\)/g)];m.forEach(x=>say(esc(x[1])))},
@@ -92,8 +119,8 @@ uname:a=>say(a.includes('-a')?'Jelly-OS 1.0 jellycat tty1':'Jelly-OS'),
 echo:a=>say(esc(a.join(' '))),
 logout:()=>login(),exit:()=>login()};
 function exec(v,silent){if(!silent)say(esc(promptStr())+esc(v));const t=v.trim();if(t){hist.push(t);hp=hist.length}
-for(const part of t.split('&&')){const [c,...a]=part.trim().split(/\s+/);if(!c)continue;if(C[c]){C[c](a);if(c==='logout'||c==='exit'||c==='browse')return}else say(esc(`jsh: ${c}: command not found`))}draw()}
-function draw(){if(busy||tuiOn)return;$('line').hidden=false;$('ps').textContent=promptStr();const v=kb.value,c=kb.selectionStart==null?v.length:kb.selectionStart;$('cmd').innerHTML=esc(v.slice(0,c))+`<span class="cur">${v[c]?esc(v[c]):' '}</span>`+esc(v.slice(c+1));$('bp').textContent=path(cwd);term.scrollTop=term.scrollHeight}
+for(const part of t.split('&&')){const [c,...a]=part.trim().split(/\s+/);if(!c)continue;if(C[c]){C[c](a);if(c==='logout'||c==='exit'||tuiOn||vwOn)return}else say(esc(`jsh: ${c}: command not found`))}draw()}
+function draw(){if(busy||tuiOn||vwOn)return;$('line').hidden=false;$('ps').textContent=promptStr();const v=kb.value,c=kb.selectionStart==null?v.length:kb.selectionStart;$('cmd').innerHTML=esc(v.slice(0,c))+`<span class="cur">${v[c]?esc(v[c]):' '}</span>`+esc(v.slice(c+1));$('bp').textContent=path(cwd);term.scrollTop=term.scrollHeight}
 function complete(){const v=kb.value,parts=v.split(' '),last=parts[parts.length-1];let ms;
 if(parts.length===1)ms=Object.keys(C).filter(k=>k.startsWith(last));
 else{const i=last.lastIndexOf('/'),dir=i>=0?last.slice(0,i+1):'',pre=last.slice(i+1),n=node(resolve(dir||'.'));ms=n&&n.d?Object.keys(n.d).filter(k=>k.startsWith(pre)).map(k=>dir+k+(n.d[k].d?'/':'')):[]}
@@ -104,8 +131,8 @@ function tents(){const n=node(T.s);return (T.s.length?['..']:[]).concat(sorted(n
 function tdraw(){const E=tents(),n=node(T.s);T.i=Math.max(0,Math.min(T.i,E.length-1));
 $('tl').innerHTML=`<span class="pt">${esc(path(T.s))}</span><div class="pc">`+E.map((k,i)=>`<div class="row${i===T.i?' on':''}" data-r="${i}">${esc(k==='..'?'..':k+(n.d[k].d?'/':''))}</div>`).join('')+'</div>';
 const k=E[T.i],c=k==='..'?null:n.d[k];let title=k,body='';
-if(!c){title='..';body='Parent directory'}else if(c.d){title=k+'/';body=sorted(c.d).map(x=>x+(c.d[x].d?'/':'')).join('\n')||'Empty'}else body=c.p?cardText(c.p):c.f;
-$('tr').innerHTML=`<span class="pt">${esc(title)}</span><div class="pc">${esc(body)}</div>`;$('bp').textContent=path(T.s)}
+if(!c){title='..';body='Parent directory'}else if(c.d){title=k+'/';body=sorted(c.d).map(x=>x+(c.d[x].d?'/':'')).join('\n')||'Empty'}else body=c.p?null:c.f;
+$('tr').innerHTML=`<span class="pt">${esc(title)}</span><div class="pc">${body===null?cardRows(c.p,false).map(h=>`<div>${h||'&nbsp;'}</div>`).join(''):esc(body)}</div>`;$('bp').textContent=path(T.s)}
 function tkey(k){const E=tents(),cur=E[T.i];
 if(k==='ArrowUp'||k==='k')T.i=(T.i-1+E.length)%E.length;else if(k==='ArrowDown'||k==='j')T.i=(T.i+1)%E.length;
 else if(k==='Enter'||k==='ArrowRight'||k==='l'){if(cur==='..'){T.s.pop();T.i=0}else if(node(T.s).d[cur].d){T.s.push(cur);T.i=0}}
@@ -113,11 +140,17 @@ else if(k==='Backspace'||k==='ArrowLeft'||k==='h'){if(T.s.length){const up=T.s.p
 else if(k==='q'||k==='Escape')return tuiQuit();else return false;tdraw();return true}
 function tuiStart(){tuiOn=true;T={s:[...cwd],i:0};$('term').hidden=true;$('tui').hidden=false;$('wn').textContent='0:browse*';tdraw();kb.focus({preventScroll:true})}
 function tuiQuit(){tuiOn=false;$('tui').hidden=true;$('term').hidden=false;$('wn').textContent='0:jsh*';draw();return true}
+// The viewer: full screen like browse, the picture in its own colours under the CRT layer, h/l (or the arrows) and q (or Esc).
+function vdraw(){const S=V.p[8],s=S[V.i],im=$('vi');im.width=s.w;im.height=s.h;im.alt=s.alt;im.src=shotSrc(s);$('vt').textContent=V.p[1];$('vn').textContent=`${V.i+1} of ${S.length}`;$('vc').textContent=s.alt;$('kp').classList.toggle('off',V.i===0);$('kn').classList.toggle('off',V.i===S.length-1)}
+function vkey(k){const n=V.p[8].length;if(k==='ArrowLeft'||k==='h'){if(V.i>0)V.i--}else if(k==='ArrowRight'||k==='l'){if(V.i<n-1)V.i++}else if(k==='q'||k==='Escape')return vwQuit();else return false;vdraw();return true}
+function vwStart(p){vwOn=true;V={p,i:0};$('term').hidden=true;$('vw').hidden=false;$('wn').textContent='0:view*';vdraw();kb.focus({preventScroll:true})}
+function vwQuit(){vwOn=false;$('vw').hidden=true;$('term').hidden=false;$('wn').textContent='0:jsh*';draw();return true}
 function setTheme(t){const [f,d,b]=P[t];root.style.setProperty('--fg',f);root.style.setProperty('--dim',d);root.style.setProperty('--bg',b)}
 function setCrt(on){fx=on;root.classList.toggle('scan',on);root.classList.toggle('glow',on)}
 kb.addEventListener('keydown',e=>{
 if(busy){skip=true;e.preventDefault();return}
-if(tuiOn){if(tkey(e.key))e.preventDefault();return}
+// Full screen, every key belongs to the viewer or browse: none reaches the prompt behind it.
+if(vwOn||tuiOn){if(vwOn)vkey(e.key);else tkey(e.key);if(!e.metaKey&&!e.ctrlKey&&e.key!=='Tab')e.preventDefault();return}
 const k=e.key;
 if(k==='Enter'){e.preventDefault();const v=kb.value;kb.value='';exec(v);return}
 if(k==='Tab'){e.preventDefault();complete();draw();return}
@@ -133,18 +166,20 @@ root.addEventListener('click',e=>{
 if(busy){skip=true;return}
 const r=e.target.closest('[data-r]');if(r&&tuiOn){const i=+r.dataset.r;if(i===T.i)tkey('Enter');else{T.i=i;tdraw()}kb.focus({preventScroll:true});return}
 const key=e.target.closest('[data-k]');if(key&&tuiOn){tkey(key.dataset.k);kb.focus({preventScroll:true});return}
+if(key&&vwOn){vkey(key.dataset.k);kb.focus({preventScroll:true});return}
 const l=e.target.closest('.lk');if(l&&!tuiOn){exec(l.dataset.c);kb.focus({preventScroll:true});return}
 if(e.target.closest('a'))return;
 if(!String(window.getSelection())) kb.focus({preventScroll:true})});
 const wait=ms=>new Promise(r=>setTimeout(r,skip?0:ms));
-async function login(){busy=true;skip=matchMedia('(prefers-reduced-motion: reduce)').matches;tuiOn=false;$('tui').hidden=true;$('term').hidden=false;$('line').hidden=true;out.innerHTML='';cwd=[];kb.value='';$('bp').textContent='~';
+async function login(){busy=true;skip=matchMedia('(prefers-reduced-motion: reduce)').matches;tuiOn=false;vwOn=false;$('tui').hidden=true;$('vw').hidden=true;$('term').hidden=false;$('line').hidden=true;out.innerHTML='';cwd=[];kb.value='';$('bp').textContent='~';
 say('Jelly-OS 1.0 tty1');say('');await wait(500);
 const d=document.createElement('div');d.textContent='jellycat login: ';out.appendChild(d);await wait(400);
 for(const ch of 'guest'){d.textContent+=ch;await wait(90)}await wait(250);
 const now=new Date();say(esc('Last login: '+now.toString().slice(0,16)+now.toTimeString().slice(0,5)+' on tty1'));say('');await wait(200);
 say('Jellycat Studio. Type help for the commands, or click a name.');say('Try: '+lk('ls','ls')+'  '+lk('tree','tree')+'  '+lk('open hundo','open hundo')+'  '+lk('browse','browse'));say('');
 busy=false;skip=false;draw()}
-document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));$('rb').onclick=()=>{hist=[];hp=0;login()};
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>setTheme(b.dataset.q));
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const ph=b.dataset.z==='1';root.style.width=ph?'412px':'';root.style.height=ph?'839px':'';term.scrollTop=term.scrollHeight});$('rb').onclick=()=>{hist=[];hp=0;login()};
 const tick=()=>{const d=new Date();$('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,1000);
 login();
 </script>

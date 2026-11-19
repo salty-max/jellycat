@@ -47,7 +47,20 @@ rules changes this file in the same pull request.
 - `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. `q` returns to the
   prompt as it was.
 
+## Viewer
+
+- A project's screenshots open in a viewer: a window on the desktop, full screen in the shell (`view <project>`, like `browse`).
+- The picture is shown whole, scaled to fit, in its own colours, with the CRT layer on top. Desktop-sized and phone-sized pictures
+  share one window (desktop) or one full-screen pane (shell), which keeps its size from one picture to the next. On the desktop the
+  picture box is fixed, so the buttons stay put; in the shell the caption sits right under the picture.
+- The count (`2 of 3`) is in the window's info line, or set in the top border in the shell. The caption is the picture's alt text,
+  kept to two lines.
+- Previous and next are buttons with pixel arrows on the desktop and `h`/`l` in the shell's key bar; ← and → work in both. At the
+  first or last picture the control is dim. Esc closes the window; `q` or Esc returns the shell to the prompt as it was.
+- The Info window and the `open` card list Stack, Link, Source and Screenshots. An unknown Link or Source is `-`; a project with no
+  pictures has no Screenshots row.
+
 ## Words
 
 - Project facts come from the project's own README. Unknown is `-`. Placeholders say so (`hello@your-domain (placeholder)`).
-- No taglines, jokes, invented numbers or statuses. System messages are plain: "Sending is turned off in this mockup."
+- No taglines, jokes, invented numbers or statuses. System messages are plain: "Jelly-OS has shut down."
