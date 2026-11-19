@@ -7,6 +7,9 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 
 - `app/`: the site. `root.tsx` is the page shell, `routes.ts` the routes, `routes/` one module per route, `os/` the OS's parts,
   `app.css` Tailwind and the phosphor tokens.
+- `app/core/`: what both layouts read. `projects.ts` is the project data (every fact from the project's own README, a link
+  perhaps from its GitHub homepage field, an unknown fact `-`), `studio.ts` the studio's Readme and `contact.txt`, `site.ts`
+  the OS's name and the site's address.
 - `public/`: files served as they are (the favicon).
 - `e2e/`: Playwright tests against the production build.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.

@@ -1,8 +1,8 @@
 # Phase 1: the OS
 
 Phase 1 of [plan.md](plan.md), split into tasks. Each task is one child session working in its own worktree and branch, and
-lands as one reviewed commit or a short series. The decisions this split adds are also in [plan.md](plan.md). The questions it
-still needs answered are at the end.
+lands as one reviewed commit or a short series. The decisions this split adds are also in [plan.md](plan.md). The user's answers
+to its questions are at the end.
 
 ## Decisions this plan adds
 
@@ -43,6 +43,8 @@ still needs answered are at the end.
 - **The OS's name and the site's address are constants in `app/core/site.ts`** (A2 creates it; D1a extends it). Every task that
   prints the name (`uname`, the welcome, the boot screen, the meta) imports it, so the rename is one edit.
 - **No `gero` command and no `lab` directory in Phase 1.** They come with the Lab in Phase 2.
+- **Four project folders**: `web`, `addons`, `engines` and `tools` (addon-kit, wow-data, harness), from Q1's answer. B1's
+  tree, the desktop's Projects folder and D3's folder windows have all four.
 
 ## How the work runs
 
@@ -63,7 +65,8 @@ still needs answered are at the end.
 
 ## The tasks
 
-"After" names the tasks that must be on `main` first, and the questions (Q1–Q7, at the end) that must be answered.
+"After" names the tasks that must be on `main` first, and the questions (Q1–Q7) a task waited on; the user's answers are at
+the end.
 
 | ID  | Task                                 | Kind     | Model  | After               |
 | --- | ------------------------------------ | -------- | ------ | ------------------- |
@@ -130,13 +133,13 @@ The critical path is A2 → B1 → C1 → D1b → D3 → E1/E2 → F1 → F2.
 
 **Delivers**
 - `app/core/projects.ts`, holding the type and the data:
-  - the type has slug, name, folder (`web` / `addons` / `engines`), kind, description, stack, link, source and
+  - the type has slug, name, folder (`web` / `addons` / `engines` / `tools`), kind, description, stack, link, source and
     `screenshots: { src, size, alt, width, height }[]`, where `src` is a path without extension (E3 writes `<src>.avif` and
     `<src>.webp`) and `size` is `desktop` or `phone`;
   - the data is every project from Q1, its facts from its own README; unknown is `-`.
 - `app/core/site.ts`, holding the OS name and `SITE_URL` (the vercel.app address until F2).
 - README Layout names `app/core/`.
-- `app/core/studio.ts`, holding the studio's Readme and `contact.txt`. The address stays the placeholder until Q6.
+- `app/core/studio.ts`, holding the studio's Readme and `contact.txt`, with the address `max@jellycat.fr` (Q6) as a link.
 - A unit test of the data's rules: unique slugs, no empty strings, `https` links, no unknown folders.
 
 **Files:** `app/core/projects.ts`, `app/core/studio.ts`, `app/core/site.ts`, README Layout and their tests.
@@ -360,14 +363,14 @@ windows.
 **Delivers**
 - The desktop's folder model (Jelly HD: Projects, Readme, Terminal, Control Panel; Trash empty) beside the apps; Projects and
   its folders read B1's file system.
-- Folder windows (Jelly HD, Projects, Web, Addons, Engines, Trash):
+- Folder windows (Jelly HD, Projects, Web, Addons, Engines, Tools, Trash):
   - by icon or by name;
   - an info line with the item count and the view.
 - The project's Info window: icon, name and kind; Stack, Link and Source; the description.
 - Readme.
 - Control Panel: phosphor radios and effect checkboxes on Base UI, bound to the settings.
 - Terminal: C1 in a window.
-- Mail as Q4 decides.
+- No Mail (Q4): the Readme and `contact.txt` carry the address as a link.
 - The desktop's URL behaviour: Projects open at `/`, and the Info window at `/projects/<slug>`, over Projects.
 
 **Files:** `app/os/desktop/apps/*`, `app/os/desktop/desktop.tsx`, `app/os/layout.tsx` (the URL part), `e2e/desktop.spec.ts`. It adds
@@ -427,43 +430,47 @@ Story-level axe already gates the components; this pass covers what it can't.
 ### F2 Launch on the domain (ops)
 
 **Delivers**
-- `SITE_URL`, the contact address and the OS name set from Q5–Q7.
+- `SITE_URL` moved to `https://jellycat.fr` (Q5). The contact address is set since A2 (Q6), and the OS name stays Jelly-OS
+  (Q7).
+- `https://hundo.quest`, Hundo's Link, checked to serve before the launch ([still open](#still-open)). If it doesn't, the
+  user is asked through the opener.
 - The domain attached in Vercel, with `www` redirecting to the apex. That needs the user's go. DNS is the user's.
 - Production probed: the headers (CSP, `frame-ancestors`), `/sitemap.xml`, the canonicals, 404.
 - README Hosting and `docs/plan.md` updated.
 
-**Files:** `app/core/site.ts`, `app/core/studio.ts`, README, `docs/plan.md`.
+**Files:** `app/core/site.ts`, README, `docs/plan.md`, and `app/core/projects.ts` if the user changes Hundo's Link.
 
-## Questions for the user
+## The user's answers
 
-Each one says what it blocks.
+Given on 19 Nov 2026, when wave 1 opened. Each names the tasks it unblocked.
 
-1. **Which projects are on the site?** Blocks A2.
-   - Recommend 18:
-     - Web: Hundo, Farseer, Lucarne, WoWLocker.
-     - Addons: Ravenpost, Hearthtale, Lorekeeper's Codex, Mealbook, Second Wind, Keyring, Goodwill, Palaver, Primer, Yonder,
-       Yours Truly.
-     - Engines: Gero, gtx-16, Opus.
-   - Leave out:
-     - Watchtower, which its README calls a menu-bar app on the author's Mac;
-     - wowguessr, a working name, not hosted;
-     - addon-kit, wow-data and harness, which are tooling.
-   - Fold Gero Lab into Gero as its link.
-2. **Links and source.** Blocks A2's Link and Source fields; they can land as `-` and be filled later.
-   - Facts:
-     - every repository is public except gtx-16, which is private;
-     - the sites are hundo.quest, lucarne.fr, hearthtale.app, wow-locker.app and ravenpost-site.vercel.app (all in their READMEs), and
-       farseer-mu.vercel.app and gero-lab.vercel.app (GitHub's homepage field, not the README).
-   - Recommend:
-     - Link: the project's own site, from its README or its GitHub homepage, else `-`;
-     - Source: the GitHub repository for every public one, `-` for gtx-16.
-3. **Where do screenshots come from?** Blocks E3, and so E2.
-   - Recommend: the web apps captured from their live sites by a script here; the addons from pictures the user takes in
-     game, added when they come.
-   - A project with no pictures has no Screenshots row.
-4. **Mail on the Phase 1 desktop?** Blocks D3. The approved mockup has Mail with sending turned off.
-   - Recommend leaving Mail out until Phase 2's form; `contact.txt` and the Readme carry the address as a link.
-5. **The domain.** Blocks F2 only. Recommend jellycat.fr if it's the user's, with the apex canonical and `www` redirecting.
-6. **The contact address.** Blocks F2; the placeholder says so until then. Recommend `hello@<domain>` forwarding to the
-   user's inbox.
-7. **The OS name.** Blocks F2 only; the name is one constant. Recommend keeping Jelly-OS.
+1. **Which projects are on the site?** (A2) The user's words: "The recommended 18 but somme modifications. Drop Opus it is not
+   finished. And imo Addon-kit + wow-data deserve a word. Same for harness it is an AI world now". Then, told that nothing in
+   gtx-16 runs yet (its README says so): "Drop it like Opus". So 19 projects, in four folders:
+   - Web: Hundo, Farseer, Lucarne, WoWLocker.
+   - Addons: Ravenpost, Hearthtale, Lorekeeper's Codex, Mealbook, Second Wind, Keyring, Goodwill, Palaver, Primer, Yonder,
+     Yours Truly.
+   - Engines: Gero, with Gero Lab as its link.
+   - Tools, the fourth folder: addon-kit, wow-data and harness.
+   - Left out: Opus, not finished; gtx-16, nothing in it runs yet; Watchtower, which its README calls a menu-bar app on the
+     author's Mac; wowguessr, a working name, not hosted.
+2. **Links and source.** (A2) Link is the project's own site, from its README or its GitHub homepage field, else `-`. Source is
+   the GitHub repository for every public one, else `-`.
+   - `gh repo view` on 19 Nov 2026: all 19 are public, harness, addon-kit and wow-data included (gtx-16, dropped since, was the
+     private one), so every Source is set.
+   - Hundo's Link is the user's word, not its README's: "I'll deploy hundo.quest" ([still open](#still-open)).
+3. **Screenshots.** (E3, and so E2) The web apps' pictures are captured from their live sites by a script here (E3). The
+   addons' come later, from the user's own pictures in game. A2 leaves every `screenshots` list empty; E3 fills them. A project
+   with no pictures has no Screenshots row.
+4. **Mail.** (D3) No Mail on the Phase 1 desktop. `contact.txt` and the Readme carry the address as a link.
+5. **The domain.** (F2) jellycat.fr, the apex canonical and `www` redirecting to it. `SITE_URL` stays
+   `https://jellycat-iota.vercel.app` until F2.
+6. **The contact address.** (A2) `max@jellycat.fr`, the user's own choice over `hello@`. A2 puts it in `app/core/studio.ts`.
+7. **The OS name.** (F2) Jelly-OS stays.
+
+### Still open
+
+- **hundo.quest.** Hundo's Link is `https://hundo.quest`: the user will deploy something on the apex. Until then it answers
+  Vercel's `DEPLOYMENT_NOT_FOUND`, so the link is dead on the vercel.app production as soon as a task shows the projects;
+  Hundo's README only names its six guides' sites (koholint.hundo.quest and the others). F2 checks the apex serves before the
+  launch. E3 captures a guide's site for Hundo's pictures, as before.

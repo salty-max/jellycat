@@ -25,10 +25,13 @@ was the alternative, kept for its record.
 - **Screenshots stay in colour.** The phosphor look covers the OS; the work itself is shown as it is, in a viewer window, with the
   CRT layer still on top.
 - **Copy**: facts from each project's own README. No taglines, jokes, invented numbers or statuses. An unknown fact is written `-`.
+- **Projects**: 19, in four folders (web, addons, engines, tools). A project's Link is its own site and its Source its public
+  repository, else `-`. [phase-1.md](phase-1.md#the-users-answers) has the list.
 - **Stack**: hundo's tools in one package: React 19, React Router 8 (framework mode), Vite 8, Tailwind 4, Vitest, Testing Library,
   Storybook 10, Playwright, Lighthouse CI, ESLint. Base UI and zustand come in with Phase 1's first components. Vitest and its
   browser packages move together to one exact version, as the React Router packages do.
-- **Hosting**: Vercel, team `jellycat`, a preview per pull request.
+- **Hosting**: Vercel, team `jellycat`, a preview per pull request. The site launches on jellycat.fr, the apex canonical and
+  `www` redirecting to it. The address on the site is max@jellycat.fr; the Phase 1 desktop has no Mail app.
 
 ## Phases
 
@@ -62,10 +65,6 @@ A log fed from GitHub, gtx-16 carts if it gets a web build, a small original gam
 
 ## Still to decide
 
-[phase-1.md](phase-1.md#questions-for-the-user) has each question with a recommendation and the task it blocks.
-
-- Which projects are on the site.
-- Each project's link and source (every repository is public except gtx-16's), and where the screenshots come from.
-- Whether the Phase 1 desktop has Mail before Phase 2's form.
-- The domain, and the contact address on it.
-- The OS's name: Jelly-OS is the working name.
+The user answered phase-1.md's questions on 19 Nov 2026 ([the answers](phase-1.md#the-users-answers)). Nothing is left to decide
+for Phase 1. One thing stays open: Hundo's Link is hundo.quest, which the user will deploy, and F2 checks it serves
+([still open](phase-1.md#still-open)).
