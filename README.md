@@ -48,7 +48,12 @@ pnpm check
 the not-found route prerendered once and moved there by the config's `buildEnd` (which also deletes React Router's unused SPA
 fallback). Vercel serves `404.html` with a 404 status at
 any address with no file, so a typo is a real 404 and not the app's shell. `build/server` is only used during the build.
-`vercel.json` serves `build/client` and sets the security headers. A Content-Security-Policy comes in Phase 1, once the inline
+`vercel.json` serves `build/client` and sets the security headers. It uses `routes`, not `headers`, so a missing asset never gets
+the year of cache: the year on hashed `/assets/*` is set in the `hit` phase, which only runs for a file that exists, and the
+`error` phase sets `no-store` on `/assets/*` in case the 404 page served there picked it up. A `headers` rule matches by path alone
+and would put that year on the 404 ([hundo's deploy notes](https://github.com/salty-max/hundo/blob/main/docs/deploying.md#pitfalls)
+have the side-by-side test). `vercel build` writes the table Vercel will run to `.vercel/output/config.json`: Vercel drops an empty
+`filesystem` phase and adds its own error route to `/404.html`. A Content-Security-Policy comes in Phase 1, once the inline
 hydration script's hash can be allowed.
 
 The React Router packages are pinned to one exact version together: pnpm holds back releases under a day old, and the three
