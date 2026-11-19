@@ -16,27 +16,34 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
+    "@base-ui/react": "^1.9.0",
     "@fontsource/vt323": "^5.3.0",
     "@react-router/node": "8.5.1",
     "isbot": "^5.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router": "8.5.1"
+    "react-router": "8.5.1",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
     "@lhci/cli": "0.16.1",
     "@playwright/test": "1.65.1",
     "@react-router/dev": "8.5.1",
     "@storybook/addon-a11y": "^10.6.7",
+    "@storybook/addon-vitest": "^10.6.7",
     "@storybook/react-vite": "^10.6.7",
     "@tailwindcss/vite": "^4.3.5",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.12",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/browser": "5.1.1",
+    "@vitest/browser-playwright": "5.1.1",
     "eslint": "^10.14.0",
     "eslint-plugin-better-tailwindcss": "^4.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -44,13 +51,14 @@
     "eslint-plugin-storybook": "^10.6.7",
     "globals": "^17.14.0",
     "jsdom": "^31.0.0",
+    "sharp": "^0.35.5",
     "sirv": "^3.0.2",
     "storybook": "^10.6.7",
     "tailwindcss": "^4.3.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.2",
     "vite": "^8.3.7",
-    "vitest": "^5.1.0"
+    "vitest": "5.1.1"
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || ^26.0.0"

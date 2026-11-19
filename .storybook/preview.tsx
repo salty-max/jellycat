@@ -2,7 +2,9 @@ import type { Preview } from "@storybook/react-vite";
 import "@fontsource/vt323";
 import "../app/app.css";
 
+// axe runs on every story and fails it, and with it the Vitest run, on a violation.
 const preview: Preview = {
+  parameters: { a11y: { test: "error" } },
   globalTypes: {
     phosphor: {
       description: "Phosphor colour",

@@ -15,7 +15,8 @@ and the scripts, `docs/plan.md` the decisions and the phases, `docs/design.md` t
 - **Look at it before calling it done.** A visual change is screenshotted in the real Chrome (Playwright, `channel: "chrome"`) at
   1:1 and compared with the mockup or the reference, zoomed in. A difference from `docs/design.md` changes that file in the same
   pull request.
-- **Versions**: the React Router packages move together, to one exact version. pnpm's minimum release age stays on: no
+- **Versions**: the React Router packages move together, to one exact version; so do the Vitest trio (`vitest`, `@vitest/browser`,
+  `@vitest/browser-playwright`). pnpm's minimum release age stays on: no
   `minimumReleaseAgeExclude` entry without the user's go.
 
 <!-- harness:start -->

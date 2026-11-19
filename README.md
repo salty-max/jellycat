@@ -10,6 +10,8 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 - `public/`: files served as they are (the favicon).
 - `e2e/`: Playwright tests against the production build.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
+- `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
+- `scripts/`: `serve.mjs` (the preview server) and `look.mjs` (a mockup and a story side by side).
 - `mockups/`: the HTML mockups that settled the look. Not part of the build.
 - `docs/`: the plan and the design rules.
 - `harness/`, `harness.toml`, `.claude/`: the git hooks, the task board and the review helpers sessions work under
@@ -32,7 +34,9 @@ pnpm dev
 pnpm check
 ```
 
-`pnpm check` runs lint, typecheck, the unit tests and the build, as CI's first job does. The others:
+`pnpm check` runs lint, typecheck, the tests and the build, as CI's first job does. The tests are Vitest projects: `unit` (jsdom)
+and `stories:green`, `stories:amber` and `stories:white`, which run every story headless in the system Chrome, once per phosphor,
+with axe failing the run on a violation. The others:
 
 - `pnpm e2e`: builds, serves `build/client` on port 4173 (`scripts/serve.mjs`), and runs Playwright on a desktop and a phone
   viewport in the system Chrome.
@@ -40,6 +44,9 @@ pnpm check
 - `pnpm storybook`: the component stories on port 6006.
 - `pnpm preview`: serves the production build the way Vercel does (`scripts/serve.mjs`): a file at its path, a folder's
   `index.html`, and `404.html` with a 404 status for anything else.
+- `node scripts/look.mjs`: screenshots a mockup's frame and a story at 652x480 and 1:1, and writes them side by side, with 4x crops,
+  to `.cache/look/`. It starts its own mockups server and Storybook on free ports. `--mockup`, `--selector`, `--story`,
+  `--phosphor`, `--size`, `--crop` and `--name` change what it compares (by default the desktop mockup's `#jd` and the boot screen).
 - `pnpm build-storybook`: the static Storybook, which CI builds too.
 
 ## Build
