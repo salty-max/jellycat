@@ -17,7 +17,7 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 
 ## Scripts
 
-You need Node 22.22.2 or later on 22, 24.15 or later on 24, or Node 26 (the packages' own floor; CI uses 26), and pnpm
+You need Node 22.22.2 or later on 22, 24.15 or later on 24, or 26 (the packages' own floor; CI uses 26), and pnpm
 (the version is pinned in `package.json`). The harness's hooks need [bun](https://bun.sh).
 
 ```bash
@@ -49,11 +49,20 @@ the not-found route prerendered once and moved there by the config's `buildEnd` 
 fallback). Vercel serves `404.html` with a 404 status at
 any address with no file, so a typo is a real 404 and not the app's shell. `build/server` is only used during the build.
 `vercel.json` serves `build/client` and sets the security headers. It uses `routes`, not `headers`, so a missing asset never gets
-the year of cache: the year on hashed `/assets/*` is set in the `hit` phase, which only runs for a file that exists, and the
-`error` phase sets `no-store` on `/assets/*` in case the 404 page served there picked it up. A `headers` rule matches by path alone
-and would put that year on the 404 ([hundo's deploy notes](https://github.com/salty-max/hundo/blob/main/docs/deploying.md#pitfalls)
-have the side-by-side test). `vercel build` writes the table Vercel will run to `.vercel/output/config.json`: Vercel drops an empty
-`filesystem` phase and adds its own error route to `/404.html`. A Content-Security-Policy comes in Phase 1, once the inline
+the year of cache: the year on hashed `/assets/*` is set in the `hit` phase, which only runs for a file that exists. A `headers`
+rule matches by path alone and would put that year on the 404
+([hundo's deploy notes](https://github.com/salty-max/hundo/blob/main/docs/deploying.md#pitfalls) have the side-by-side test).
+`vercel build` writes the table Vercel will run to `.vercel/output/config.json`: Vercel adds its own error route to `/404.html`.
+
+What the first production deploy answered (19 Nov 2026, `899e915`): `/` 200; `/no/such/page` and `/assets/nope.js` 404 with the
+not-found page and `public, max-age=0, must-revalidate`; a real `/assets/*.js` 200 with `immutable`; the security headers on all of
+them, 404s included. Vercel installed with pnpm 11.18.0 (from `packageManager`) on Node 26.x.
+
+## Hosting
+
+Vercel project `jellycat` on the team `jellycat`, connected to `salty-max/jellycat`, production branch `main`, Node 26.x. Until the
+domain is attached, production is <https://jellycat-iota.vercel.app>. A push to `main` deploys production; a pull request gets a
+preview. `engines` caps Node at 26 so a new major never arrives by itself. A Content-Security-Policy comes in Phase 1, once the inline
 hydration script's hash can be allowed.
 
 The React Router packages are pinned to one exact version together: pnpm holds back releases under a day old, and the three
