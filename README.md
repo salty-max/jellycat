@@ -43,7 +43,9 @@ and `stories:green`, `stories:amber` and `stories:white`, which run every story 
 with axe failing the run on a violation. The others:
 
 - `pnpm e2e`: builds, serves `build/client` on port 4173 (`scripts/serve.mjs`), and runs Playwright on a desktop and a phone
-  viewport in the system Chrome.
+  viewport in the system Chrome. It serves on 127.0.0.1 and only tests that server, never whatever else answers on port 4173
+  (another worktree's run, a `pnpm preview`, another project's `vite preview`): when it can't have the port, it fails once the
+  build is done.
 - `pnpm lighthouse`: Lighthouse CI on `build/client` (run `pnpm build` first), held to `lighthouserc.json`.
 - `pnpm storybook`: the component stories on port 6006.
 - `pnpm preview`: serves the production build the way Vercel does (`scripts/serve.mjs`): a file at its path, a folder's
