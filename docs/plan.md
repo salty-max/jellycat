@@ -54,4 +54,5 @@ A log fed from GitHub, gtx-16 carts if it gets a web build, a small original gam
 
 - The domain.
 - The OS's name: Jelly-OS is the working name.
-- Which repositories are public (Opus, gtx-16), and each project's link and screenshots.
+- Which projects' source repositories are public, so their pages can link to the code (Opus and gtx-16 are open questions; the
+  projects themselves are on the site either way), and each project's link and screenshots.

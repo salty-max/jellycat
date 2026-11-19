@@ -20,14 +20,18 @@ test("an unknown address answers 404 with the not-found page", async ({ request,
   expect(await res.text()).toContain("There&#x27;s no page at this address.");
   expect((await request.get("/assets/no-such-chunk.js")).status()).toBe(404);
 
-  // The page is /404 prerendered, served at another address: it has to hydrate there without a mismatch. The document's own 404 is
-  // the one console error expected.
+  // The page is /404 prerendered, served at another address, nested here so a relative asset URL would break: it has to load its
+  // files and hydrate there without a mismatch. The document's own 404 is the one failed response expected.
+  const address = "/no/such/page";
   const errors: string[] = [];
+  page.on("response", (response) => {
+    if (response.status() >= 400 && new URL(response.url()).pathname !== address) errors.push(`${response.status()} ${response.url()}`);
+  });
   page.on("console", (message) => {
     if (message.type() === "error" && !message.text().startsWith("Failed to load resource")) errors.push(message.text());
   });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/no-such-page");
+  await page.goto(address);
   await expect(page).toHaveTitle("Page not found · Jellycat Studio");
   await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
   await page.waitForLoadState("networkidle");
