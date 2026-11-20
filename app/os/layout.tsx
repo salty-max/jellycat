@@ -5,6 +5,7 @@ import { projectBySlug } from "../core/projects";
 import type { Block } from "../core/readme";
 import { BootScreen } from "./boot-screen";
 import { Crt } from "./crt";
+import type { DesktopProps } from "./desktop/desktop";
 import { isOsMatch } from "./os-route";
 import { Shell } from "./shell/shell";
 
@@ -19,7 +20,7 @@ type LayoutName = "unknown" | "shell" | "boot" | "desktop";
 
 type Media = "unknown" | "narrow" | "wide";
 type ProjectData = { blocks: readonly Block[] | null };
-type DesktopComponent = ComponentType;
+type DesktopComponent = ComponentType<DesktopProps>;
 
 /** The mockup's boot: the boot screen stays at least this long from the first paint, none under reduced motion. */
 const BOOT_MS = 1300;
@@ -116,6 +117,8 @@ export function OsLayout() {
     },
     [navigate, pathname],
   );
+  // Closing the Info window the address names (or one an open is waiting on) goes back to the desktop at `/`.
+  const closeProject = useCallback(() => navigate("/"), [navigate]);
   // A project's page opens on its card and its README, as if typed: the text phones, crawlers and link previews read.
   const initialCommand = useMemo(() => (project ? [`open ${project.slug}`, `cat ${readmePath(project)}`] : undefined), [project]);
   const Desktop = desktop && desktop !== "failed" ? desktop.Desktop : null;
@@ -136,7 +139,7 @@ export function OsLayout() {
             <BootScreen />
           </div>
         )}
-        {layout === "desktop" && Desktop && <Desktop />}
+        {layout === "desktop" && Desktop && <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} />}
       </Crt>
     </main>
   );

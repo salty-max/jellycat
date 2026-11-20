@@ -1,0 +1,278 @@
+import { act, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_SETTINGS, useSettings } from "../../../core/settings";
+import { Desktop } from "../desktop";
+import { useWindows } from "../windows/store";
+import { useFolderViews } from "./folder-view";
+import { ids, openFolder } from "./launch";
+
+beforeEach(() => {
+  // jsdom has no matchMedia: no pointer, so the Terminal doesn't focus its prompt itself.
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: () => {}, removeEventListener: () => {} }));
+  useWindows.setState(useWindows.getInitialState(), true);
+  useFolderViews.setState(useFolderViews.getInitialState(), true);
+  useSettings.setState({ ...DEFAULT_SETTINGS });
+});
+
+const win = (name: string) => screen.findByRole("dialog", { name });
+const titles = () => Object.values(useWindows.getState().windows).map((window) => window.title);
+
+describe("the desktop's first windows", () => {
+  it("opens Projects, with its four folders read from the file system", async () => {
+    render(<Desktop />);
+    const projects = await win("Projects");
+    expect(within(projects).getByText("4 items")).toBeInTheDocument();
+    expect(within(projects).getByText("by icon")).toBeInTheDocument();
+    for (const name of ["Web", "Addons", "Engines", "Tools"]) expect(within(projects).getByRole("option", { name })).toBeInTheDocument();
+  });
+
+  it("opens Jelly HD from its icon, holding Projects, Readme, Terminal and Control Panel", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
+    const hd = await win("Jelly HD");
+    expect(within(hd).getAllByRole("option").map((option) => option.textContent)).toEqual(["Projects", "Readme", "Terminal", "Control Panel"]);
+  });
+
+  it("opens an empty Trash", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Trash" }));
+    const trash = await win("Trash");
+    expect(within(trash).getByText("0 items")).toBeInTheDocument();
+    expect(within(trash).getByText("No items")).toBeInTheDocument();
+  });
+});
+
+describe("folder windows", () => {
+  it("a folder opens the folder it names, and a project opens its Info window", async () => {
+    const opened: string[] = [];
+    render(<Desktop onOpenProject={(slug) => opened.push(slug)} />);
+    await userEvent.dblClick(await screen.findByRole("option", { name: "Web" }));
+    const web = await win("Web");
+    expect(within(web).getByRole("option", { name: /Hundo/ })).toBeInTheDocument();
+    await userEvent.dblClick(within(web).getByRole("option", { name: /Hundo/ }));
+    expect(await win("Hundo Info")).toBeInTheDocument();
+    expect(opened).toEqual(["hundo"]);
+  });
+
+  it("every project sits in its folder", async () => {
+    render(<Desktop />);
+    for (const [folder, name] of [["tools", "Tools"], ["addons", "Addons"], ["engines", "Engines"]] as const) {
+      act(() => void openFolder(folder));
+      const items = within(await win(name)).getAllByRole("option");
+      expect(items.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("shows its items by name when its view says so", async () => {
+    render(<Desktop />);
+    const projects = await win("Projects");
+    act(() => useFolderViews.getState().setView(ids.folder("projects"), "name"));
+    expect(within(projects).getByText("by name")).toBeInTheDocument();
+    expect(within(projects).getAllByRole("option").map((option) => option.textContent)).toEqual(["AddonsFolder", "EnginesFolder", "ToolsFolder", "WebFolder"]);
+  });
+
+  it("moves between items with the arrows and opens with Enter", async () => {
+    render(<Desktop />);
+    const projects = await win("Projects");
+    within(projects).getByRole("option", { name: "Web" }).focus();
+    await userEvent.keyboard("{ArrowRight}");
+    expect(within(projects).getByRole("option", { name: "Addons" })).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    expect(await win("Addons")).toBeInTheDocument();
+  });
+});
+
+describe("the Info window", () => {
+  it("lists Stack, Link, Source and Screenshots and opens the README by its default button", async () => {
+    render(<Desktop slug="hundo" />);
+    const info = await win("Hundo Info");
+    for (const label of ["Stack", "Link", "Source", "Screenshots"]) expect(within(info).getByText(label)).toBeInTheDocument();
+    expect(within(info).getByRole("link", { name: "hundo.quest" })).toHaveAttribute("target", "_blank");
+    await userEvent.click(within(info).getByRole("button", { name: "Open Readme" }));
+    const readme = await win("Hundo Readme");
+    expect(await within(readme).findByRole("heading", { name: "Hundo" })).toBeInTheDocument();
+  });
+
+  it("answers Enter with Open Readme", async () => {
+    render(<Desktop slug="hundo" />);
+    await win("Hundo Info");
+    await userEvent.keyboard("{Enter}");
+    expect(await win("Hundo Readme")).toBeInTheDocument();
+  });
+
+  it("shows an unknown link as a dash and gives a project with no pictures no Screenshots row", async () => {
+    render(<Desktop slug="harness" />);
+    const info = await win("harness Info");
+    expect(within(info).queryByText("Screenshots")).toBeNull();
+    expect(within(info).getByText("Link").nextElementSibling).toHaveTextContent("-");
+  });
+
+  it("leaves the screenshot viewer to its own task: View opens a window that says it is a placeholder", async () => {
+    render(<Desktop slug="hundo" />);
+    const info = await win("Hundo Info");
+    await userEvent.click(within(info).getByRole("button", { name: "View" }));
+    expect(await screen.findByText(/placeholder/)).toBeInTheDocument();
+  });
+});
+
+describe("the README window", () => {
+  it("scrolls, takes the focus, and closes with Esc", async () => {
+    render(<Desktop slug="hundo" />);
+    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" }));
+    const readme = await win("Hundo Readme");
+    await within(readme).findByRole("heading", { name: "Hundo" });
+    await waitFor(() => expect(readme.querySelector(".app-doc")).toHaveFocus());
+    await userEvent.keyboard("{Escape}");
+    expect(titles()).not.toContain("Hundo Readme");
+  });
+
+  it("opens a linked project's Info window", async () => {
+    render(<Desktop slug="hundo" />);
+    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" }));
+    const readme = await win("Hundo Readme");
+    await within(readme).findByRole("heading", { name: "Hundo" });
+    await userEvent.click(within(readme).getByRole("link", { name: "harness" }));
+    expect(await win("harness Info")).toBeInTheDocument();
+  });
+});
+
+describe("the studio's Readme", () => {
+  it("carries the address as a link", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Readme" }));
+    const readme = await win("Readme");
+    expect(within(readme).getByRole("link", { name: "max@jellycat.fr" })).toHaveAttribute("href", "mailto:max@jellycat.fr");
+    expect(within(readme).getByText("Jellycat Studio")).toBeInTheDocument();
+  });
+});
+
+describe("the Control Panel", () => {
+  it("sets the phosphor with its radios and the effects with its checkboxes", async () => {
+    render(<Desktop />);
+    act(() => void useWindows.getState().open({ app: "panel", title: "Control Panel", size: { w: 400, h: 170 } }));
+    const panel = await win("Control Panel");
+    expect(within(panel).getByRole("radio", { name: "Green" })).toBeChecked();
+    await userEvent.click(within(panel).getByRole("radio", { name: "Amber" }));
+    expect(useSettings.getState().phosphor).toBe("amber");
+    expect(within(panel).getByRole("radio", { name: "Amber" })).toBeChecked();
+    for (const [name, key] of [["Scanlines", "scanlines"], ["Glow", "glow"], ["Dither pattern", "dither"]] as const) {
+      await userEvent.click(within(panel).getByRole("checkbox", { name }));
+      expect(useSettings.getState()[key]).toBe(false);
+    }
+    await userEvent.click(within(panel).getByRole("checkbox", { name: "Flicker" }));
+    expect(useSettings.getState().flicker).toBe(true);
+  });
+
+  it("opens from Jelly HD", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
+    await userEvent.dblClick(within(await win("Jelly HD")).getByRole("option", { name: "Control Panel" }));
+    expect(await win("Control Panel")).toBeInTheDocument();
+  });
+});
+
+describe("the Terminal", () => {
+  const type = async (terminal: HTMLElement, line: string) => {
+    await userEvent.type(within(terminal).getByLabelText("Terminal input"), `${line}{Enter}`);
+  };
+
+  it("runs ls", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    const terminal = await win("Terminal");
+    await type(terminal, "ls");
+    expect(await within(terminal).findByRole("button", { name: /^projects/ })).toBeInTheDocument();
+  });
+
+  it("opens a project's README window with less", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    const terminal = await win("Terminal");
+    await type(terminal, "less ~/projects/web/hundo/README");
+    expect(await win("Hundo Readme")).toBeInTheDocument();
+    expect(within(terminal).getByText("opened Hundo Readme")).toBeInTheDocument();
+  });
+
+  it("prints any other file", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    const terminal = await win("Terminal");
+    await type(terminal, "less ~/contact.txt");
+    expect(await within(terminal).findAllByText(/max@jellycat\.fr/)).not.toHaveLength(0);
+    expect(titles()).not.toContain("Jellycat Studio Readme");
+  });
+
+  it("opens a project's Info window with open", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    await type(await win("Terminal"), "open hundo");
+    expect(await win("Hundo Info")).toBeInTheDocument();
+  });
+});
+
+describe("the address", () => {
+  it("opens the Info window over Projects for a deep link", async () => {
+    render(<Desktop slug="hundo" />);
+    expect(await win("Projects")).toBeInTheDocument();
+    const info = await win("Hundo Info");
+    expect(info).toHaveAttribute("data-active");
+    expect(info.style.zIndex > (await win("Projects")).style.zIndex).toBe(true);
+  });
+
+  it("closes the Info window when the address goes back to the desktop, and opens it again going forward", async () => {
+    const { rerender } = render(<Desktop slug="hundo" />);
+    await win("Hundo Info");
+    rerender(<Desktop />);
+    await waitFor(() => expect(titles()).not.toContain("Hundo Info"));
+    expect(titles()).toContain("Projects");
+    rerender(<Desktop slug="hundo" />);
+    expect(await win("Hundo Info")).toBeInTheDocument();
+  });
+
+  it("tells the host when the Info window it names is closed", async () => {
+    const closed: string[] = [];
+    render(<Desktop slug="hundo" onCloseProject={(slug) => closed.push(slug)} />);
+    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Close" }));
+    expect(closed).toEqual(["hundo"]);
+  });
+
+  it("takes the address back when the window an open is waiting on is closed before the address arrives", async () => {
+    const closed: string[] = [];
+    render(<Desktop onOpenProject={() => {}} onCloseProject={(slug) => closed.push(slug)} />);
+    await userEvent.dblClick(await screen.findByRole("option", { name: "Web" }));
+    await userEvent.dblClick(within(await win("Web")).getByRole("option", { name: /Hundo/ }));
+    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Close" }));
+    expect(closed).toEqual(["hundo"]);
+  });
+
+  it("keeps one Info window as the address walks between projects", async () => {
+    const { rerender } = render(<Desktop slug="hundo" />);
+    await win("Hundo Info");
+    rerender(<Desktop slug="farseer" />);
+    await win("Farseer Info");
+    expect(titles()).not.toContain("Hundo Info");
+    rerender(<Desktop slug="hundo" />);
+    await win("Hundo Info");
+    expect(titles()).not.toContain("Farseer Info");
+    rerender(<Desktop />);
+    await waitFor(() => expect(titles().filter((title) => title.endsWith("Info"))).toEqual([]));
+  });
+
+  it("does not tell it of a window the address no longer names", async () => {
+    const closed: string[] = [];
+    const { rerender } = render(<Desktop slug="hundo" onCloseProject={(slug) => closed.push(slug)} />);
+    await win("Hundo Info");
+    rerender(<Desktop onCloseProject={(slug) => closed.push(slug)} />);
+    await waitFor(() => expect(titles()).not.toContain("Hundo Info"));
+    expect(closed).toEqual([]);
+  });
+
+  it("tells the host which project an icon opened", async () => {
+    const opened: string[] = [];
+    render(<Desktop onOpenProject={(slug) => opened.push(slug)} />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    await userEvent.type(within(await win("Terminal")).getByLabelText("Terminal input"), "open hundo{Enter}");
+    await waitFor(() => expect(opened).toEqual(["hundo"]));
+  });
+});

@@ -274,3 +274,15 @@ test("the history of the initial command is the session's", async () => {
   await user.keyboard("{ArrowUp}");
   expect(input).toHaveValue("pwd");
 });
+
+test("a host's onPage takes a paged file and prints its lines; null leaves it to the pager", async () => {
+  outsideAct();
+  const taken = setup({ onPage: () => [[{ kind: "text", text: "opened by the host" }]] });
+  await taken.type("less ~/README");
+  expect(await screen.findByText("opened by the host")).toBeInTheDocument();
+  expect(screen.getByText(/^\[jellycat\] 0:jsh\*$/)).toBeInTheDocument();
+  taken.unmount();
+  const left = setup({ onPage: () => null });
+  await left.type("less ~/README");
+  expect(await screen.findByText(/^\[jellycat\] 0:less\*$/)).toBeInTheDocument();
+});

@@ -55,7 +55,8 @@ rules changes this file in the same pull request.
   - Keyboard: arrows on the focused title bar move the window by 8px, Shift+arrows resize it by 8px.
   - A window is a non-modal dialog (`role="dialog"`, `aria-modal="false"`). Focus goes into it when it opens, unless its app has
     already put it inside, and back to what had it before when it closes. Esc is the app's to handle.
-- Folder windows have an info line (item count, view) and show their items by icon or by name (View menu). A folder holding more
+- Folder windows have an info line (item count, view) and show their items by icon, in the order the data lists them, or by name, a
+  list sorted by name with its kind (View menu). A folder holding more
   than it shows scrolls, with the 1-bit scroll bar (see Readme).
 - Dialogs have a 3px double border and no title bar. The default button has a second outline.
   - An alert (Base UI's AlertDialog) is modal, at least 320×140: the icon beside the message, centred in the space above the
