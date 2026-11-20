@@ -4,8 +4,11 @@ import { policy, withPolicy } from "../scripts/csp";
 
 // Every page the build wrote carries its Content-Security-Policy (scripts/csp.ts), and Chrome runs it under that policy without a
 // violation, all the way to a hydrated page. The files are read inside the test, since Playwright collects tests before its web
-// server runs the build.
+// server runs the build, so one test per page can't be generated; the one test walks them all, each as a named step, and its timeout grows
+// with the number of pages instead of sitting at Playwright's 30 s default.
 const CLIENT = "build/client";
+// The budget each page adds to the test: a page takes about 1.5 s alone (31 s for 21 pages), so this leaves room for a loaded machine.
+const PER_PAGE = 10_000;
 
 // The policy with its hashes taken out, as scripts/csp.ts writes it.
 const POLICY =
@@ -21,6 +24,7 @@ type Probe = { violations: string[]; injected?: boolean };
 test("every page runs under its Content-Security-Policy", async ({ context }) => {
   const files = readdirSync(CLIENT, { recursive: true, encoding: "utf8" }).filter((file) => file.endsWith(".html"));
   expect(files).toEqual(expect.arrayContaining(["index.html", "404.html"]));
+  test.setTimeout(30_000 + files.length * PER_PAGE);
 
   // Registered before any page script runs, so a violation during parsing is caught too.
   await context.addInitScript(() => {
@@ -59,7 +63,7 @@ test("every page runs under its Content-Security-Policy", async ({ context }) =>
       expect(errors).toEqual([]);
       // Hydrated: React has claimed the prerendered <body> (it keeps its fiber on each DOM node it owns, under this key since React
       // 17). A blocked script stops it before that.
-      await page.waitForFunction(() => Object.keys(document.body).some((key) => key.startsWith("__reactFiber$")));
+      await page.waitForFunction(() => Object.keys(document.body).some((key) => key.startsWith("__reactFiber$")), undefined, { timeout: PER_PAGE });
 
       // And the policy is enforced, not only present: an inline script added now is refused.
       await page.evaluate(() => {
