@@ -50,6 +50,10 @@ rules changes this file in the same pull request.
   than it shows scrolls, with the 1-bit scroll bar (see Readme).
 - Dialogs have a 3px double border and no title bar. The default button has a second outline.
 - Selection: one click selects, a second click or a double click opens, Enter opens the focused icon.
+- Arrows move between icons and select. A click on the bare desktop deselects. The clock is drawn on the
+  client only (the page is prerendered); the menu bar's slot stays empty until the menus exist.
+- The boot screen is the cat at 4× (64px), the OS name as the page's `h1`, and "Starting up" in the dim tone; the shut-down screen is
+  one button, "Click to restart".
 
 ## Shell
 
