@@ -10,7 +10,9 @@ const Note = ({ text = "note" }: AppProps & { text?: string }) => <p>{text}</p>;
 const Field = () => <input aria-label="Command" autoFocus />;
 const registry = { note: Note, field: Field };
 
-const open = (app: string, title = app, props = {}) => useWindows.getState().open({ app, title, size: { w: 300, h: 200 }, props });
+// A store call, a raw pointer event or a focus is an update the layer renders: it runs inside act, where the render it causes is flushed.
+const inAct = (fn: () => void) => act(fn);
+const open = (app: string, title = app, props = {}) => inAct(() => void useWindows.getState().open({ app, title, size: { w: 300, h: 200 }, props }));
 const win = (name: string) => screen.getByRole("dialog", { name });
 const state = (id: string) => useWindows.getState().windows[id]!;
 
@@ -30,7 +32,7 @@ describe("the layer", () => {
   });
   it("marks the window in front and stacks by order", async () => {
     open("note", "One");
-    useWindows.getState().open({ app: "note", id: "n2", title: "Two", size: { w: 200, h: 150 } });
+    inAct(() => void useWindows.getState().open({ app: "note", id: "n2", title: "Two", size: { w: 200, h: 150 } }));
     await screen.findByRole("dialog", { name: "Two" });
     expect(win("Two")).toHaveAttribute("data-active");
     expect(win("Two").style.zIndex).toBe("2");
@@ -58,7 +60,7 @@ describe("the boxes", () => {
   it("a click on a window behind brings it to the front", async () => {
     const user = userEvent.setup();
     open("note", "One");
-    useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } });
+    inAct(() => void useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } }));
     await user.click(await screen.findByRole("dialog", { name: "One" }));
     expect(useWindows.getState().order).toEqual(["b", "note"]);
     expect(win("One")).toHaveAttribute("data-active");
@@ -101,21 +103,21 @@ describe("pointer", () => {
     open("note", "Readme");
     const bar = within(await screen.findByRole("dialog", { name: "Readme" })).getByRole("group");
     const { x, y } = state("note");
-    bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100, button: 0 }));
-    bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 130, clientY: 120 }));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100, button: 0 })));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 130, clientY: 120 })));
     expect(state("note")).toMatchObject({ x: x + 30, y: y + 20 });
-    bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: -5000, clientY: -5000 }));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: -5000, clientY: -5000 })));
     expect(state("note")).toMatchObject({ x: -240, y: 0 });
-    bar.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
-    bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 100, clientY: 100 }));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointerup", { bubbles: true })));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 100, clientY: 100 })));
     expect(state("note")).toMatchObject({ x: -240, y: 0 });
   });
   it("dragging the grip resizes it", async () => {
     open("note", "Readme");
     const frame = await screen.findByRole("dialog", { name: "Readme" });
     const grip = frame.querySelector(".window-grip")!;
-    grip.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 300, clientY: 200, button: 0 }));
-    grip.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 340, clientY: 230 }));
+    inAct(() => void grip.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 300, clientY: 200, button: 0 })));
+    inAct(() => void grip.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 1, clientX: 340, clientY: 230 })));
     expect(state("note")).toMatchObject({ w: 340, h: 230 });
   });
 });
@@ -123,10 +125,10 @@ describe("pointer", () => {
 describe("with a window behind", () => {
   it("raising a window by its title bar keeps its DOM node, so the drag keeps its pointer", async () => {
     open("note", "One");
-    useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } });
+    inAct(() => void useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } }));
     const back = await screen.findByRole("dialog", { name: "One" });
     const bar = within(back).getByRole("group");
-    bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 50, clientY: 50, button: 0 }));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 50, clientY: 50, button: 0 })));
     expect(useWindows.getState().order).toEqual(["b", "note"]);
     expect(screen.getByRole("dialog", { name: "One" })).toBe(back);
     expect(back.isConnected).toBe(true);
@@ -135,18 +137,18 @@ describe("with a window behind", () => {
     open("note", "One");
     const bar = within(await screen.findByRole("dialog", { name: "One" })).getByRole("group");
     const { x } = state("note");
-    bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 50, clientY: 50, button: 0 }));
-    bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 0, clientX: 90, clientY: 50 }));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 50, clientY: 50, button: 0 })));
+    inAct(() => void bar.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, buttons: 0, clientX: 90, clientY: 50 })));
     expect(state("note").x).toBe(x);
   });
   it("Tabbing into a window behind brings it to the front", async () => {
     const user = userEvent.setup();
     open("note", "One");
-    useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } });
+    inAct(() => void useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } }));
     await screen.findByRole("dialog", { name: "Two" });
     await user.click(within(win("One")).getByRole("group"));
-    useWindows.getState().focus("b");
-    within(win("One")).getByRole("button", { name: "Close" }).focus();
+    inAct(() => void useWindows.getState().focus("b"));
+    inAct(() => within(win("One")).getByRole("button", { name: "Close" }).focus());
     expect(useWindows.getState().order.at(-1)).toBe("note");
   });
   it("closing the front window sends the focus to its opener, not into the one behind", async () => {
@@ -155,9 +157,9 @@ describe("with a window behind", () => {
     open("note", "One");
     await screen.findByRole("dialog", { name: "One" });
     opener.focus();
-    useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } });
+    inAct(() => void useWindows.getState().open({ app: "note", id: "b", title: "Two", size: { w: 200, h: 150 } }));
     await screen.findByRole("dialog", { name: "Two" });
-    act(() => useWindows.getState().close("b"));
+    inAct(() => void useWindows.getState().close("b"));
     expect(opener).toHaveFocus();
     opener.remove();
   });
@@ -170,7 +172,7 @@ describe("focus, more", () => {
     const other = document.createElement("button");
     document.body.append(other);
     other.focus();
-    act(() => void open("note", "One"));
+    open("note", "One");
     expect(one).toHaveFocus();
     other.remove();
   });
@@ -180,7 +182,7 @@ describe("focus, more", () => {
     const elsewhere = document.createElement("input");
     document.body.append(elsewhere);
     elsewhere.focus();
-    act(() => useWindows.getState().close("note"));
+    inAct(() => void useWindows.getState().close("note"));
     expect(elsewhere).toHaveFocus();
     elsewhere.remove();
   });
@@ -194,7 +196,7 @@ describe("focus", () => {
     open("note", "Readme");
     const frame = await screen.findByRole("dialog", { name: "Readme" });
     expect(frame).toHaveFocus();
-    act(() => useWindows.getState().close("note"));
+    inAct(() => void useWindows.getState().close("note"));
     expect(opener).toHaveFocus();
     opener.remove();
   });

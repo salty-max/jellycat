@@ -69,7 +69,17 @@ function mount() {
     },
   };
   render(<ViewerView api={api} slug="hundo" />);
-  return { close, press: (key: string) => handler!(key) };
+  // The key handler steps the view's state: it runs inside act, which flushes the render it causes.
+  return {
+    close,
+    press: (key: string) => {
+      let handled = false;
+      act(() => {
+        handled = handler!(key);
+      });
+      return handled;
+    },
+  };
 }
 
 test("full screen: the name and the count are set in the border, the caption sits under the picture", () => {

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { useSettings } from "../../../core/settings";
@@ -55,12 +55,16 @@ describe("the menu bar", () => {
   it("the keyboard: arrows across, down into a menu, Enter selects, Esc closes", async () => {
     const user = userEvent.setup();
     render(<Bar />);
-    screen.getByRole("menuitem", { name: "File" }).focus();
+    act(() => screen.getByRole("menuitem", { name: "File" }).focus());
     await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}");
     expect(screen.getByRole("menuitem", { name: "Special" })).toHaveFocus();
     await user.keyboard("{ArrowDown}");
-    expect(await screen.findByRole("menuitemradio", { name: "Green phosphor" })).toBeInTheDocument();
-    await user.keyboard("{ArrowDown}{Enter}");
+    const green = await screen.findByRole("menuitemradio", { name: "Green phosphor" });
+    // The menu puts the focus on its first item after it opens: an arrow before that starts the walk from the top, a step short.
+    await waitFor(() => expect(green).toHaveFocus());
+    await user.keyboard("{ArrowDown}");
+    await waitFor(() => expect(screen.getByRole("menuitemradio", { name: "Amber phosphor" })).toHaveFocus());
+    await user.keyboard("{Enter}");
     expect(useSettings.getState().phosphor).toBe("amber");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
 

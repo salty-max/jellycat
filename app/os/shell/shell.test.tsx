@@ -164,7 +164,7 @@ test("cat prints the blocks the host gave it, without loading the chunk", async 
 test("a view opened by Enter on a name in the log gives the focus to the prompt's input, so its keys reach it", async () => {
   const { user, type, input } = setup();
   await type("open hundo");
-  screen.getByRole("button", { name: "~/projects/web/hundo/README" }).focus();
+  act(() => screen.getByRole("button", { name: "~/projects/web/hundo/README" }).focus());
   await settle(() => fireEvent.click(screen.getByRole("button", { name: "~/projects/web/hundo/README" })));
   expect(await screen.findByRole("region", { name: "~/projects/web/hundo/README" })).toBeInTheDocument();
   expect(input).toHaveFocus();
