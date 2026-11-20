@@ -59,8 +59,18 @@ rules changes this file in the same pull request.
 
 - Prompt `guest@jellycat:<path>$`, a block cursor (hollow when the shell isn't focused), a status bar in inverse video:
   `[jellycat] 0:jsh*` on the left, the path and the clock on the right.
+- The input is a real, labelled `<input>`, 1px and clear, with a font size of 16px so iOS doesn't zoom in; the prompt's own text is
+  what shows. It is never focused on mount on a phone; a tap on the screen focuses it. Tab completes, ↑ ↓ walk the history, Ctrl-C
+  abandons the line (`^C`), Ctrl-L clears the log and Ctrl-U the line.
 - Every name in the output is clickable and runs the command it stands for, so the shell works without typing. A project's name
-  (in `ls` and `tree`) opens it; a README's name pages it.
+  (in `ls` and `tree`) opens it; a README's name pages it. A command is a `<button>`, a project's name an `<a href="/projects/<slug>">`;
+  pressing one keeps the focus where it was. Hover is inverse video.
+- The output is `role="log"`. The first paint is the welcome and the prompt; the typed login (banner, `jellycat login: guest`, last
+  login, welcome) plays on `logout` and `exit` only, and any key or click skips it, as does `prefers-reduced-motion`.
+- The shell fills its box: the screen on a phone, the Terminal window on the desktop. The host plugs in through props: `onOpenProject`,
+  `initialCommand` (printed at first paint, its effects not run) and a full-screen slot for `browse` and the viewer; without one those
+  show a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
+- The status bar's clock is client-only: it is not in the markup the server renders.
 - Messages read like a Unix shell's (`jsh: foo: command not found`), never chatty.
 - `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. `q` returns to the
   prompt as it was.

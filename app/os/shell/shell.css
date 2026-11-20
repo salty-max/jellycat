@@ -1,0 +1,239 @@
+/* The shell's own CSS (docs/design.md Shell, Readme). The tube's colours are app.css's tokens; the glow comes from the `crt-glow` utility. */
+.sh {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 20px;
+  line-height: 1.15;
+  font-variant-ligatures: none;
+  cursor: text;
+  text-align: left;
+}
+.sh [hidden] {
+  display: none !important;
+}
+.sh a {
+  color: inherit;
+}
+.sh :focus-visible {
+  outline: 1px dotted var(--phosphor-fg);
+  outline-offset: 1px;
+}
+
+/* The output: white-space keeps the double spaces between names; the scroll bar is hidden, the log follows its end. */
+.sh-term {
+  position: absolute;
+  inset: 0 0 24px 0;
+  padding: 14px 20px 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.sh-term::-webkit-scrollbar {
+  display: none;
+}
+
+/* A name in the output: a button or a link; hover is inverse video. */
+.sh-lk {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  white-space: inherit;
+  cursor: pointer;
+}
+.sh-lk:hover {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+
+/* The prompt's line: the block cursor is inverse video, hollow while the input has no focus. */
+.sh-cursor {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.sh[data-focus="false"] .sh-cursor {
+  background: none;
+  color: inherit;
+  box-shadow: inset 0 0 0 1px var(--phosphor-fg);
+}
+
+/* The real input: 1px and clear, so the prompt's own text is what shows; 16px keeps iOS from zooming in on focus. */
+.sh-input {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+}
+
+/* The status bar: inverse video. */
+.sh-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 20px;
+  white-space: nowrap;
+}
+.sh-bar-right {
+  margin-left: auto;
+}
+
+.sh-kr {
+  display: grid;
+  grid-template-columns: 13ch minmax(0, 1fr);
+}
+.sh-kr > span {
+  overflow-wrap: anywhere;
+}
+.sh-h1 {
+  margin: 0;
+  font: inherit;
+}
+
+/* A README: the marks are drawn dim here, so the HTML holds the words alone. */
+.sh-md {
+  white-space: normal;
+}
+.sh-md > * {
+  margin: 0;
+}
+.sh-md > * + * {
+  margin-top: 1lh;
+}
+.sh-md > h2 + *,
+.sh-md > h3 + * {
+  margin-top: 0;
+}
+.sh-md h2,
+.sh-md h3 {
+  font: inherit;
+}
+.sh-md ul {
+  list-style: none;
+  padding: 0;
+}
+.sh-md li {
+  display: grid;
+  grid-template-columns: 2ch minmax(0, 1fr);
+}
+.sh-md h2::before,
+.sh-md h3::before,
+.sh-md li::before {
+  color: var(--phosphor-dim);
+}
+.sh-md h2::before {
+  content: "# " / "";
+}
+.sh-md h3::before {
+  content: "## " / "";
+}
+.sh-md li::before {
+  content: "-" / "";
+}
+.sh-md code {
+  font: inherit;
+}
+.sh-md code::before,
+.sh-md code::after {
+  content: "`" / "";
+  color: var(--phosphor-dim);
+}
+.sh-md p,
+.sh-md li > span {
+  overflow-wrap: anywhere;
+}
+
+/* Full screen (the pager, and the host's browse and viewer): a double-bordered pane with its title set in the border, and a key bar. */
+.sh-full {
+  position: absolute;
+  inset: 0 0 24px 0;
+  padding: 22px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: default;
+}
+.sh-pane {
+  position: relative;
+  min-height: 0;
+  border: 4px double var(--phosphor-fg);
+  padding: 10px 8px 4px;
+  white-space: pre-wrap;
+}
+.sh-pt {
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  padding: 0 6px;
+  background: var(--phosphor-bg);
+  white-space: nowrap;
+}
+.sh-pt-right {
+  left: auto;
+  right: 10px;
+}
+.sh-pager {
+  flex: 1;
+  padding: 12px 4px 4px 10px;
+}
+.sh-pt-path {
+  max-width: calc(100% - 100px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sh-pager-text {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-right: 6px;
+}
+.sh-pager-text::-webkit-scrollbar {
+  display: none;
+}
+.sh-placeholder {
+  margin: 0;
+}
+.sh-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.sh-keys button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.sh-keys b {
+  margin-right: 6px;
+  padding: 0 5px;
+  font-weight: 400;
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.sh-keys .sh-off {
+  color: var(--phosphor-dim);
+}
+.sh-keys .sh-off b {
+  background: var(--phosphor-dim);
+}
