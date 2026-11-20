@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
+import { loadReadme } from "../../../core/readme";
 import { Crt } from "../../crt";
 import { Shell } from "../shell";
 import { fullScreenViews } from "../../full-screen-views";
@@ -55,6 +56,8 @@ export const ProjectCard: Story = {
 /** A project's README selected: the text in the right pane. */
 export const ReadmeText: Story = {
   play: async ({ canvasElement }) => {
+    // The README's chunk loads from the dev server, a wait that depends on the machine: read it in first, not after a fixed pause.
+    await loadReadme("hundo");
     const canvas = await browse(canvasElement);
     await userEvent.keyboard("{Enter}");
     for (const name of ["web/", "hundo/"]) {
@@ -62,9 +65,8 @@ export const ReadmeText: Story = {
       await userEvent.keyboard("{Enter}");
     }
     await userEvent.keyboard("j");
-    // Storybook's test environment doesn't retry a suspended README by itself (a browser does): once the chunk is in, moving off and back renders it.
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Storybook's test environment doesn't retry a suspended README by itself (a browser does): with the chunk in, moving off and back renders it (the first render read a promise React had not yet seen settle, so it suspended even so).
     await userEvent.keyboard("kj");
-    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" }, { timeout: 8000 })).toBeInTheDocument();
+    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument();
   },
 };

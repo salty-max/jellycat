@@ -73,7 +73,7 @@ export const Cat: Story = {
     await userEvent.type(input(canvas), "cat ~/projects/web/hundo/README{Enter}");
     // Storybook's test environment doesn't retry a suspended README by itself (a browser does): a keystroke renders the log again.
     await userEvent.type(input(canvas), "x");
-    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" }, { timeout: 8000 })).toBeInTheDocument();
+    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument();
   },
 };
 
@@ -84,7 +84,7 @@ export const Pager: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(input(canvas));
     await userEvent.type(input(canvas), "less ~/projects/web/hundo/README{Enter}");
-    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" }, { timeout: 8000 })).toBeInTheDocument();
+    await expect(await canvas.findByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument();
     await userEvent.keyboard("{Space}");
   },
 };

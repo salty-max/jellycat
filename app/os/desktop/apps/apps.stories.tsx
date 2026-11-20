@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, userEvent, within } from "storybook/test";
+import { loadReadme } from "../../../core/readme";
 import { DEFAULT_SETTINGS, useSettings } from "../../../core/settings";
 import { Crt } from "../../crt";
 import { Desktop } from "../desktop";
@@ -78,8 +79,10 @@ export const InfoWindow: Story = {
 };
 
 export const ProjectReadme: Story = {
+  // The README's chunk loads from the dev server, a wait that depends on the machine: the window waits on the same promise.
   args: { open: () => void openProjectReadme("hundo") },
   play: async ({ canvasElement }) => {
+    await loadReadme("hundo");
     const readme = within(canvasElement).getByRole("dialog", { name: "Hundo Readme" });
     await expect(await within(readme).findByRole("heading", { name: "Hundo" })).toBeInTheDocument();
   },
