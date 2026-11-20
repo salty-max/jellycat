@@ -7,8 +7,9 @@ to its questions are at the end.
 ## Decisions this plan adds
 
 - **Pages are shell-first.**
-  - Every page prerenders the shell's session as its text. On `/projects/<slug>`, the output of `open <slug>` is already on
-    screen. That is the text phones, crawlers and link previews read; Google indexes the phone rendering.
+  - Every page prerenders the shell's session as its text. On `/projects/<slug>`, the output of `open <slug>` and of `cat` of
+    its README is already on screen, scrolled to the `open` line. That is the text phones, crawlers and link previews read;
+    Google indexes the phone rendering.
   - The page also prerenders the desktop's boot screen.
   - Before JS, a CSS media query shows one or the other. It is scoped to a wrapper that only the server snapshot renders
     (`data-layout="unknown"`), so a failed desktop chunk can fall back to the shell on a wide screen.
@@ -43,6 +44,10 @@ to its questions are at the end.
 - **The OS's name and the site's address are constants in `app/core/site.ts`** (A2 creates it; D1a extends it). Every task that
   prints the name (`uname`, the welcome, the boot screen, the meta) imports it, so the rename is one edit.
 - **No `gero` command and no `lab` directory in Phase 1.** They come with the Lab in Phase 2.
+- **Every project has a README** (A5): `app/content/readme/<slug>.md`, in a small Markdown subset that `app/core/readme.ts`
+  parses into blocks, each README a chunk of its own loaded on first use. In the file system a project is a directory holding
+  it, `~/projects/<folder>/<slug>/README`; there is no `<slug>.txt`, and the card comes from `open`. `docs/design.md` Readme
+  (A3) says how each layout shows it.
 - **Four project folders**: `web`, `addons`, `engines` and `tools` (addon-kit, wow-data, harness), from Q1's answer. B1's
   tree, the desktop's Projects folder and D3's folder windows have all four.
 
@@ -74,11 +79,12 @@ the end.
 | A2  | Project data                         | prose    | Opus   | Q1                  |
 | A3  | Viewer mockup                        | design   | Opus   | -                   |
 | A4  | Content-Security-Policy              | security | Opus   | -                   |
+| A5  | Project write-ups                    | prose    | Opus   | A2                  |
 | B1  | Core: file system and commands       | code     | Sonnet | A2                  |
 | B2  | The look: settings, CRT, icons, font | code     | Sonnet | A1                  |
-| D1a | Pages, meta, sitemap                 | code     | Sonnet | A2, A4              |
+| D1a | Pages, meta, sitemap                 | code     | Sonnet | A2, A4, A5          |
 | E3  | Screenshots                          | prose    | Opus   | A1, A2, Q3          |
-| C1  | Shell                                | code     | Sonnet | B1, B2              |
+| C1  | Shell                                | code     | Sonnet | A5, B1, B2          |
 | C2a | Windows and dialogs                  | code     | Sonnet | B2                  |
 | C2b | Desktop surface                      | code     | Sonnet | B2                  |
 | D1b | Layout switch                        | code     | Opus   | C1, C2a, C2b, D1a   |
@@ -91,7 +97,7 @@ the end.
 
 **What runs at the same time.** Each wave can start as soon as its dependencies are on `main`:
 
-1. A1, A2, A3, A4.
+1. A1, A2, A3, A4; A5 once A2 is on `main`.
 2. B1, B2, D1a, E3.
 3. C1, C2a, C2b.
 4. D1b.
@@ -183,19 +189,55 @@ marked as a placeholder. It ends with the user's approval, through the opener.
 - After the push, `curl -sI` on the preview or production for both headers. `serve.mjs` and LHCI don't send `vercel.json`'s
   headers, so this is the only test of `frame-ancestors`.
 
+### A5 Project write-ups (prose)
+
+**Delivers**
+- `app/content/readme/<slug>.md`, one README per project for a professional reader (a client, a recruiter, a developer): what
+  it is, how it's built, and the engineering that doesn't show from outside. The user approved the shape and the Hundo and
+  harness samples ("Approve as is"):
+  - `# <Name>`, a paragraph saying what it is, `## How it's built`, `## How it's checked`, at most one closing line;
+  - 250 to 500 words, neutral third person, every fact from the project's own repository; no Stack or Links section, which
+    the card already shows;
+  - the subset: one `#` title, `##` headings, one-line paragraphs, one-level `- ` lists, code spans, and links to `https://…`
+    or to another project as `/projects/<slug>`.
+- `app/core/readme.ts`:
+  - `parseReadme`: the blocks (title, heading, paragraph, list; inline text, code, link, project link). Anything outside the
+    subset throws, naming the file and line.
+  - `loadReadme(slug)`: each README a chunk of its own, loaded and parsed on first use, the same promise for the same slug
+    (React's `use()` reads it; a loader awaits it). The 19 together are about 54 KB, 19 KB gzipped, and a visitor reads one
+    at a time.
+  - `README_SLUGS` and `readmeText` (the plain text, each link as its words).
+- A card corrected where the project's code disagreed with A2's reading of its README: Lucarne's stack is Postgres (its
+  README's Workers + D1 intro and SQLite host section are stale).
+- `studio.ts`'s Readme says "Each project has a README in the projects folder."; README Layout names `app/content/readme/`
+  and `readme.ts`.
+
+**Files:** `app/content/readme/*`, `app/core/readme.ts` and its test, `app/core/projects.ts` (Lucarne's stack, the slug's
+comment), `app/core/studio.ts` (one line), README Layout, this section and its knock-ons in B1, C1, D1a, D1b, D2 and D3.
+
+**Checks**
+- Unit tests: every project has a README and every README a project; each is titled with the project's name, opens with what
+  it is, has the two sections in order, runs 250 to 500 words, and has no em dash, filler word or local path; the parser
+  refuses each construct left out, naming the line.
+- A cold read of every text against its repository, by an agent that didn't write it.
+
 ### B1 Core: file system and commands (code, no React)
 
 **Delivers**
 - `app/core/fs.ts`: the tree built from the data, path resolution with `~`, `.` and `..`, and sorting. The tree is:
   - `README`;
   - `contact.txt`;
-  - `projects/<folder>/<slug>.txt`.
+  - `projects/<folder>/<slug>/README`, a directory per project holding its README (A5). No `<slug>.txt`: the card comes
+    from `open`.
 - `app/core/shell.ts`: a pure command runner. It takes a line and the session (cwd, history) and returns the output plus the
   new session.
-  - Commands: `help`, `ls`, `cd`, `cat`, `open`, `tree`, `browse`, `theme`, `crt`, `clear`, `history`, `pwd`, `whoami`, `date`,
-    `uname`, `echo`, `logout`, `exit`, and `&&`.
-  - Output is typed segments: text, dim, command button, project link, external link, project card.
-  - Effects are returned, never performed: open project, set theme, set CRT, browse, clear, logout.
+  - Commands: `help`, `ls`, `cd`, `cat`, `less`, `more`, `open`, `tree`, `browse`, `theme`, `crt`, `clear`, `history`, `pwd`,
+    `whoami`, `date`, `uname`, `echo`, `logout`, `exit`, and `&&`.
+  - Output is typed segments: text, dim, command button, project link, external link, project card, and a README by its slug,
+    which the renderer fills (C1), so the runner stays pure and synchronous.
+  - The `open` card ends with a README row: its path, which runs `less`. A README's name in `ls` and `tree` pages it.
+  - Effects are returned, never performed: open project, page a file (`less` and `more`; the host pages it, and `more` prints a
+    file that fits, as `docs/design.md` Readme says), set theme, set CRT, browse, clear, logout.
 - Tab completion and history as pure functions.
 - Messages worded as in the mockup. `uname` and the welcome take the OS name from `app/core/site.ts`.
 - `logout` and `exit` both return the logout effect.
@@ -236,6 +278,8 @@ paints amber with no hydration error.
   `projects/:slug`: the route throws a 404 `Response`, and the root `ErrorBoundary` renders the same screen as `not-found.tsx`.
 - `sitemap.xml` and `robots.txt` written in `buildEnd`.
 - `lighthouserc.json` adds one project page.
+- The route's loader returns the README's blocks (A5's `loadReadme(slug)`, awaited at build), so the prerendered page holds
+  them and hydration gets the same blocks as loader data; D1b hands them to the shell.
 - The page body stays the current boot screen until D1b.
 
 **Files:** `app/routes.ts`, `app/routes/project.tsx`, the meta in `app/routes/home.tsx`, the prerender list
@@ -275,6 +319,11 @@ or inside the desktop's Terminal window.
 - **Login:** first paint shows the welcome and prompt; the typed login plays on `logout`.
 - **Effects:** `theme` and `crt` go to the settings store. "open project" and "browse" go to the host through props:
   `onOpenProject`, `initialCommand`, and a full-screen slot. D1b and D2 plug in through these without editing the shell.
+- **README** (A5's blocks, `docs/design.md` Readme): `cat` prints the blocks the host gave it (the deep link's, from the
+  page's loader), else `use()` on `loadReadme(slug)`, which suspends until the chunk arrives; real
+  headings, lists and `code`, their marks dim by CSS. `less` and `more` page it in the full-screen slot, with the path, the
+  position and the key bar; `q` goes back to where it was opened. An https link opens in a new tab; a project link runs
+  `open <slug>`.
 - Its CSS sits next to it.
 
 **Files:** `app/os/shell/*`, `docs/design.md` Shell.
@@ -331,7 +380,10 @@ windows.
   - a failed chunk falls back to the shell;
   - crossing the breakpoint swaps the layout.
 - A `Desktop` assembled from C2a and C2b.
-- The shell's `/projects/<slug>` deep link, through `initialCommand`.
+- The shell's `/projects/<slug>` deep link, through `initialCommand`: `open <slug>`, then `cat ~/projects/<folder>/<slug>/README`
+  rendered from the loader's blocks, so hydration matches the prerender without waiting for a chunk, scrolled to the `open`
+  line. The project's name is the page's `h1`, the README's headings its
+  `h2` and `h3`.
 - URL ↔ state: `onOpenProject` pushes the URL; back and forward work.
 - `smoke.spec.ts` updated: the phone sees the shell.
 
@@ -352,6 +404,8 @@ windows.
 - double borders with the titles set in them, and the key bar;
 - keys: j/k and the arrows, Enter, Backspace, q and Esc;
 - clickable rows and keys;
+- a project's directory shows its card, and its README the text; Enter on the README pages it (`less`), and `q` there comes
+  back to `browse`;
 - `q` returns to the prompt as it was.
 
 **Files:** `app/os/shell/browse/*`, plus the one line that registers it.
@@ -366,7 +420,9 @@ windows.
 - Folder windows (Jelly HD, Projects, Web, Addons, Engines, Tools, Trash):
   - by icon or by name;
   - an info line with the item count and the view.
-- The project's Info window: icon, name and kind; Stack, Link and Source; the description.
+- The project's Info window: icon, name and kind; Stack, Link and Source; the description; and Open Readme, its default
+  button, which opens `<Name> Readme`, a text window that scrolls with the 1-bit scroll bar (A5's blocks through
+  `loadReadme`). In the Terminal window, `less` opens that window.
 - Readme.
 - Control Panel: phosphor radios and effect checkboxes on Base UI, bound to the settings.
 - Terminal: C1 in a window.

@@ -64,7 +64,7 @@ rules changes this file in the same pull request.
 
 ## Readme
 
-- Every project has a README, 250 to 450 words: one `#` title, `##` headings, paragraphs, one-level lists, code spans and links.
+- Every project has a README, 250 to 500 words: one `#` title, `##` headings, paragraphs, one-level lists, code spans and links.
   In the file system a project is a directory holding it, `~/projects/<folder>/<slug>/README`.
 - It reads the same everywhere. A heading keeps its `#` or `##`, a list item its `-` and a code span its backticks, drawn dim by
   CSS so the HTML holds only the words, in real headings, lists and `code`. A blank line comes before each heading and between
@@ -86,5 +86,6 @@ rules changes this file in the same pull request.
 
 ## Words
 
-- Project facts come from the project's own README. Unknown is `-`. Placeholders say so (`hello@your-domain (placeholder)`).
+- Project facts come from the project's own repository: its README, or its code where the README is stale. Unknown is `-`.
+  Placeholders say so (`hello@your-domain (placeholder)`).
 - No taglines, jokes, invented numbers or statuses. System messages are plain: "Jelly-OS has shut down."

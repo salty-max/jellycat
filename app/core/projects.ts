@@ -22,7 +22,7 @@ export interface Screenshot {
 }
 
 export interface Project {
-  /** The project's address (`/projects/<slug>`) and file name (`<slug>.txt`). */
+  /** The project's address (`/projects/<slug>`), its directory's name (`projects/<folder>/<slug>/`) and its README's file name (`app/content/readme/<slug>.md`). */
   slug: string;
   name: string;
   folder: Folder;
@@ -74,7 +74,7 @@ export const PROJECTS: readonly Project[] = [
     kind: "Web app",
     description:
       "The schedule of football fixtures and the French TV channel showing each one, from Ligue 1 to the World Cup, with live scores and push alerts, in a revival of broadcast teletext.",
-    stack: "React 19, Vite, Tailwind 4, Hono, Bun, SQLite",
+    stack: "React 19, Vite, Tailwind 4, Hono, Bun, Postgres",
     link: "https://lucarne.fr",
     source: github("lucarne"),
     screenshots: [],

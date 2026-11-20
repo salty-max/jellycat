@@ -20,7 +20,7 @@ export const README: TextFile = [
   [],
   ["Web apps, World of Warcraft addons, engines and tools."],
   [],
-  ["Each project has a file in the projects folder."],
+  ["Each project has a README in the projects folder."],
   ["Contact: ", email],
 ];
 
