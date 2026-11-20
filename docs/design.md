@@ -12,6 +12,13 @@ rules changes this file in the same pull request.
 - Screenshots of the projects are the one exception: they are shown in their own colours.
 - The CRT layer (scanlines, vignette, a soft glow on text) sits over everything, takes no clicks and is hidden from screen readers.
   Flicker is off by default and never runs under `prefers-reduced-motion`. The Control Panel turns each effect off.
+- Each effect is a data attribute on `<html>` (`data-phosphor`, `data-scanlines`, `data-glow`, `data-flicker`, `data-dither`), saved
+  in the settings store (`app/core/settings.ts`, persisted under `jelly-os:settings`). A script in `<head>` sets them from the saved
+  values before first paint, so a saved amber screen never flashes green; the store reads them again in an effect after hydration.
+  A missing attribute is the default: full tube, flicker off.
+- The glow is `0 0 2px` in the dim tone. The desktop mockup used that and the shell mockup `0 0 3px` in the text's own colour;
+  one value now serves both, the softer one, which keeps 18px and 20px text crisp. Inverse video (`inverse`) takes the glow off.
+- The dither is the desktop's 2px checkerboard of the phosphor at 20% over the tube's black (`dither` utility); it can be turned off.
 - The screen has rounded corners. The text is never warped: curvature would take it out of the DOM.
 
 ## Type
@@ -22,9 +29,14 @@ rules changes this file in the same pull request.
 
 ## Icons
 
-- 1-bit pixel art, drawn on a 16×16 grid and shown at 2× (32px) on the desktop and in folders, 1× in lists and menus.
-- Two tones: the outline in the phosphor colour, the inside in the tube's black (so the dithered desktop doesn't show through).
-- A selected icon is drawn inverted, and its label turns to inverse video.
+- 1-bit pixel art, drawn on a 16×16 grid and shown at 2× (32px) on the desktop and in folders, 1× in lists and menus. The title-bar
+  glyphs (close, collapse, zoom, previous, next) are 8×8, shown at 1×.
+- Two tones: the outline in the phosphor colour (`currentColor`), the inside in the tube's black (so the dithered desktop doesn't show
+  through).
+- A selected icon is drawn inverted (outline in the black, inside in the phosphor), and its label turns to inverse video.
+- They are SVG components (`app/os/icons/`), one square path per pixel, never scaled to a fraction, and hidden from screen readers:
+  the label next to an icon names it. Their grids are the mockup's.
+- All four project folders (web, addons, engines, tools) use the folder icon.
 
 ## Desktop
 

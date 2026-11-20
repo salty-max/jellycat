@@ -19,8 +19,24 @@
   --phosphor-bg: #0b0d12;
 }
 
+/* VT323 is a 0.4em-wide monospace with an 0.8em ascent and a 0.2em descent. Courier New and its metric twins are 0.6em wide, so the
+   fallback is scaled by 0.4/0.6 (66.67%) and its ascent and descent are pulled to VT323's (0.8/0.6667 and 0.2/0.6667): text set in
+   the fallback takes the same width and the same lines as the real font, and the swap doesn't move anything. */
+@font-face {
+  font-family: "VT323 Fallback";
+  src:
+    local("Courier New"),
+    local("CourierNewPSMT"),
+    local("Liberation Mono"),
+    local("Cousine");
+  size-adjust: 66.67%;
+  ascent-override: 120%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
 @theme inline {
-  --font-mono: "VT323", ui-monospace, monospace;
+  --font-mono: "VT323", "VT323 Fallback", ui-monospace, monospace;
   --color-phosphor: var(--phosphor-fg);
   --color-phosphor-dim: var(--phosphor-dim);
   --color-screen: var(--phosphor-bg);
@@ -35,17 +51,87 @@ body {
   font-variant-ligatures: none;
 }
 
-/* The CRT layer: scanlines and a vignette over the whole screen. It never takes a click and screen readers skip it. */
+/* The CRT layer. Each effect is a data attribute on <html> (data-scanlines, data-glow, data-flicker, data-dither), set by the head
+   script before first paint and kept in step with the settings store. A missing attribute means the default, so a page, a story or
+   a test with none shows the full tube. Flicker is the exception: it runs only when it is "true", and never under reduced motion. */
+
+/* Scanlines and a vignette over the whole screen. The layer never takes a click and screen readers skip it. */
 @utility crt-overlay {
   position: absolute;
   inset: 0;
+  z-index: 9999;
   pointer-events: none;
   background:
     repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.28) 0 1px, transparent 1px 3px),
     radial-gradient(ellipse at center, transparent 60%, rgb(0 0 0 / 0.6) 100%);
+
+  :root[data-scanlines="false"] & {
+    display: none;
+  }
 }
 
-/* A soft phosphor bloom on text, in the text's own colour. */
+/* A faint brightness pulse over the screen, in the phosphor colour. */
+@utility crt-flicker {
+  position: absolute;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  display: none;
+  background: var(--phosphor-fg);
+  opacity: 0;
+
+  :root[data-flicker="true"] & {
+    display: block;
+    animation: crt-flicker 4s infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root[data-flicker="true"] & {
+      display: none;
+      animation: none;
+    }
+  }
+}
+
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  48% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0;
+  }
+  53% {
+    opacity: 0.02;
+  }
+}
+
+/* A soft phosphor bloom on text: 2px, in the dim tone. It keeps small text crisp where a bloom in the text's own colour smears it. */
 @utility crt-glow {
-  text-shadow: 0 0 3px;
+  text-shadow: 0 0 2px var(--phosphor-dim);
+
+  :root[data-glow="false"] & {
+    text-shadow: none;
+  }
+}
+
+/* Inverse video: dark text on a phosphor block. The glow would bloom the dark text, so it goes. */
+@utility inverse {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+
+/* The desktop's dither: a 2px checkerboard of the phosphor at 20% over the tube's black. */
+@utility dither {
+  background-color: var(--phosphor-bg);
+  background-image: repeating-conic-gradient(color-mix(in srgb, var(--phosphor-fg) 20%, var(--phosphor-bg)) 0 25%, transparent 0 50%);
+  background-size: 2px 2px;
+
+  :root[data-dither="false"] & {
+    background-image: none;
+  }
 }

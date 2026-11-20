@@ -9,7 +9,7 @@ const PHOSPHORS = ["green", "amber", "white"] as const;
 const storyProject = (phosphor: (typeof PHOSPHORS)[number]) => ({
   extends: false as const,
   // Named here so Vite never finds them mid-run and reloads the page under a test.
-  optimizeDeps: { include: ["zustand", "@testing-library/react"] },
+  optimizeDeps: { include: ["zustand", "zustand/middleware", "@testing-library/react"] },
   plugins: [react(), storybookTest({ configDir: ".storybook", initialGlobals: { phosphor } })],
   test: {
     name: `stories:${phosphor}`,
