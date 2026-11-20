@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Icon } from "../../icons/icon";
+import { useReportSelection } from "../menubar/selection";
 import { useDesktop } from "./context";
 import { byName, FOLDER_TITLES, folderItems, type FolderId, type FolderItem } from "./folder-model";
 import { useFolderViews } from "./folder-view";
@@ -16,6 +17,7 @@ export function FolderWindow({ windowId, folder }: { windowId: string; folder: F
   const items = useMemo(() => folderItems(folder), [folder]);
   const shown = useMemo(() => (view === "name" ? byName(items) : items), [items, view]);
   const [selected, setSelected] = useState<string | null>(null);
+  useReportSelection(windowId, selected, () => setSelected(null));
   // Whether the click that began this click sequence is the one that selected the item (so its second click opens).
   const selectedByFirstClick = useRef(false);
   const refs = useRef(new Map<string, HTMLElement>());

@@ -1,0 +1,78 @@
+/* The menu bar's menus, from mockups/phosphor-desktop.html (.mt, .dd, .mi, .msep). */
+
+.menubar-bar {
+  display: flex;
+  align-items: stretch;
+}
+
+.menubar-trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
+  cursor: default;
+  font: inherit;
+  text-shadow: inherit;
+}
+.menubar-trigger[data-popup-open],
+.menubar-trigger[data-pressed] {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.menubar-trigger:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: -3px;
+}
+.menubar-trigger[data-popup-open]:focus-visible {
+  outline-color: var(--phosphor-bg);
+}
+
+.menubar-positioner {
+  z-index: 9000;
+}
+.menubar-popup {
+  box-sizing: border-box;
+  min-width: 180px;
+  padding: 3px 0;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  border: 1px solid var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+  outline: none;
+}
+
+.menubar-item {
+  position: relative;
+  box-sizing: border-box;
+  height: 21px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  white-space: nowrap;
+  cursor: default;
+  outline: none;
+}
+.menubar-item[data-highlighted]:not([data-disabled]) {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.menubar-item[data-disabled] {
+  color: var(--phosphor-dim);
+}
+/* The checked item's mark: a 6px square. */
+.menubar-mark {
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+}
+
+.menubar-separator {
+  border-top: 1px dashed var(--phosphor-dim);
+  margin: 3px 0;
+}

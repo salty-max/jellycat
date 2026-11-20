@@ -38,7 +38,7 @@ export default tseslint.config(
       // No formatter wraps this repo's lines, so a class list stays on one line.
       "better-tailwindcss/enforce-consistent-line-wrapping": "off",
       // An area's own CSS file defines classes the plugin can't see (it reads app.css alone): each area names its prefix here.
-      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^sh(-|$)", "^window(-|$)", "^alert(-|$)", "^app(-|$)", "^vw(-|$)"] }],
+      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^sh(-|$)", "^window(-|$)", "^alert(-|$)", "^app(-|$)", "^vw(-|$)", "^menubar(-|$)"] }],
     },
   },
   // Config files and scripts run on Node.

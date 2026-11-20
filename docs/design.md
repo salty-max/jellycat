@@ -43,6 +43,14 @@ rules changes this file in the same pull request.
 
 - A menu bar across the top: the cat menu (About, Control Panel), File, Edit, View, Special, Window, and the clock on the right.
   An item that can't act now is shown dim, not hidden.
+  - The cat menu: About (a dialog naming the OS, its version and the studio) and Control Panel. File: Open and Get Info (the selected
+    icon; Get Info for a project only) and Close Window (the front window). Edit is all dim. View: by Icon and by Name, the front folder
+    window's view checked, dim when no folder is in front. Special: the three phosphors, CRT effects (scanlines and glow on, or every effect off), Dither
+    pattern, Restart and Shut Down... Window: the open windows in the order they opened, the front one checked.
+  - A menu opens on a click and while one is open, hover moves between them; ↑ ↓ ← → move, Enter picks, Esc closes. A checked item has a
+    6px square at its left.
+  - Restart closes every window and shows the boot screen again; Shut Down... asks first (Cancel, Shut Down), then shows the shut-down
+    screen, and a click restarts.
 - The desktop is a 1px checker dither of the phosphor at 20% (a Control Panel setting turns it off). Icons stand in a column on
   the right; Trash at the bottom.
 - Windows: a 1px phosphor frame, a hard 3px shadow in the dim tone, a 22px title bar. The window in front has an inverse title bar.
@@ -64,7 +72,7 @@ rules changes this file in the same pull request.
     Focus is on the default button; Enter presses it. A click outside doesn't close it. It sits in the same place as a dialog window.
 - Selection: one click selects, a second click or a double click opens, Enter opens the focused icon.
 - Arrows move between icons and select. A click on the bare desktop deselects. The clock is drawn on the
-  client only (the page is prerendered); the menu bar's slot stays empty until the menus exist.
+  client only (the page is prerendered).
 - The boot screen is the cat at 4× (64px), the OS name as the page's `h1`, and "Starting up" in the dim tone; the shut-down screen is
   one button, "Click to restart".
 

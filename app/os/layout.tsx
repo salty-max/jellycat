@@ -3,7 +3,7 @@ import { useLocation, useMatches, useNavigate } from "react-router";
 import { readmePath } from "../core/fs";
 import { projectBySlug } from "../core/projects";
 import type { Block } from "../core/readme";
-import { BootScreen } from "./boot-screen";
+import { BootScreen, ShutDownScreen } from "./boot-screen";
 import { Crt } from "./crt";
 import type { DesktopProps } from "./desktop/desktop";
 import { isOsMatch } from "./os-route";
@@ -17,7 +17,7 @@ import { Shell } from "./shell/shell";
 export const DESKTOP_QUERY = "(min-width: 768px) and (min-height: 520px)";
 
 /** What the layout shows: before hydration both the shell and the boot screen are in the page and the CSS picks one. */
-type LayoutName = "unknown" | "shell" | "boot" | "desktop";
+type LayoutName = "unknown" | "shell" | "boot" | "desktop" | "off";
 
 type Media = "unknown" | "narrow" | "wide";
 type ProjectData = { blocks: readonly Block[] | null };
@@ -79,11 +79,21 @@ export function OsLayout() {
   const [desktop, setDesktop] = useState<{ Desktop: DesktopComponent } | "failed" | null>(null);
   const [booted, setBooted] = useState(false);
   const [bootedFor, setBootedFor] = useState(media);
-  // Leaving the wide layout ends its boot: the next crossing boots again.
+  // Special > Restart and Shut Down…: `off` shows the shut-down screen; `boots` counts the starts, so a restart boots again.
+  const [off, setOff] = useState(false);
+  const [boots, setBoots] = useState(0);
+  // Leaving the wide layout ends its boot (and a shut-down): the next crossing boots again.
   if (bootedFor !== media) {
     setBootedFor(media);
     setBooted(false);
+    setOff(false);
   }
+  const restart = useCallback(() => {
+    setOff(false);
+    setBooted(false);
+    setBoots((count) => count + 1);
+  }, []);
+  const shutDown = useCallback(() => setOff(true), []);
 
   useEffect(() => {
     if (media === "unknown") return;
@@ -101,10 +111,10 @@ export function OsLayout() {
       live = false;
       clearTimeout(timer);
     };
-  }, [media]);
+  }, [media, boots]);
 
   const layout: LayoutName =
-    media === "unknown" ? "unknown" : media === "narrow" || desktop === "failed" ? "shell" : desktop && booted ? "desktop" : "boot";
+    media === "unknown" ? "unknown" : media === "narrow" || desktop === "failed" ? "shell" : off ? "off" : desktop && booted ? "desktop" : "boot";
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -140,7 +150,10 @@ export function OsLayout() {
             <BootScreen />
           </div>
         )}
-        {layout === "desktop" && Desktop && <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} />}
+        {layout === "off" && <ShutDownScreen onRestart={restart} />}
+        {layout === "desktop" && Desktop && (
+          <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} onRestart={restart} onShutDown={shutDown} />
+        )}
       </Crt>
     </main>
   );

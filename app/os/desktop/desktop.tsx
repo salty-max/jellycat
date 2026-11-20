@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DesktopContext } from "./apps/context";
 import { ICON_TARGETS, ids, openFolder, openInfo, openTarget } from "./apps/launch";
+import { SystemMenus } from "./menubar/menus";
 import type { AppComponent } from "./registry";
 import { MenuBar } from "./surface/menu-bar";
 import { DesktopSurface } from "./surface/surface";
@@ -18,6 +19,10 @@ export type DesktopProps = {
   onOpenProject?: (slug: string) => void;
   /** The Info window the address names was closed: the host moves the address back to the desktop. */
   onCloseProject?: (slug: string) => void;
+  /** Special > Restart: the windows are closed; the host shows the boot screen again. */
+  onRestart?: () => void;
+  /** Special > Shut Down…, once confirmed: the windows are closed; the host shows the shut-down screen. */
+  onShutDown?: () => void;
 };
 
 /**
@@ -25,7 +30,10 @@ export type DesktopProps = {
  * sets it). A chunk of its own, which the layout loads on wide screens only. It starts with the Projects folder open, as the
  * mockup boots, and the address `/projects/<slug>` adds that project's Info window; back and forward open it and, back at the desktop, close it.
  */
-export function Desktop({ registry, slug, onOpenProject, onCloseProject }: DesktopProps) {
+export function Desktop({ registry, slug, onOpenProject, onCloseProject, onRestart, onShutDown }: DesktopProps) {
+  // The boxes the drop-downs and the dialogs are drawn in, held in state so they are set before either opens.
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+  const [deskBox, setDeskBox] = useState<HTMLElement | null>(null);
   // The host's callbacks and the project the desktop wants an Info window for, read through a ref so they don't restart the effects
   // below. `wanted` runs ahead of `slug`: the address changes once the route's loader is done, an open from the desktop at once.
   const host = useRef<{ slug?: string; onCloseProject?: DesktopProps["onCloseProject"]; wanted?: string }>({ slug, onCloseProject });
@@ -74,9 +82,11 @@ export function Desktop({ registry, slug, onOpenProject, onCloseProject }: Deskt
 
   return (
     <DesktopContext.Provider value={actions}>
-      <div className="flex size-full cursor-default flex-col text-lg leading-[1.1] select-none">
-        <MenuBar />
-        <div className="relative min-h-0 flex-1">
+      <div ref={setRoot} className="relative flex size-full cursor-default flex-col text-lg leading-[1.1] select-none">
+        <MenuBar>
+          <SystemMenus container={root} dialogContainer={deskBox} onRestart={onRestart} onShutDown={onShutDown} />
+        </MenuBar>
+        <div ref={setDeskBox} className="relative min-h-0 flex-1">
           <DesktopSurface onOpen={(id) => ICON_TARGETS[id] && openTarget(ICON_TARGETS[id], openProject)}>
             <WindowLayer registry={registry} />
           </DesktopSurface>

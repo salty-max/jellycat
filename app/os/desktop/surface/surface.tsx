@@ -1,5 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Icon } from "../../icons/icon";
+import { useReportSelection } from "../menubar/selection";
 import { DESKTOP_ICONS, type DesktopIcon } from "./desktop-icons";
 
 type SurfaceProps = {
@@ -13,6 +14,7 @@ type SurfaceProps = {
 /** The desktop under the windows: the dither, and the icon column on the right with Trash at the bottom. */
 export function DesktopSurface({ onOpen, icons = DESKTOP_ICONS, children }: SurfaceProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  useReportSelection("desktop", selected, () => setSelected(null));
   // Whether the click that began this click sequence is the one that selected the icon (so its second click opens).
   const selectedByFirstClick = useRef(false);
   const refs = useRef(new Map<string, HTMLDivElement>());

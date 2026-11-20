@@ -24,16 +24,16 @@ export function Clock({ now = systemNow }: { now?: () => Date }) {
 }
 
 /**
- * The menu bar's frame: the cat, a slot for the menus (C2a/D1b fill it), and the clock on the right.
- * The slot is empty until the menus exist.
+ * The menu bar's frame: the menus (the cat menu first: E1's `SystemMenus`) and the clock on the right. Given none, it shows the cat alone.
  */
 export function MenuBar({ children, now }: { children?: ReactNode; now?: () => Date }) {
   return (
     <div className="flex h-6 items-stretch border-b border-phosphor bg-screen px-2.5">
-      <div className="flex items-center px-[9px]">
-        <Icon name="cat" scale={1} />
-      </div>
-      {children}
+      {children ?? (
+        <div className="flex items-center px-[9px]">
+          <Icon name="cat" scale={1} />
+        </div>
+      )}
       <Clock now={now} />
     </div>
   );
