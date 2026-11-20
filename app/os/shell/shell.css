@@ -5,7 +5,10 @@
   height: 100%;
   overflow: hidden;
   font-size: 20px;
-  line-height: 1.15;
+  /* 24px lines (1.2 of the 20px text, so the pitch follows the font): names stacked one above the other (`ls`, browse's rows, the
+     card's buttons) are 24px targets, where 23px lines fail the minimum target size. Nothing inside sets its own size but the
+     hidden input. */
+  line-height: 1.2;
   font-variant-ligatures: none;
   cursor: text;
   text-align: left;
@@ -51,6 +54,17 @@
   text-align: inherit;
   white-space: inherit;
   cursor: pointer;
+}
+/* A name on a line of several (`ls`, the welcome's `Try:`) never breaks over two lines, as `ls` prints it: a name split across
+   lines covers its neighbours' space, and none of them is then a 24px target. A name alone on its line (a path `ls` echoes, a
+   `tree` entry, a contact link), the card's README path and a link in a README's text still wrap. */
+.sh-term .sh-lk {
+  white-space: nowrap;
+}
+.sh-term .sh-lk:only-child,
+.sh-kr .sh-lk,
+.sh-md .sh-lk {
+  white-space: inherit;
 }
 .sh-lk:hover {
   background: var(--phosphor-fg);
@@ -101,12 +115,10 @@
   margin-left: auto;
 }
 
-/* A card's rows are 24px lines, a pixel more than the shell's 23px: the buttons in them (Screenshots, README) inherit it and are
-   24px targets, where two on consecutive 23px lines fail the minimum target size (Lighthouse's target-size). */
+/* A card's rows: the label, then the value. */
 .sh-kr {
   display: grid;
   grid-template-columns: 13ch minmax(0, 1fr);
-  line-height: 24px;
 }
 .sh-kr > span {
   overflow-wrap: anywhere;

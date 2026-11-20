@@ -90,6 +90,8 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
 
   const input = useRef<HTMLInputElement>(null);
   const terminal = useRef<HTMLDivElement>(null);
+  /** Whether the focus was on a name in the log when the last line ran. */
+  const fromLog = useRef(false);
   const nextId = useRef(first.items.length);
   const keyHandler = useRef<KeyHandler | null>(null);
   const skip = useRef(false);
@@ -126,7 +128,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
   const rows = () => {
     const view = terminal.current;
     if (!view) return 0;
-    return Math.floor(view.clientHeight / (parseFloat(getComputedStyle(view).lineHeight) || 23));
+    return Math.floor(view.clientHeight / (parseFloat(getComputedStyle(view).lineHeight) || 24));
   };
 
   const logout = () => {
@@ -193,6 +195,8 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
   const runLine = useCallback(
     (line: string) => {
       if (busy) return skipLogin();
+      // Noted before a full-screen view can hide the log (see the layout effect below).
+      fromLog.current = !!terminal.current?.contains(document.activeElement);
       setFull(null);
       exec(line);
     },
@@ -259,6 +263,15 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
     if (autoFocus && matchMedia("(hover: hover) and (pointer: fine)").matches) input.current?.focus({ preventScroll: true });
   }, [autoFocus]);
 
+  // A full-screen view hides the log. Opened from a name in it by the keyboard (Enter on the card's README path), the name had the
+  // focus and is gone: the prompt's input takes it, so the view gets the keys typed. Where the focus was is noted when the line
+  // runs, since a browser may move it off a hidden name before this runs. A tap never focuses a name, so a phone's keyboard
+  // doesn't come up.
+  useLayoutEffect(() => {
+    if (full && fromLog.current) input.current?.focus({ preventScroll: true });
+    fromLog.current = false;
+  }, [full]);
+
   // The log follows its end; a session that opens with a command starts at that command's line.
   const started = useRef(false);
   const anchored = useRef(first.items.some((item) => item.initial));
@@ -303,7 +316,9 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
     if (key === "Enter") {
       event.preventDefault();
       exec(value);
-    } else if (key === "Tab") {
+    } else if (key === "Tab" && !event.shiftKey && value.trim()) {
+      // Tab completes the line being typed. On an empty line, and with Shift, it moves the focus as it does anywhere else, so the
+      // keyboard can always leave the prompt (for the names above it, or the Terminal window's boxes).
       event.preventDefault();
       const done = complete(value, session.cwd);
       if (done.options.length) print([text(prompt(session.cwd) + value), text(done.options.join("  "))]);

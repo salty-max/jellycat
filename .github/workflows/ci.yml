@@ -56,7 +56,7 @@ jobs:
           path: test-results
           retention-days: 14
 
-  # Lighthouse on the production build, held to lighthouserc.json.
+  # Lighthouse on the production build: the phone's preset held to lighthouserc.json, the desktop's to lighthouserc.desktop.json.
   lighthouse:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -69,13 +69,20 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+        id: build
       # (the runner's Chrome won't start in Lighthouse's sandbox; hundo's run passes the same flag on CI)
       - run: pnpm lighthouse --collect.settings.chromeFlags=--no-sandbox
+      # (a computer gets the desktop, so the same pages again on the desktop preset; it runs even when the phone's run failed, but
+      # not when the build did)
+      - run: pnpm lighthouse:desktop --collect.settings.chromeFlags=--no-sandbox
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: lighthouse
-          path: .cache/lighthouse
+          path: |
+            .cache/lighthouse
+            .cache/lighthouse-desktop
           # (.cache is a hidden folder, which upload-artifact leaves out unless told)
           include-hidden-files: true
           retention-days: 14

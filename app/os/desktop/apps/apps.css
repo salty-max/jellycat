@@ -31,6 +31,12 @@
 .app-doc {
   user-select: text;
 }
+/* Reached by the keyboard (Tab, or opened with Enter), the text shows a dashed ring inside it, as every focus ring is dashed; opened
+   by a click, it shows none, and the window's inverse title bar says where the focus is. */
+.app-doc:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: -4px;
+}
 .app-scroll::-webkit-scrollbar,
 .app-doc::-webkit-scrollbar {
   width: 14px;
@@ -140,12 +146,10 @@
   outline: 1px solid var(--phosphor-fg);
   outline-offset: 2px;
 }
+/* Focused, a button's ring is dashed; the default button's second outline turns dashed too (as the mockup draws it). */
 .app-button:focus-visible {
   outline: 1px dashed var(--phosphor-fg);
   outline-offset: 2px;
-}
-.app-button[data-default]:focus-visible {
-  outline-style: solid;
 }
 .app-actions {
   display: flex;

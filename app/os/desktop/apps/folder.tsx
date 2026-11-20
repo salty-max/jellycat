@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Icon } from "../../icons/icon";
 import { useReportSelection } from "../menubar/selection";
 import { useDesktop } from "./context";
@@ -22,6 +22,14 @@ export function FolderWindow({ windowId, folder }: { windowId: string; folder: F
   const selectedByFirstClick = useRef(false);
   const refs = useRef(new Map<string, HTMLElement>());
   const tabStop = selected ?? shown[0]?.key;
+  // The focus goes to the items when the folder opens (the window leaves it there), so the arrows and Enter work at once; only while
+  // its own window has it (a deep link opens Projects and an Info window together, and the Info window keeps it).
+  useEffect(() => {
+    const item = tabStop ? refs.current.get(tabStop) : undefined;
+    if (item?.closest('[role="dialog"]')?.contains(document.activeElement)) item.focus({ preventScroll: true });
+    // On open only: later, the focus is the user's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const open = (item: FolderItem) => openTarget(item.target, openProject);
   const select = (key: string, focus = false) => {

@@ -55,7 +55,9 @@ rules changes this file in the same pull request.
   the right; Trash at the bottom.
 - Windows: a 1px phosphor frame, a hard 3px shadow in the dim tone, a 22px title bar. The window in front has an inverse title bar.
   Three boxes on the right: collapse to the title bar, zoom, close. In front, a box's outline melts into the inverse bar, so each
-  shows as a 14px dark square, as the mockup draws it. A grip in the bottom-right corner resizes.
+  shows as a 14px dark square, as the mockup draws it. The boxes stand 0.5rem apart, where the mockup has 3px: their centres are
+  1.5rem (24px) apart, so each is a 24px target by its spacing (WCAG's minimum target size, Lighthouse's `target-size`). A grip in
+  the bottom-right corner resizes.
   - A new window cascades 26px right and 24px down from the one before, clear of the icon column and the bottom edge; a dialog
     stands centred, a little above the middle. A second open of a window brings it to the front.
   - A drag keeps 60px of the window in view across and its title bar on the desktop. The minimum size is 220×120.
@@ -64,9 +66,10 @@ rules changes this file in the same pull request.
   - A window is a non-modal dialog (`role="dialog"`, `aria-modal="false"`). Focus goes into it when it opens, unless its app has
     already put it inside, and back to what had it before when it closes. Esc is the app's to handle.
 - Folder windows have an info line (item count, view) and show their items by icon, in the order the data lists them, or by name, a
-  list sorted by name with its kind (View menu). A folder holding more
-  than it shows scrolls, with the 1-bit scroll bar (see Readme).
-- Dialogs have a 3px double border and no title bar. The default button has a second outline.
+  list sorted by name with its kind (View menu). A folder holding more than it shows scrolls, with the 1-bit scroll bar (see
+  Readme). When a folder opens, the focus goes to its first item, so the arrows and Enter work at once.
+- Dialogs have a 3px double border and no title bar. The default button has a second outline; focused, it turns dashed, as every
+  focus ring is.
   - An alert (Base UI's AlertDialog) is modal, at least 320×140: the icon beside the message, centred in the space above the
     buttons, the first line naming it, buttons at the bottom right.
     Focus is on the default button; Enter presses it. A click outside doesn't close it. It sits in the same place as a dialog window.
@@ -78,13 +81,15 @@ rules changes this file in the same pull request.
 
 ## Shell
 
-- Text 20px on 23px lines; the `open` card's rows on 24px lines, so its buttons (Screenshots, README), one above the other, are
-  24px targets.
+- Text 20px on 24px lines (a line height of 1.2, so the pitch follows the font), where the mockup has 23px: names one above the other
+  (`ls`, `tree`, browse's rows, the `open` card's buttons) are then 24px targets. A name on a line of several (`ls`, the welcome's
+  `Try:`) never breaks over two lines.
 - Prompt `guest@jellycat:<path>$`, a block cursor (hollow when the shell isn't focused), a status bar in inverse video:
   `[jellycat] 0:jsh*` on the left, the path and the clock on the right.
 - The input is a real, labelled `<input>`, 1px and clear, with a font size of 16px so iOS doesn't zoom in; the prompt's own text is
-  what shows. It is never focused on mount on a phone; a tap on the screen focuses it. Tab completes, ↑ ↓ walk the history, Ctrl-C
-  abandons the line (`^C`), Ctrl-L clears the log and Ctrl-U the line.
+  what shows. It is never focused on mount on a phone; a tap on the screen focuses it. Tab completes a line being typed; on an
+  empty line, and with Shift, it moves the focus as anywhere else, so the keyboard can always leave the prompt. ↑ ↓ walk the
+  history, Ctrl-C abandons the line (`^C`), Ctrl-L clears the log and Ctrl-U the line.
 - Every name in the output is clickable and runs the command it stands for, so the shell works without typing. A project's name
   (in `ls` and `tree`) opens it; a README's name pages it. A command is a `<button>`, a project's name an `<a href="/projects/<slug>">`;
   pressing one keeps the focus where it was. An address (https, the e-mail) and a link in a README's text are underlined; a name
@@ -124,8 +129,9 @@ rules changes this file in the same pull request.
   does elsewhere.
 - Desktop: the Info window, sized to its content, ends with a default button, Open Readme (Enter works too). It opens
   `<Name> Readme`, a text window that scrolls. Its scroll bar is 1-bit: a track dithered in the dim tone, a hollow thumb, a box at
-  the bottom for the grip. Esc closes it. The window takes the focus, shown by its inverse title bar, so the text has no focus
-  ring of its own.
+  the bottom for the grip. Esc closes it. The window takes the focus, shown by its inverse title bar; opened by a click, the text
+  has no focus ring of its own. Reached by the keyboard (Tab, or opened with Enter), it shows a 1px dashed ring inside it, where
+  the mockup has none: the window's own boxes are tab stops too, and without it the step from them to the text showed nothing.
 - Shell: `cat` prints it. `less` (or `more`) pages it full screen, like `browse`: the path in the top border (cut with `…` when
   long), the position on the right (`top`, a percentage, `end`), the key bar `j k` scroll, `Space b` page, `q` quit; the arrows,
   Page Up/Down, `g` and `G` work too. `q` goes back to where it was opened, the prompt or `browse`.
@@ -135,6 +141,15 @@ rules changes this file in the same pull request.
 - `/projects/<slug>` prerenders the session with `open <slug>` and `cat ~/projects/<folder>/<slug>/README` already run, each at
   its own prompt, scrolled to the `open` line. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the
   README's headings its `h2` and `h3`.
+
+## Keyboard and motion
+
+- Everything works with no mouse: each app opens and closes from the keyboard, on the desktop and in the shell (`e2e/keyboard.spec.ts`).
+- Every tab stop shows its focus, on keyboard focus only (`:focus-visible`): a 1px dashed ring in the phosphor on the desktop,
+  dotted in the shell. The shell's input is the exception: its cursor shows any focus, a tap's too, solid when focused and hollow
+  when not (`e2e/focus.spec.ts`).
+- Under `prefers-reduced-motion` the boot screen doesn't wait, the typed login doesn't play and the flicker never runs
+  (`e2e/motion.spec.ts`).
 
 ## Words
 

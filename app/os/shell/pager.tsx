@@ -12,7 +12,7 @@ function position(scroller: HTMLElement): string {
   return `${Math.round((scroller.scrollTop / max) * 100)}%`;
 }
 
-const lineHeight = (element: HTMLElement) => parseFloat(getComputedStyle(element).lineHeight) || 23;
+const lineHeight = (element: HTMLElement) => parseFloat(getComputedStyle(element).lineHeight) || 24;
 
 /** `less` and `more`: a file full screen, the path in the top border, the position on the right and the key bar below. */
 export function Pager({ path, source, api }: { path: string; source: PageSource; api: FullScreenApi }) {

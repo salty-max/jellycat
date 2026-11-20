@@ -62,9 +62,11 @@
   text-overflow: ellipsis;
 }
 
+/* The boxes stand 0.5rem apart, so their centres are 1.5rem (24px) apart: each is a 24px target by its spacing (WCAG's target
+   size), where the mockup's 3px gaps left 19px. */
 .window-boxes {
   display: flex;
-  gap: 3px;
+  gap: 0.5rem;
 }
 .window-boxes button,
 .alert-button {
@@ -187,6 +189,7 @@
   outline: 1px solid var(--phosphor-fg);
   outline-offset: 2px;
 }
+/* Focused, the default button's second outline turns dashed, as every focus ring is (and as the mockup draws it). */
 .alert-button[data-default]:focus-visible {
-  outline-style: solid;
+  outline-style: dashed;
 }

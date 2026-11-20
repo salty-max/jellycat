@@ -21,6 +21,8 @@ export function KeyBar({ keys, onKey }: { keys: readonly KeyBarEntry[]; onKey: (
           onClick={() => onKey(entry.send)}
         >
           <b>{entry.key}</b>
+          {/* The gap on screen is the cap's margin; this space is for the button's name ("j k move", not "j kmove"). */}
+          <span className="sr-only"> </span>
           {entry.label}
         </button>
       ))}

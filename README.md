@@ -17,7 +17,9 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
   anything else, naming the file and line.
 - `public/`: files served as they are: the favicon, and `screenshots/<slug>/`, each project's pictures as AVIF and WebP, which
   `projects.ts` lists with their alt text and size.
-- `e2e/`: Playwright tests against the production build.
+- `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
+  screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
+  focus seen on screen (`focus.spec.ts`), and reduced motion (`motion.spec.ts`).
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
 - `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side), `csp.ts` (the build step that
@@ -54,7 +56,9 @@ with axe failing the run on a violation. The others:
   viewport in the system Chrome. It serves on 127.0.0.1 and only tests that server, never whatever else answers on port 4173
   (another worktree's run, a `pnpm preview`, another project's `vite preview`): when it can't have the port, it fails once the
   build is done.
-- `pnpm lighthouse`: Lighthouse CI on `build/client` (run `pnpm build` first), held to `lighthouserc.json`.
+- `pnpm lighthouse`: Lighthouse CI on `build/client` (run `pnpm build` first) with the phone's preset, held to `lighthouserc.json`;
+  `pnpm lighthouse:desktop` the same pages on Lighthouse's desktop preset, held to `lighthouserc.desktop.json`. Both want 100 in
+  accessibility, best practices and SEO, and 0.9 in performance; CI runs both.
 - `pnpm storybook`: the component stories on port 6006.
 - `pnpm preview`: serves the production build the way Vercel does (`scripts/serve.mjs`): a file at its path, a folder's
   `index.html`, and `404.html` with a 404 status for anything else.

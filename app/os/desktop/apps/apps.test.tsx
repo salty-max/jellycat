@@ -73,6 +73,15 @@ describe("folder windows", () => {
     expect(within(projects).getAllByRole("option").map((option) => option.textContent)).toEqual(["AddonsFolder", "EnginesFolder", "ToolsFolder", "WebFolder"]);
   });
 
+  it("takes the focus to its first item when it opens, so the arrows and Enter work at once", async () => {
+    render(<Desktop />);
+    const projects = await win("Projects");
+    await waitFor(() => expect(within(projects).getByRole("option", { name: "Web" })).toHaveFocus());
+    await userEvent.keyboard("{Enter}");
+    const web = await win("Web");
+    await waitFor(() => expect(within(web).getAllByRole("option")[0]).toHaveFocus());
+  });
+
   it("moves between items with the arrows and opens with Enter", async () => {
     render(<Desktop />);
     const projects = await win("Projects");

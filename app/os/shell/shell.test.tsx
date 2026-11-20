@@ -81,6 +81,18 @@ test("Tab completes a command, and lists names that share no more letters", asyn
   expect(within(log).getByText(/^cd\s+cat\s+crt\s+clear$/)).toBeInTheDocument();
 });
 
+test("Tab on an empty line, and Shift+Tab, move the focus: the keyboard can always leave the prompt", async () => {
+  const { user, input } = setup();
+  await user.click(input);
+  await user.keyboard("{Tab}");
+  expect(input).not.toHaveFocus();
+  await user.click(input);
+  await user.type(input, "hel");
+  await user.keyboard("{Shift>}{Tab}{/Shift}");
+  expect(input).not.toHaveFocus();
+  expect(input).toHaveValue("hel");
+});
+
 test("↑ and ↓ walk the history", async () => {
   const { user, input, type } = setup();
   await type("pwd");
@@ -147,6 +159,17 @@ test("cat prints the blocks the host gave it, without loading the chunk", async 
   await type("cat ~/projects/web/hundo/README");
   expect(within(log).getByRole("heading", { name: "Given" })).toBeInTheDocument();
   expect(within(log).getByText("code")).toBeInTheDocument();
+});
+
+test("a view opened by Enter on a name in the log gives the focus to the prompt's input, so its keys reach it", async () => {
+  const { user, type, input } = setup();
+  await type("open hundo");
+  screen.getByRole("button", { name: "~/projects/web/hundo/README" }).focus();
+  await settle(() => fireEvent.click(screen.getByRole("button", { name: "~/projects/web/hundo/README" })));
+  expect(await screen.findByRole("region", { name: "~/projects/web/hundo/README" })).toBeInTheDocument();
+  expect(input).toHaveFocus();
+  await user.keyboard("q");
+  expect(screen.queryByRole("region", { name: "~/projects/web/hundo/README" })).toBeNull();
 });
 
 test("less pages a README full screen: the path, the position, the key bar, and q goes back", async () => {
