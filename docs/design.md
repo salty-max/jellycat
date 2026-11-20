@@ -122,7 +122,7 @@ rules changes this file in the same pull request.
   Page Up/Down, `g` and `G` work too. `q` goes back to where it was opened, the prompt or `browse`.
 - The `open` card's README row shows the path and runs `less`. In `browse`, a project's directory shows its card and its README
   the text; Enter on the README pages it.
-- In the desktop's Terminal, `less` opens the README's window; any other file is printed, as `more` prints a file that fits.
+- In the desktop's Terminal, `less` opens the README's window; any other file is printed, as `more` prints a file that fits. From `browse` in the Terminal a README or a file pages inside the window, so `q` comes back to `browse`.
 - `/projects/<slug>` prerenders the session with `open <slug>` and `cat ~/projects/<folder>/<slug>/README` already run, each at
   its own prompt, scrolled to the `open` line. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the
   README's headings its `h2` and `h3`.

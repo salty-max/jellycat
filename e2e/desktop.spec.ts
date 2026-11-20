@@ -85,6 +85,26 @@ test("the Terminal runs ls, and less opens a README's window", async ({ page }) 
   await expect(terminal.getByText("opened Hundo Readme")).toBeVisible();
 });
 
+test("browse in the Terminal shows its two panes in the window, and q comes back to the prompt", async ({ page }) => {
+  await boot(page);
+  await page.getByRole("option", { name: "Terminal" }).dblclick();
+  const terminal = window(page, "Terminal");
+  const input = terminal.getByLabel("Terminal input");
+  await input.fill("browse");
+  await input.press("Enter");
+  const directory = terminal.getByRole("group", { name: "Directory" });
+  await expect(directory.getByRole("button", { name: "projects/" })).toBeVisible();
+  await expect(terminal.getByLabel("Selection")).toBeVisible();
+  // Enter on a file pages it inside the window; q there comes back to browse.
+  await directory.getByRole("button", { name: "contact.txt" }).click();
+  await input.press("Enter");
+  await expect(terminal.getByRole("region", { name: "~/contact.txt" })).toBeVisible();
+  await input.press("q");
+  await expect(directory).toBeVisible();
+  await input.press("q");
+  await expect(terminal.getByRole("log", { name: "Terminal output" })).toBeVisible();
+});
+
 test("the studio's Readme carries the address as a link", async ({ page }) => {
   await boot(page);
   await page.getByRole("option", { name: "Readme" }).dblclick();

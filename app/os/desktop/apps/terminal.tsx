@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { projectBySlug } from "../../../core/projects";
 import type { Line } from "../../../core/shell";
+import { browseView } from "../../shell/browse/slot";
 import { Shell, type ShellProps } from "../../shell/shell";
 import { useDesktop } from "./context";
 import { openProjectReadme } from "./launch";
@@ -8,7 +9,7 @@ import "./apps.css";
 
 /**
  * The Terminal: the shell in a window. `open` opens the project's Info window, and `less` (or `more`) on a project's README opens its
- * Readme window; any other file is printed, as `more` prints a file that fits.
+ * Readme window; any other file is printed, as `more` prints a file that fits. `browse` is full screen inside the window.
  */
 export function TerminalApp() {
   const { openProject } = useDesktop();
@@ -21,7 +22,7 @@ export function TerminalApp() {
   }, []);
   return (
     <div className="app-pane">
-      <Shell onOpenProject={openProject} onPage={onPage} autoFocus />
+      <Shell onOpenProject={openProject} onPage={onPage} fullScreen={browseView} autoFocus />
     </div>
   );
 }
