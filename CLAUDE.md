@@ -7,8 +7,8 @@ and the scripts, `docs/plan.md` the decisions and the phases, `docs/design.md` t
 
 - **The check**: `pnpm check` (lint, typecheck, unit tests, build), through the harness: `bun harness/q.ts check -- bun run check`.
   A change to what the browser shows also runs `pnpm e2e`.
-- **Words on screen come from the projects' READMEs.** No taglines, jokes, invented numbers or statuses; an unknown fact is `-`;
-  a placeholder says so. System messages stay plain.
+- **Words on screen come from the project's own repository: its README, or its code where the README is stale.** No taglines,
+  jokes, invented numbers or statuses; an unknown fact is `-`; a placeholder says so. System messages stay plain.
 - **Our own OS.** No Fallout, Vault-Tec, RobCo or Pip-Boy names or art; no Apple or Microsoft logos, fonts, icons or sounds.
 - **Text stays in the DOM.** The CRT layer is an overlay that takes no clicks and is hidden from screen readers; nothing on screen is
   drawn into a canvas or warped.
