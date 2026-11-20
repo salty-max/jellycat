@@ -232,13 +232,21 @@ comment), `app/core/studio.ts` (one line), README Layout, this section and its k
 - `app/core/shell.ts`: a pure command runner. It takes a line and the session (cwd, history) and returns the output plus the
   new session.
   - Commands: `help`, `ls`, `cd`, `cat`, `less`, `more`, `open`, `tree`, `browse`, `theme`, `crt`, `clear`, `history`, `pwd`,
-    `whoami`, `date`, `uname`, `echo`, `logout`, `exit`, and `&&`.
+    `whoami`, `date`, `uname`, `echo`, `logout`, `exit`, `view <project>` and `&&`.
   - Output is typed segments: text, dim, command button, project link, external link, project card, and a README by its slug,
     which the renderer fills (C1), so the runner stays pure and synchronous.
   - The `open` card ends with a README row: its path, which runs `less`. A README's name in `ls` and `tree` pages it.
-  - Effects are returned, never performed: open project, page a file (`less` and `more`; the host pages it, and `more` prints a
-    file that fits, as `docs/design.md` Readme says), set theme, set CRT, browse, clear, logout.
-- Tab completion and history as pure functions.
+  - `view <project>` runs the viewer (`docs/design.md` Viewer): the "view project" effect, which E2 plugs into C1's full-screen
+    slot; a project with no screenshots prints `view: <slug>: no screenshots`.
+  - Effects are returned, never performed: open project, view project, page a file (`less` and `more`; the host pages it, and
+    `more` prints a file that fits, as `docs/design.md` Readme says), set theme, set CRT, browse, clear, logout. `page`,
+    `view`, `browse` and `logout` end the line, so what follows a `&&` there isn't run; `clear` empties the log before the
+    line's output, the echo included. The host echoes `prompt(cwd)` and the line itself.
+  - `run(line, session, { now })` takes the clock, so `date` stays pure. `banner()`, `lastLogin(now)` and `welcome()` give C1 the login's lines.
+  - `ls` and `tree` sort directories first, then by name, as the mockup does (`contact.txt` before `README`); Tab's path
+    options sort the same way, where the mockup used insertion order.
+- Tab completion and history as pure functions: `complete(line, cwd)` returns the new line and, when several names share no
+  more letters, the names to list; `historyStep(history, index, "up" | "down")`.
 - Messages worded as in the mockup. `uname` and the welcome take the OS name from `app/core/site.ts`.
 - `logout` and `exit` both return the logout effect.
 
