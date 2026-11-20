@@ -1,23 +1,15 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { vi } from "vitest";
 import { loadReadme, parseReadme } from "../../core/readme";
 import { useSettings } from "../../core/settings";
+import { settle } from "../../test-act";
 import type { FullScreenSlot } from "./full-screen";
 import { Shell, type ShellProps } from "./shell";
 
 // The first load of a README chunk transforms it in jsdom: do it once, before the tests that read one.
 beforeAll(() => loadReadme("hundo"));
-
-// React only retries a component that suspended (`use` on a README's chunk) outside act, so the tests that wait for one leave act's
-// environment on, and put it back after.
-const outsideAct = () => {
-  (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = false;
-};
-afterEach(() => {
-  (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-});
 
 const prompt = (path = "~") => `guest@jellycat:${path}$ `;
 
@@ -30,7 +22,13 @@ function setup(props: ShellProps = {}) {
     await user.click(input);
     await user.type(input, `${line}{Enter}`);
   };
-  return { user, input, log, type, ...view };
+  // A line that reads a README suspends on its chunk the first time (see settle): Enter goes through an awaited act.
+  const typeSettled = async (line: string) => {
+    await user.click(input);
+    await user.type(input, line);
+    await settle(() => fireEvent.keyDown(input, { key: "Enter" }));
+  };
+  return { user, input, log, type, typeSettled, ...view };
 }
 
 test("first paint is the welcome and the prompt, with a labelled input that has no focus", () => {
@@ -136,11 +134,8 @@ test("open prints the card and tells the host; a project's link runs open", asyn
 });
 
 test("cat prints a README as real headings, lists and code", async () => {
-  outsideAct();
-  const { user, input, log, type } = setup();
-  await type("cat ~/projects/web/hundo/README");
-  // jsdom doesn't retry the suspended README on its own (a browser does): a keystroke renders the log again.
-  await user.type(input, "x");
+  const { log, typeSettled } = setup();
+  await typeSettled("cat ~/projects/web/hundo/README");
   expect(await within(log).findByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument();
   expect(within(log).getAllByRole("heading", { level: 3 }).length).toBeGreaterThan(0);
   expect(within(log).getAllByRole("list").length).toBeGreaterThan(0);
@@ -155,9 +150,8 @@ test("cat prints the blocks the host gave it, without loading the chunk", async 
 });
 
 test("less pages a README full screen: the path, the position, the key bar, and q goes back", async () => {
-  outsideAct();
-  const { user, input, type } = setup();
-  await type("less ~/projects/web/hundo/README");
+  const { user, input, typeSettled } = setup();
+  await typeSettled("less ~/projects/web/hundo/README");
   expect(await screen.findByRole("heading", { name: "Hundo" })).toBeInTheDocument();
   expect(screen.getByRole("region", { name: "~/projects/web/hundo/README" })).toBeInTheDocument();
   expect(screen.getByText(/^\[jellycat\] 0:less\*$/)).toBeInTheDocument();
@@ -276,7 +270,6 @@ test("the history of the initial command is the session's", async () => {
 });
 
 test("a host's onPage takes a paged file and prints its lines; null leaves it to the pager", async () => {
-  outsideAct();
   const taken = setup({ onPage: () => [[{ kind: "text", text: "opened by the host" }]] });
   await taken.type("less ~/README");
   expect(await screen.findByText("opened by the host")).toBeInTheDocument();

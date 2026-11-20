@@ -46,6 +46,8 @@ describe("the menu bar", () => {
     await user.click(await screen.findByRole("menuitem", { name: "About Jelly-OS" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Jelly-OS 1.0" }, { timeout: 3000 });
     expect(dialog).toHaveTextContent("Jellycat Studio");
+    // The dialog puts the focus on its default button after it opens: Enter before that presses nothing.
+    await waitFor(() => expect(screen.getByRole("button", { name: "OK" })).toHaveFocus());
     await user.keyboard("{Enter}");
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   });
@@ -173,6 +175,7 @@ describe("the menu bar", () => {
     await user.click(screen.getByRole("menuitem", { name: "Special" }));
     await user.click(await screen.findByRole("menuitem", { name: "Shut Down..." }));
     await screen.findByRole("alertdialog");
+    await waitFor(() => expect(screen.getByRole("button", { name: "Shut Down" })).toHaveFocus());
     await user.keyboard("{Enter}");
     expect(onShutDown).toHaveBeenCalledOnce();
     expect(useWindows.getState().windows).toEqual({});

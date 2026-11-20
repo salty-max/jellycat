@@ -1,7 +1,8 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, useSettings } from "../../../core/settings";
+import { settle } from "../../../test-act";
 import { Desktop } from "../desktop";
 import { useWindows } from "../windows/store";
 import { useFolderViews } from "./folder-view";
@@ -89,7 +90,8 @@ describe("the Info window", () => {
     const info = await win("Hundo Info");
     for (const label of ["Stack", "Link", "Source", "Screenshots"]) expect(within(info).getByText(label)).toBeInTheDocument();
     expect(within(info).getByRole("link", { name: "hundo.quest" })).toHaveAttribute("target", "_blank");
-    await userEvent.click(within(info).getByRole("button", { name: "Open Readme" }));
+    // The README's first read suspends on its chunk (see settle).
+    await settle(() => fireEvent.click(within(info).getByRole("button", { name: "Open Readme" })));
     const readme = await win("Hundo Readme");
     expect(await within(readme).findByRole("heading", { name: "Hundo" })).toBeInTheDocument();
   });
@@ -120,7 +122,8 @@ describe("the Info window", () => {
 describe("the README window", () => {
   it("scrolls, takes the focus, and closes with Esc", async () => {
     render(<Desktop slug="hundo" />);
-    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" }));
+    const open = within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" });
+    await settle(() => fireEvent.click(open));
     const readme = await win("Hundo Readme");
     await within(readme).findByRole("heading", { name: "Hundo" });
     await waitFor(() => expect(readme.querySelector(".app-doc")).toHaveFocus());
@@ -130,7 +133,8 @@ describe("the README window", () => {
 
   it("opens a linked project's Info window", async () => {
     render(<Desktop slug="hundo" />);
-    await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" }));
+    const open = within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" });
+    await settle(() => fireEvent.click(open));
     const readme = await win("Hundo Readme");
     await within(readme).findByRole("heading", { name: "Hundo" });
     await userEvent.click(within(readme).getByRole("link", { name: "harness" }));
