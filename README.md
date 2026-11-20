@@ -67,6 +67,10 @@ fallback). Vercel serves `404.html` with a 404 status at any address with no fil
 error route answers in plain text; the site has no `/api`), so a typo is a real 404 and not the app's shell. `build/server` is
 only used during the build.
 
+The same `buildEnd` writes `sitemap.xml` (the home page and a page for each project in `app/core/projects.ts`, on `SITE_URL`) and
+`robots.txt` (everything allowed, the sitemap named). `/projects/:slug` is prerendered for each project; its loader awaits the
+project's README at build, and a slug with no project throws a 404 that the root `ErrorBoundary` draws as the not-found screen.
+
 Each page carries its Content-Security-Policy in a `<meta http-equiv>`, written by `scripts/csp.ts` as the last step of
 `buildEnd`, so `404.html` gets one too. React Router and React start each page with inline scripts (the hydration data, the module
 imports, scroll restoration, React's streaming code), a different set on each page, and a static site has no server to add a
