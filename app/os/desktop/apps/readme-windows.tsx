@@ -64,8 +64,3 @@ export function ProjectReadme({ windowId, slug }: { windowId: string; slug: stri
     </div>
   );
 }
-
-/** Stands where the screenshot viewer goes until it is built (E2 replaces this app in the registry). */
-export function ViewerPlaceholder() {
-  return <p className="m-0">The screenshot viewer is a placeholder until it is built.</p>;
-}

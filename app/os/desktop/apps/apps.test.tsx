@@ -108,11 +108,12 @@ describe("the Info window", () => {
     expect(within(info).getByText("Link").nextElementSibling).toHaveTextContent("-");
   });
 
-  it("leaves the screenshot viewer to its own task: View opens a window that says it is a placeholder", async () => {
+  it("opens the screenshot viewer from View", async () => {
     render(<Desktop slug="hundo" />);
     const info = await win("Hundo Info");
     await userEvent.click(within(info).getByRole("button", { name: "View" }));
-    expect(await screen.findByText(/placeholder/)).toBeInTheDocument();
+    const viewer = await win("Hundo Screenshots");
+    expect(within(viewer).getByText("1 of 3")).toBeInTheDocument();
   });
 });
 
@@ -192,6 +193,15 @@ describe("the Terminal", () => {
     await type(terminal, "less ~/projects/web/hundo/README");
     expect(await win("Hundo Readme")).toBeInTheDocument();
     expect(within(terminal).getByText("opened Hundo Readme")).toBeInTheDocument();
+  });
+
+  it("opens a project's Screenshots window with view", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    const terminal = await win("Terminal");
+    await type(terminal, "view hundo");
+    expect(await win("Hundo Screenshots")).toBeInTheDocument();
+    expect(within(terminal).getByText("opened Hundo Screenshots")).toBeInTheDocument();
   });
 
   it("prints any other file", async () => {

@@ -102,6 +102,7 @@ rules changes this file in the same pull request.
   kept to two lines.
 - Previous and next are buttons with pixel arrows on the desktop and `h`/`l` in the shell's key bar; ← and → work in both. At the
   first or last picture the control is dim. Esc closes the window; `q` or Esc returns the shell to the prompt as it was.
+- In the desktop's Terminal, `view <project>` opens the viewer's window and prints `opened <Name> Screenshots`; it is not full screen there.
 - The Info window and the `open` card list Stack, Link, Source and Screenshots, and the card a README row after them. An unknown
   Link or Source is `-`; a project with no pictures has no Screenshots row.
 

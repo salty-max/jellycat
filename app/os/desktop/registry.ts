@@ -2,8 +2,9 @@ import type { ComponentType } from "react";
 import { ControlPanel } from "./apps/control-panel";
 import { FolderWindow } from "./apps/folder";
 import { ProjectInfo } from "./apps/project-info";
-import { ProjectReadme, StudioReadme, ViewerPlaceholder } from "./apps/readme-windows";
+import { ProjectReadme, StudioReadme } from "./apps/readme-windows";
 import { TerminalApp } from "./apps/terminal";
+import { ViewerWindow } from "../viewer/viewer-window";
 
 /** What every app in a window is given: its window's id, then the `props` it was opened with (typed by the app itself). */
 export type AppProps = { windowId: string };
@@ -23,5 +24,5 @@ export const REGISTRY: Record<string, AppComponent> = {
   readme: StudioReadme,
   panel: ControlPanel,
   terminal: TerminalApp,
-  viewer: ViewerPlaceholder, // E2 replaces this line with the screenshot viewer.
+  viewer: ViewerWindow,
 };

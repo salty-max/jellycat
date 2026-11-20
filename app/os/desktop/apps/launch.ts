@@ -26,10 +26,10 @@ export function openProjectReadme(slug: string) {
   if (project) open({ id: ids.readme(slug), app: "project-readme", title: `${project.name} Readme`, size: { w: 460, h: 380 }, props: { slug } });
 }
 
-/** The screenshot viewer is E2's; until it lands this opens the window that says so. */
+/** A project's screenshot viewer window. */
 export function openViewer(slug: string) {
   const project = projectBySlug(slug);
-  if (project) open({ id: ids.viewer(slug), app: "viewer", title: `${project.name} Screenshots`, size: { w: 340, h: 140 }, props: { slug } });
+  if (project) open({ id: ids.viewer(slug), app: "viewer", title: `${project.name} Screenshots`, size: { w: 470, h: 384 }, props: { slug } });
 }
 
 export const openStudioReadme = () => open({ app: "readme", title: "Readme", size: { w: 340, h: 210 } });

@@ -4,12 +4,12 @@ import type { Line } from "../../../core/shell";
 import { browseView } from "../../shell/browse/slot";
 import { Shell, type ShellProps } from "../../shell/shell";
 import { useDesktop } from "./context";
-import { openProjectReadme } from "./launch";
+import { openProjectReadme, openViewer } from "./launch";
 import "./apps.css";
 
 /**
  * The Terminal: the shell in a window. `open` opens the project's Info window, and `less` (or `more`) on a project's README opens its
- * Readme window; any other file is printed, as `more` prints a file that fits. `browse` is full screen inside the window.
+ * Readme window; any other file is printed, as `more` prints a file that fits. `view` on a project opens its Screenshots window. `browse` is full screen inside the window.
  */
 export function TerminalApp() {
   const { openProject } = useDesktop();
@@ -20,9 +20,15 @@ export function TerminalApp() {
     openProjectReadme(source.slug);
     return [[{ kind: "text", text: `opened ${project.name} Readme` }]];
   }, []);
+  const onView = useCallback((slug: string): readonly Line[] | null => {
+    const project = projectBySlug(slug);
+    if (!project) return null;
+    openViewer(slug);
+    return [[{ kind: "text", text: `opened ${project.name} Screenshots` }]];
+  }, []);
   return (
     <div className="app-pane">
-      <Shell onOpenProject={openProject} onPage={onPage} fullScreen={browseView} autoFocus />
+      <Shell onOpenProject={openProject} onPage={onPage} onView={onView} fullScreen={browseView} autoFocus />
     </div>
   );
 }

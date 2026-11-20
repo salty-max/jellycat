@@ -26,6 +26,11 @@ export interface ShellProps {
    * here and returns the lines to print in its place; null leaves it to the shell's pager.
    */
   onPage?: (page: { command: "less" | "more"; path: string; source: PageSource }) => readonly Line[] | null;
+  /**
+   * `view` ran on a project with pictures. The host that shows them its own way (the desktop's Terminal opens the viewer's window)
+   * takes it here and returns the lines to print in its place; null leaves it to the full-screen view.
+   */
+  onView?: (slug: string) => readonly Line[] | null;
   /** The host's full-screen views, `browse` and the viewer. Without one the shell shows a placeholder saying so. */
   fullScreen?: FullScreenSlot;
   /** Focus the prompt once mounted, on a screen with a pointer and a keyboard; never on a phone, where it would raise the keyboard. */
@@ -68,7 +73,7 @@ const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(pre
  * The terminal over `app/core/shell.ts`: it fills its box, full screen on a phone or inside the desktop's Terminal window. The
  * runner is pure; this component prints what it returns, performs its effects and draws the prompt, the pager and the status bar.
  */
-export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScreen, autoFocus = false }: ShellProps) {
+export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, fullScreen, autoFocus = false }: ShellProps) {
   const [first] = useState(() => firstPaint(initialCommand));
   const [items, setItems] = useState(first.items);
   const [session, setSession] = useState(first.session);
@@ -144,8 +149,11 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
         return set("glow", effect.on);
       case "openProject":
         return onOpenProject?.(effect.slug);
-      case "viewProject":
+      case "viewProject": {
+        const taken = onView?.(effect.slug);
+        if (taken) return print(taken);
         return setFull({ view: { kind: "view", slug: effect.slug }, back: null });
+      }
       case "browse":
         return setFull({ view: { kind: "browse", cwd }, back: null });
       case "page": {
