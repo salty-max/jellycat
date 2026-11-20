@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { PageSource } from "../../core/shell";
 
 /** A view that takes the whole screen. The pager is the shell's own; `browse` and the screenshot viewer are the host's. */
-export type FullScreenView = { kind: "browse" } | { kind: "view"; slug: string };
+export type FullScreenView = { kind: "browse"; /** The directory the session was in: browse opens there. */ cwd: readonly string[] } | { kind: "view"; slug: string };
 
 /** Returns true when the key was used: the shell then keeps it from the prompt behind. */
 export type KeyHandler = (key: string) => boolean;
@@ -15,6 +15,8 @@ export interface FullScreenApi {
   page: (path: string, source: PageSource) => void;
   /** Sends this view every key typed while it is in front, until the returned function is called. */
   onKey: (handler: KeyHandler) => () => void;
+  /** Sets the path the status bar shows on the right while this view is in front (browse: the directory it is in); `null` goes back to the session's. */
+  setPath: (path: string | null) => void;
 }
 
 /** The host's full-screen views: `browse` (D2) and the viewer (E2). Without one, the shell shows a placeholder. */

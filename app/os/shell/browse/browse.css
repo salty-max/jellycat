@@ -1,0 +1,41 @@
+/* browse (docs/design.md Shell): two panes in double borders, the left one the directory, the right the selected entry. The panes, titles and
+   key bar are shell.css's (`sh-full`, `sh-pane`, `sh-pt`, `sh-keys`). */
+.sh-panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 10px;
+}
+/* On a phone the left pane is narrow: a long path is cut, as the pager's is. */
+.sh-panes .sh-pt {
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sh-pc {
+  height: 100%;
+  overflow: hidden;
+}
+.sh-row {
+  display: block;
+  width: 100%;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.sh-row[aria-current="true"] {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.sh-peek {
+  height: 100%;
+}

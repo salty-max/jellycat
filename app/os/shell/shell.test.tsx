@@ -206,7 +206,7 @@ test("browse and view go to the host's full-screen slot, and q comes back", asyn
   await type("browse");
   expect(screen.getByText("host: browse")).toBeInTheDocument();
   expect(screen.getByText(/^\[jellycat\] 0:browse\*$/)).toBeInTheDocument();
-  expect(fullScreen).toHaveBeenCalledWith({ kind: "browse" }, expect.objectContaining({ close: expect.any(Function) }));
+  expect(fullScreen).toHaveBeenCalledWith({ kind: "browse", cwd: [] }, expect.objectContaining({ close: expect.any(Function) }));
   // The host's view closes itself through the API it was given.
   const api = fullScreen.mock.calls.at(-1)![1];
   act(() => api.close());

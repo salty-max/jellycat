@@ -77,6 +77,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
   const [historyIndex, setHistoryIndex] = useState(first.session.history.length);
   const [focused, setFocused] = useState(false);
   const [full, setFull] = useState<Full | null>(null);
+  const [viewPath, setViewPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loginRun, setLoginRun] = useState(0);
   const [clock, setClock] = useState("");
@@ -104,6 +105,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
   // The API a full-screen view gets: stable, so its effects don't restart.
   const api = useMemo<FullScreenApi>(
     () => ({
+      setPath: setViewPath,
       close: () => setFull((current) => current?.back ?? null),
       page: (path, source) => setFull((current) => ({ view: { kind: "page", command: "less", path, source }, back: current })),
       onKey: (handler) => {
@@ -133,7 +135,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
     setLoginRun((count) => count + 1);
   };
 
-  const perform = (effect: Effect) => {
+  const perform = (effect: Effect, cwd: readonly string[]) => {
     switch (effect.kind) {
       case "theme":
         return set("phosphor", effect.phosphor);
@@ -145,7 +147,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
       case "viewProject":
         return setFull({ view: { kind: "view", slug: effect.slug }, back: null });
       case "browse":
-        return setFull({ view: { kind: "browse" }, back: null });
+        return setFull({ view: { kind: "browse", cwd }, back: null });
       case "page": {
         const taken = onPage?.({ command: effect.command, path: effect.path, source: effect.source });
         if (taken) return print(taken);
@@ -176,7 +178,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
     setHistoryIndex(result.session.history.length);
     setValue("");
     setCaret(0);
-    result.effects.forEach(perform);
+    result.effects.forEach((effect) => perform(effect, result.session.cwd));
   };
 
   // A pressed name or command: the view in front is closed, the line runs.
@@ -369,7 +371,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, fullScre
         {slot && <Slot view={slot} api={api} render={fullScreen} />}
         <div className="sh-bar inverse">
           <span>[jellycat] 0:{windowName}*</span>
-          <span className="sh-bar-right">{homePath(session.cwd)}</span>
+          <span className="sh-bar-right">{viewPath ?? homePath(session.cwd)}</span>
           <span suppressHydrationWarning>{clock}</span>
         </div>
         <input

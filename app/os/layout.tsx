@@ -7,6 +7,7 @@ import { BootScreen } from "./boot-screen";
 import { Crt } from "./crt";
 import type { DesktopProps } from "./desktop/desktop";
 import { isOsMatch } from "./os-route";
+import { browseView } from "./shell/browse/slot";
 import { Shell } from "./shell/shell";
 
 /**
@@ -131,7 +132,7 @@ export function OsLayout() {
       <Crt>
         {(layout === "unknown" || layout === "shell") && (
           <div data-os="shell" className="size-full">
-            <Shell onOpenProject={openProject} initialCommand={initialCommand} readmes={readmes} autoFocus={layout === "shell"} />
+            <Shell onOpenProject={openProject} initialCommand={initialCommand} readmes={readmes} fullScreen={browseView} autoFocus={layout === "shell"} />
           </div>
         )}
         {(layout === "unknown" || layout === "boot") && (

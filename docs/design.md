@@ -88,8 +88,9 @@ rules changes this file in the same pull request.
   show a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
 - The status bar's clock is client-only: it is not in the markup the server renders.
 - Messages read like a Unix shell's (`jsh: foo: command not found`), never chatty.
-- `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. `q` returns to the
-  prompt as it was.
+- `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. It opens in the
+  directory the prompt was in, and the status bar shows the directory it is in (the slot's `setPath`) until it closes. Enter on a
+  README or a file pages it; `q` there comes back to `browse`, and `q` in `browse` returns to the prompt as it was.
 
 ## Viewer
 

@@ -416,7 +416,9 @@ windows.
   back to `browse`;
 - `q` returns to the prompt as it was.
 
-**Files:** `app/os/shell/browse/*`, plus the one line that registers it.
+**Files:** `app/os/shell/browse/*`, plus the one line that registers it. D2 also gave the slot two things the mockup has: the view carries
+the session's `cwd` (browse opens there) and the API a `setPath` (the status bar shows the browsed path), a few lines in `shell.tsx` and
+`full-screen.ts` (the user decided both).
 
 **Checks:** component tests; story; `look.mjs` against the mockup; e2e on the phone (the shell is on the page since D1b).
 
