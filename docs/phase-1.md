@@ -36,7 +36,7 @@ to its questions are at the end.
   - `vercel.json`'s header carries only what a meta tag can't: `frame-ancestors 'none'`, plus `object-src`/`base-uri`. It never
     carries `default-src`, `script-src` or `style-src`, because both policies apply.
 - **`sitemap.xml` and `robots.txt` are written by `buildEnd`** from the project data, with a `SITE_URL` constant. That constant
-  is the vercel.app address until the launch, and it also feeds `canonical` and `og:url`.
+  is `https://jellycat.fr` since the launch (F2), and it also feeds `canonical` and `og:url`.
 - **Vitest, `@vitest/browser` and `@vitest/browser-playwright` move together to one exact version**, like the React Router
   packages: the Playwright provider requires its exact Vitest.
 - **Each area's CSS lives next to its components** and is imported by them. `app/app.css` keeps the tokens and the CRT, so
@@ -529,14 +529,13 @@ Given on 19 Nov 2026, when wave 1 opened. Each names the tasks it unblocked.
    addons' come later, from the user's own pictures in game. A2 leaves every `screenshots` list empty; E3 fills them. A project
    with no pictures has no Screenshots row.
 4. **Mail.** (D3) No Mail on the Phase 1 desktop. `contact.txt` and the Readme carry the address as a link.
-5. **The domain.** (F2) jellycat.fr, the apex canonical and `www` redirecting to it. `SITE_URL` stays
-   `https://jellycat-iota.vercel.app` until F2.
+5. **The domain.** (F2) jellycat.fr, the apex canonical and `www` redirecting to it. `SITE_URL` was
+   `https://jellycat-iota.vercel.app` until F2, which moves it.
 6. **The contact address.** (A2) `max@jellycat.fr`, the user's own choice over `hello@`. A2 puts it in `app/core/studio.ts`.
 7. **The OS name.** (F2) Jelly-OS stays.
 
 ### Still open
 
-- **hundo.quest.** Hundo's Link is `https://hundo.quest`: the user will deploy something on the apex. Until then it answers
-  Vercel's `DEPLOYMENT_NOT_FOUND`, so the link is dead on the vercel.app production as soon as a task shows the projects;
-  Hundo's README only names its six guides' sites (koholint.hundo.quest and the others). F2 checks the apex serves before the
-  launch. E3 captures a guide's site for Hundo's pictures, as before.
+- **hundo.quest, resolved.** Hundo's Link is `https://hundo.quest`. It serves Hundo's own page now (checked on 20 Nov 2026: 200, and
+  `www.hundo.quest` redirects to it), so the link is live. Hundo's README only names its six guides' sites (koholint.hundo.quest
+  and the others). E3 captures a guide's site for Hundo's pictures, as before.

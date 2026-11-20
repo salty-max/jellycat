@@ -8,10 +8,10 @@ export const OS_NAME = "Jelly-OS";
 export const OS_VERSION = "1.0";
 
 /**
- * The site's address, with no trailing slash: canonical links, `og:url` and the sitemap are built on it. It stays the
- * vercel.app address until the launch moves it to https://jellycat.fr (docs/phase-1.md, F2).
+ * The site's address, with no trailing slash: canonical links, `og:url` and the sitemap are built on it. It is the
+ * apex of the domain (`www` redirects to it); the vercel.app address still serves, with canonicals pointing here.
  */
-export const SITE_URL = "https://jellycat-iota.vercel.app";
+export const SITE_URL = "https://jellycat.fr";
 
 /** The absolute address of a page on the site: `pageUrl("/projects/hundo")`, and `pageUrl("/")` for the home page. */
 export function pageUrl(path: string): string {

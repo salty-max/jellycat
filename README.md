@@ -117,6 +117,7 @@ included. Vercel installed with pnpm 11.18.0 (from `packageManager`) on Node 26.
 
 ## Hosting
 
-Vercel project `jellycat` on the team `jellycat`, connected to `salty-max/jellycat`, production branch `main`, Node 26.x. Until the
-domain is attached, production is <https://jellycat-iota.vercel.app>. A push to `main` deploys production; a push to any other
+Vercel project `jellycat` on the team `jellycat`, connected to `salty-max/jellycat`, production branch `main`, Node 26.x. Production is
+<https://jellycat.fr>, the apex canonical; `www.jellycat.fr` redirects to it. The vercel.app address still serves, with its canonicals
+pointing at jellycat.fr. A push to `main` deploys production; a push to any other
 branch gets a preview. `engines` caps Node at 26 so a new major never arrives by itself.

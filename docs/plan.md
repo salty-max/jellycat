@@ -70,5 +70,5 @@ A log fed from GitHub, gtx-16 carts if it gets a web build, a small original gam
 ## Still to decide
 
 The user answered phase-1.md's questions on 19 Nov 2026 ([the answers](phase-1.md#the-users-answers)). Nothing is left to decide
-for Phase 1. One thing stays open: Hundo's Link is hundo.quest, which the user will deploy, and F2 checks it serves
-([still open](phase-1.md#still-open)).
+for Phase 1. Hundo's Link is hundo.quest, which serves
+([checked on 20 Nov 2026](phase-1.md#still-open)).
