@@ -5,7 +5,7 @@ import { projectBySlug } from "../../core/projects";
 import { useWindows } from "../desktop/windows/store";
 import type { FullScreenApi } from "../shell/full-screen";
 import { Shell } from "../shell/shell";
-import { browseView } from "../shell/browse/slot";
+import { fullScreenViews } from "../full-screen-views";
 import { ViewerView } from "./viewer-view";
 import { ViewerWindow } from "./viewer-window";
 
@@ -103,7 +103,7 @@ test("full screen: l and h (and the arrows) step, dim at the ends, and q or Esc 
 
 test("in the shell, view opens the viewer and q returns to the prompt; a project with no pictures prints a message", async () => {
   const user = userEvent.setup();
-  render(<Shell fullScreen={browseView} />);
+  render(<Shell fullScreen={fullScreenViews} />);
   const input = screen.getByLabelText("Terminal input");
   await user.click(input);
   await user.type(input, "view lucarne{Enter}");

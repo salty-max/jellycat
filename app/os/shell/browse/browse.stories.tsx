@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { Crt } from "../../crt";
 import { Shell } from "../shell";
-import { browseView } from "./slot";
+import { fullScreenViews } from "../../full-screen-views";
 
 // browse in the shell's full-screen slot, in the mockup's 652×480 frame.
 const meta = {
   title: "OS/Browse",
   component: Shell,
-  args: { fullScreen: browseView },
+  args: { fullScreen: fullScreenViews },
   decorators: [
     (Story) => (
       <div className="h-[480px] w-[652px]">

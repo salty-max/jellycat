@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { projectBySlug } from "../../../core/projects";
 import type { Line } from "../../../core/shell";
-import { browseView } from "../../shell/browse/slot";
+import { fullScreenViews } from "../../full-screen-views";
 import { Shell, type ShellProps } from "../../shell/shell";
 import { useDesktop } from "./context";
 import { openProjectReadme, openViewer } from "./launch";
@@ -28,7 +28,7 @@ export function TerminalApp() {
   }, []);
   return (
     <div className="app-pane">
-      <Shell onOpenProject={openProject} onPage={onPage} onView={onView} fullScreen={browseView} autoFocus />
+      <Shell onOpenProject={openProject} onPage={onPage} onView={onView} fullScreen={fullScreenViews} autoFocus />
     </div>
   );
 }

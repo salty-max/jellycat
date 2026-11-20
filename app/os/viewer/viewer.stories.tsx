@@ -6,7 +6,7 @@ import { Crt } from "../crt";
 import { Desktop } from "../desktop/desktop";
 import { openViewer } from "../desktop/apps/launch";
 import { useWindows } from "../desktop/windows/store";
-import { browseView } from "../shell/browse/slot";
+import { fullScreenViews } from "../full-screen-views";
 import { Shell } from "../shell/shell";
 
 // The viewer in the desktop's 652x480 frame, and full screen in the shell.
@@ -59,7 +59,7 @@ export const WindowPhonePicture: Story = {
 
 /** `view hundo` in the shell: full screen, the count in the top border, the caption under the picture. */
 export const FullScreen: Story = {
-  render: () => <Shell fullScreen={browseView} />,
+  render: () => <Shell fullScreen={fullScreenViews} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByLabelText("Terminal input");
