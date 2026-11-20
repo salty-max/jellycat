@@ -250,6 +250,24 @@ test("the initial command is printed at first paint, as typed, with the project'
   expect(onOpenProject).not.toHaveBeenCalled();
 });
 
+test("several initial commands run one after the other, each at its own prompt, as a project's page opens", async () => {
+  const readmes = { hundo: parseReadme("# Hundo\n\n## How it's built\n\nA paragraph.\n") };
+  const html = renderToString(<Shell initialCommand={["open hundo", "cat ~/projects/web/hundo/README"]} readmes={readmes} />);
+  expect(html).toContain("guest@jellycat:~$ open hundo<");
+  expect(html).toContain("guest@jellycat:~$ cat ~/projects/web/hundo/README<");
+  // The card's name is the page's h1, the README's title and headings its h2 and h3, from the blocks given (no chunk to wait for).
+  expect(html).toMatch(/<h1[^>]*>Hundo<\/h1>/);
+  expect(html).toContain("<h2>Hundo</h2>");
+  expect(html).toContain("<h3>How it&#x27;s built</h3>");
+
+  const { user, input } = setup({ initialCommand: ["open hundo", "pwd"] });
+  await user.click(input);
+  await user.keyboard("{ArrowUp}");
+  expect(input).toHaveValue("pwd");
+  await user.keyboard("{ArrowUp}");
+  expect(input).toHaveValue("open hundo");
+});
+
 test("the history of the initial command is the session's", async () => {
   const { user, input } = setup({ initialCommand: "pwd" });
   await user.click(input);

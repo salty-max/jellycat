@@ -99,7 +99,7 @@ export const Browse: Story = {
   },
 };
 
-/** A page's first paint: the session with `open` and the README's `cat` already run. */
+/** A page's first paint: the session with `open` and the README's `cat` already run, as a project's page has it. */
 export const ProjectPage: Story = {
-  args: { initialCommand: "open hundo && cat ~/projects/web/hundo/README" },
+  args: { initialCommand: ["open hundo", "cat ~/projects/web/hundo/README"] },
 };

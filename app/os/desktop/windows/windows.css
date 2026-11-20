@@ -85,9 +85,7 @@
   align-items: center;
   justify-content: center;
 }
-.window[data-active] .window-boxes button {
-  border-color: var(--phosphor-bg);
-}
+/* In front, a box keeps its phosphor outline, which melts into the inverse bar: each shows as a 14px dark square, as in the mockup. */
 .window-boxes button:active svg {
   transform: translate(1px, 1px);
 }
@@ -136,14 +134,15 @@
 .alert-layer[data-fixed] {
   position: fixed;
 }
+/* At least the mockup's 320x140: the message centred in the space above the buttons, which keep 10px from it. */
 .alert {
   grid-row: 2;
   box-sizing: border-box;
   width: 320px;
   max-width: 100%;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   padding: 10px;
   background: var(--phosphor-bg);
   color: var(--phosphor-fg);
@@ -154,6 +153,7 @@
   outline: none;
 }
 .alert-message {
+  flex: 1;
   display: flex;
   gap: 16px;
   align-items: center;

@@ -33,9 +33,12 @@ const meta = {
   title: "OS/Windows",
   component: Desk,
   decorators: [
+    // The desktop's type, which windows and dialogs inherit from it (app/os/desktop/desktop.tsx).
     (Story) => (
       <Crt>
-        <Story />
+        <div className="size-full text-lg leading-[1.1]">
+          <Story />
+        </div>
       </Crt>
     ),
   ],

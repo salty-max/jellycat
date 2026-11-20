@@ -1,20 +1,31 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+// The OS once hydrated: the shell on a phone, the desktop's boot screen then its icons on a computer (e2e/layout.spec.ts has the rest).
+async function expectOs(page: Page, phone: boolean) {
+  if (phone) await expect(page.getByRole("log", { name: "Terminal output" })).toBeVisible();
+  else {
+    await expect(page.getByRole("heading", { name: "Jelly-OS 1.0" })).toBeVisible();
+    await expect(page.getByRole("listbox", { name: "Desktop" })).toBeVisible();
+  }
+}
 
 test("the home page is prerendered HTML", async ({ request }) => {
   const res = await request.get("/");
   expect(res.status()).toBe(200);
   const html = await res.text();
   expect(html).toContain("<title>Jellycat Studio</title>");
+  // Both layouts are in the page before any script runs: the shell's welcome and the desktop's boot screen.
+  expect(html).toContain("Type help for the commands, or click a name.");
   expect(html).toContain("Jelly-OS 1.0");
 });
 
-test("the home page boots in the browser", async ({ page }) => {
+test("the home page boots in the browser: the phone sees the shell, a computer the desktop", async ({ page }, info) => {
   await page.goto("/");
   await expect(page).toHaveTitle("Jellycat Studio");
-  await expect(page.getByRole("heading", { name: "Jelly-OS 1.0" })).toBeVisible();
+  await expectOs(page, info.project.name === "phone");
 });
 
-test("an unknown address answers 404 with the not-found page", async ({ request, page }) => {
+test("an unknown address answers 404 with the not-found page", async ({ request, page }, info) => {
   const res = await request.get("/no-such-page");
   expect(res.status()).toBe(404);
   expect(await res.text()).toContain("There&#x27;s no page at this address.");
@@ -37,5 +48,5 @@ test("an unknown address answers 404 with the not-found page", async ({ request,
   await page.waitForLoadState("networkidle");
   expect(errors).toEqual([]);
   await page.getByRole("link", { name: "Go to the home page" }).click();
-  await expect(page.getByRole("heading", { name: "Jelly-OS 1.0" })).toBeVisible();
+  await expectOs(page, info.project.name === "phone");
 });

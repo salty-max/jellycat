@@ -50,5 +50,7 @@ test("an unknown project answers 404 and the browser shows the not-found page", 
   await expect(page).toHaveTitle(`Page not found · ${STUDIO_NAME}`);
   await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
   await page.waitForLoadState("networkidle");
+  // Hydrated over 404.html's markup, not beside it: the root's HydrateFallback draws the same screen until the loader's 404.
+  await expect(page.locator("main")).toHaveCount(1);
   expect(problems).toEqual([]);
 });

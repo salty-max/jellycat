@@ -5,7 +5,8 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 
 ## Layout
 
-- `app/`: the site. `root.tsx` is the page shell, `routes.ts` the routes, `routes/` one module per route, `os/` the OS's parts,
+- `app/`: the site. `root.tsx` is the page shell and draws the OS on the home and project pages (`os/layout.tsx`: the shell on
+  phones, the desktop from 768x520), `routes.ts` the routes, `routes/` one module per route, `os/` the OS's parts,
   `app.css` Tailwind and the phosphor tokens.
 - `app/core/`: what both layouts read. `projects.ts` is the project data (every fact from the project's own repository, its
   README or its code where the README is stale, a link perhaps from its GitHub homepage field, an unknown fact `-`),
@@ -60,6 +61,9 @@ with axe failing the run on a violation. The others:
 - `node scripts/look.mjs`: screenshots a mockup's frame and a story at 652x480 and 1:1, and writes them side by side, with 4x crops,
   to `.cache/look/`. It starts its own mockups server and Storybook on free ports. `--mockup`, `--selector`, `--story`,
   `--phosphor`, `--size`, `--crop` and `--name` change what it compares (by default the desktop mockup's `#jd` and the boot screen).
+  It waits for the mockup's boot screen or typed login to end (`--boot keep` captures it); `--mockup-run` runs a script in the
+  mockup first (`"A.readme()"` opens a window, `"page('hundo')"` the shell's project page); `--page /projects/hundo` compares a page
+  of the build instead of a story (after `pnpm build`), and `--type 'ls\n'` and `--wait-for` bring the story or the page to a state.
 - `pnpm build-storybook`: the static Storybook, which CI builds too.
 
 ## Build

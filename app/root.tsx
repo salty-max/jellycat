@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useMatches } from "react-router";
 import { DEFAULT_SETTINGS, HEAD_SCRIPT, settingsAttributes, useSettingsSync } from "./core/settings";
 import { Crt } from "./os/crt";
+import { OsLayout } from "./os/layout";
+import { showsOs } from "./os/os-route";
 import { NotFoundScreen } from "./os/not-found-screen";
 import type { Route } from "./+types/root";
 import "@fontsource/vt323";
@@ -35,9 +37,24 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
+// The OS lives here, not in the routes, so moving between the home page and a project page never remounts it: those routes only
+// name themselves as the OS's (their `handle`) and give it their data. Any other route, the not-found page, draws its own element.
 export default function App() {
   useSettingsSync();
-  return <Outlet />;
+  return showsOs(useMatches()) ? <OsLayout /> : <Outlet />;
+}
+
+// What the router draws while it hydrates an address it has no prerendered data for. On this static site that is only 404.html
+// served at an address a route with a loader claims (`/projects/no-such`): its loader then throws the 404 the boundary below
+// draws. Drawing the same screen meanwhile lets the page hydrate the markup 404.html holds instead of leaving it behind.
+export function HydrateFallback() {
+  return (
+    <main className="h-dvh">
+      <Crt>
+        <NotFoundScreen />
+      </Crt>
+    </main>
+  );
 }
 
 // Anything a route throws lands here instead of React Router's default screen. The details only show in development.

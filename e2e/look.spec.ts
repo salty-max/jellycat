@@ -21,7 +21,8 @@ test("a saved amber setting paints amber from the first paint, with no hydration
     [KEY, saved] as const,
   );
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Jelly-OS 1.0" })).toBeVisible();
+  // Hydrated: the layout has left the server's "unknown" for the shell (a phone) or the desktop.
+  await expect(page.locator("main[data-layout]")).not.toHaveAttribute("data-layout", "unknown");
   await page.waitForLoadState("networkidle");
 
   const html = page.locator("html");

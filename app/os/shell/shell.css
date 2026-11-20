@@ -16,6 +16,12 @@
 .sh a {
   color: inherit;
 }
+/* As the mockup draws them: an address (https, the e-mail) and any link in a README's text are underlined; a project's name in a
+   listing (`ls`, `tree`) and a command (a button) aren't. */
+.sh a:not([href^="/projects/"]),
+.sh-md a {
+  text-decoration: underline;
+}
 .sh :focus-visible {
   outline: 1px dotted var(--phosphor-fg);
   outline-offset: 1px;
@@ -95,9 +101,12 @@
   margin-left: auto;
 }
 
+/* A card's rows are 24px lines, a pixel more than the shell's 23px: the buttons in them (Screenshots, README) inherit it and are
+   24px targets, where two on consecutive 23px lines fail the minimum target size (Lighthouse's target-size). */
 .sh-kr {
   display: grid;
   grid-template-columns: 13ch minmax(0, 1fr);
+  line-height: 24px;
 }
 .sh-kr > span {
   overflow-wrap: anywhere;

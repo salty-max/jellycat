@@ -14,8 +14,11 @@ import "./shell.css";
 export interface ShellProps {
   /** An `open` ran (or a project's name was pressed): the host shows the project. The card is already printed. */
   onOpenProject?: (slug: string) => void;
-  /** A line run at first paint, after the welcome, as if typed: `open hundo && cat ~/projects/web/hundo/README`. Its effects are not performed. */
-  initialCommand?: string;
+  /**
+   * A line, or several one after the other, run at first paint after the welcome as if typed: a project's page passes
+   * `["open hundo", "cat ~/projects/web/hundo/README"]`. Their effects are not performed; the log opens on the first one.
+   */
+  initialCommand?: string | readonly string[];
   /** README blocks the host already loaded, by slug: `cat` prints these instead of loading the chunk (a deep link's, from the page's loader). */
   readmes?: Readonly<Record<string, readonly Block[]>>;
   /** The host's full-screen views, `browse` and the viewer. Without one the shell shows a placeholder saying so. */
@@ -41,13 +44,13 @@ interface Full {
 const MAX_LINES = 300;
 const text = (value: string): Line => [{ kind: "text", text: value }];
 
-/** The log at first paint: the welcome, and the initial command's echo and output. Pure, so server and client agree. */
-function firstPaint(initialCommand: string | undefined): { items: Item[]; session: Session } {
+/** The log at first paint: the welcome, and each initial command's echo and output. Pure, so server and client agree. */
+function firstPaint(initialCommand: string | readonly string[] | undefined): { items: Item[]; session: Session } {
   let session = newSession();
   const lines: Item[] = welcome().map((line, id) => ({ id, line }));
-  if (initialCommand) {
-    const result = run(initialCommand, session, { now: new Date(0) });
-    const shown = [text(prompt(session.cwd) + initialCommand), ...result.lines];
+  for (const command of typeof initialCommand === "string" ? [initialCommand] : (initialCommand ?? [])) {
+    const result = run(command, session, { now: new Date(0) });
+    const shown = [text(prompt(session.cwd) + command), ...result.lines];
     shown.forEach((line) => lines.push({ id: lines.length, line, initial: true }));
     session = result.session;
   }
@@ -240,7 +243,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, fullScreen, auto
 
   // The log follows its end; a session that opens with a command starts at that command's line.
   const started = useRef(false);
-  const anchored = useRef(!!initialCommand);
+  const anchored = useRef(first.items.some((item) => item.initial));
   const stick = useCallback(() => {
     if (anchored.current) return;
     if (terminal.current) terminal.current.scrollTop = terminal.current.scrollHeight;
