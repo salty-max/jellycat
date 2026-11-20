@@ -53,7 +53,29 @@ export const PROJECTS: readonly Project[] = [
     // (docs/phase-1.md, Still open).
     link: "https://hundo.quest",
     source: github("hundo"),
-    screenshots: [],
+    screenshots: [
+      {
+        src: "/screenshots/hundo/koholint-desktop",
+        size: "desktop",
+        alt: "Koholint, the Link's Awakening guide: Tail Cave, chapter 1, the rest hidden",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/hundo/lordran-desktop",
+        size: "desktop",
+        alt: "Lordran, the Dark Souls Remastered guide: chapter 1, with what to do next",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/hundo/koholint-phone",
+        size: "phone",
+        alt: "Koholint on a phone: chapter 1, Tail Cave, and the next three things to get",
+        width: 780,
+        height: 1688,
+      },
+    ],
   },
   {
     slug: "farseer",
@@ -65,7 +87,29 @@ export const PROJECTS: readonly Project[] = [
     stack: "React 19, Vite, Tailwind 4, Hono, Postgres",
     link: "https://farseer-mu.vercel.app",
     source: github("farseer"),
-    screenshots: [],
+    screenshots: [
+      {
+        src: "/screenshots/farseer/feed-desktop",
+        size: "desktop",
+        alt: "The feed of blue posts, under a search box and filters by game, kind and region",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/farseer/post-desktop",
+        size: "desktop",
+        alt: "A Blizzard news post opened, with its picture and buttons to share or save it",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/farseer/feed-phone",
+        size: "phone",
+        alt: "The feed on a phone: the game tabs, the filters and the newest blue posts",
+        width: 780,
+        height: 1688,
+      },
+    ],
   },
   {
     slug: "lucarne",
@@ -113,7 +157,29 @@ export const PROJECTS: readonly Project[] = [
     stack: "Lua, React, Vite, Tailwind, Hono, Postgres",
     link: "https://hearthtale.app",
     source: github("hearthtale"),
-    screenshots: [],
+    screenshots: [
+      {
+        src: "/screenshots/hearthtale/journal-desktop",
+        size: "desktop",
+        alt: "A journal page the addon wrote for Brannok, a test dwarf hunter",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/hearthtale/epitaph-desktop",
+        size: "desktop",
+        alt: "The epitaph the addon wrote for Pippa, a test gnome mage who died on Hardcore",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/hearthtale/journal-phone",
+        size: "phone",
+        alt: "Brannok's journal page on a phone, below the six sample pages to choose from",
+        width: 780,
+        height: 1688,
+      },
+    ],
   },
   {
     slug: "lorekeepers-codex",
@@ -231,7 +297,22 @@ export const PROJECTS: readonly Project[] = [
     stack: "Zig, WebAssembly",
     link: "https://gero-lab.vercel.app",
     source: github("gero"),
-    screenshots: [],
+    screenshots: [
+      {
+        src: "/screenshots/gero/editor-desktop",
+        size: "desktop",
+        alt: "Gero Lab's editor on the fizzbuzz sample, in Gero, stopped at line 13",
+        width: 1440,
+        height: 900,
+      },
+      {
+        src: "/screenshots/gero/cockpit-desktop",
+        size: "desktop",
+        alt: "Gero Lab stepping through fizzbuzz: stack, disassembly, registers and log",
+        width: 1440,
+        height: 900,
+      },
+    ],
   },
   {
     slug: "addon-kit",

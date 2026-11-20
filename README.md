@@ -14,12 +14,15 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
 - `app/content/readme/`: one README per project, `<slug>.md`, in a small Markdown subset (one `#` title, `##` headings,
   one-line paragraphs, one-level `- ` lists, code spans, links to `https://` or `/projects/<slug>`); `readme.ts` refuses
   anything else, naming the file and line.
-- `public/`: files served as they are (the favicon).
+- `public/`: files served as they are: the favicon, and `screenshots/<slug>/`, each project's pictures as AVIF and WebP, which
+  `projects.ts` lists with their alt text and size.
 - `e2e/`: Playwright tests against the production build.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
-- `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side) and `csp.ts` (the build step that
-  writes each page's Content-Security-Policy).
+- `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side), `csp.ts` (the build step that
+  writes each page's Content-Security-Policy) and `screenshots.mjs` (the projects' pictures: the web apps' live sites opened
+  logged out in the system Chrome at a desktop and a phone size, or a picture taken by hand with `--from`, written to
+  `public/screenshots/`; run by hand, never by the build).
 - `mockups/`: the HTML mockups that settled the look. Not part of the build.
 - `docs/`: the plan and the design rules.
 - `harness/`, `harness.toml`, `.claude/`: the git hooks, the task board and the review helpers sessions work under
