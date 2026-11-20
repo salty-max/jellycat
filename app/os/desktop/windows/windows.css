@@ -1,0 +1,192 @@
+/* Windows and dialogs, from mockups/phosphor-desktop.html (.win, .tb, .grip, .dlg). The colours are the phosphor's own variables. */
+
+.window-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Its own stacking context: the windows' z-indexes stay among themselves, under the menu bar and the icons. */
+  isolation: isolate;
+  /* The layer takes no clicks of its own: the desktop under it does (selecting an icon, clicking the bare desktop). */
+  pointer-events: none;
+}
+
+.window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  border: 1px solid var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+  pointer-events: auto;
+}
+.window:focus {
+  outline: none;
+}
+
+.window-bar {
+  flex: none;
+  box-sizing: border-box;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 3px 0 7px;
+  border-bottom: 1px solid var(--phosphor-fg);
+  touch-action: none;
+  user-select: none;
+}
+.window[data-active] .window-bar {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.window-bar:focus-visible {
+  outline: 1px dashed var(--phosphor-bg);
+  outline-offset: -3px;
+}
+.window:not([data-active]) .window-bar:focus-visible {
+  outline-color: var(--phosphor-fg);
+}
+.window[data-collapsed] .window-bar {
+  border-bottom: 0;
+  height: 22px;
+}
+
+.window-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-boxes {
+  display: flex;
+  gap: 3px;
+}
+.window-boxes button,
+.alert-button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: default;
+  text-align: center;
+  border: 1px solid var(--phosphor-fg);
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  font: inherit;
+  text-shadow: inherit;
+}
+.window-boxes button {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.window[data-active] .window-boxes button {
+  border-color: var(--phosphor-bg);
+}
+.window-boxes button:active svg {
+  transform: translate(1px, 1px);
+}
+.window-boxes button:focus-visible,
+.alert-button:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}
+.window[data-active] .window-boxes button:focus-visible {
+  outline-color: var(--phosphor-bg);
+}
+
+.window-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.window-body[hidden] {
+  display: none;
+}
+
+.window-grip {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background: linear-gradient(135deg, transparent 0 45%, var(--phosphor-fg) 45% 55%, transparent 55% 70%, var(--phosphor-fg) 70% 80%, transparent 80%);
+}
+
+/* The alert: no title bar, a 3px double border, the same hard shadow. Its layer splits the free space 2:3, above and below, as the
+   mockup puts a dialog (the mockup's /2.5). */
+.alert-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 2fr auto 3fr;
+  justify-content: center;
+  z-index: 9500;
+}
+.alert-layer[data-fixed] {
+  position: fixed;
+}
+.alert {
+  grid-row: 2;
+  box-sizing: border-box;
+  width: 320px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  border: 3px double var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+}
+.alert:focus {
+  outline: none;
+}
+.alert-message {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.alert-title,
+.alert-text {
+  margin: 0;
+}
+.alert-text {
+  color: var(--phosphor-dim);
+}
+.alert-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 10px;
+}
+.alert-button {
+  min-width: 72px;
+  height: 24px;
+  padding: 0 12px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+.alert-button:active {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.alert-button[data-default] {
+  outline: 1px solid var(--phosphor-fg);
+  outline-offset: 2px;
+}
+.alert-button[data-default]:focus-visible {
+  outline-style: solid;
+}

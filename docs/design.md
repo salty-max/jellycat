@@ -46,9 +46,18 @@ rules changes this file in the same pull request.
   the right; Trash at the bottom.
 - Windows: a 1px phosphor frame, a hard 3px shadow in the dim tone, a 22px title bar. The window in front has an inverse title bar.
   Three boxes on the right: collapse to the title bar, zoom, close. A grip in the bottom-right corner resizes.
+  - A new window cascades 26px right and 24px down from the one before, clear of the icon column and the bottom edge; a dialog
+    stands centred, a little above the middle. A second open of a window brings it to the front.
+  - A drag keeps 60px of the window in view across and its title bar on the desktop. The minimum size is 220×120.
+  - Zoom fills the desktop less the icon column and an 8px margin; a second zoom puts the window back. Collapse leaves the title bar.
+  - Keyboard: arrows on the focused title bar move the window by 8px, Shift+arrows resize it by 8px.
+  - A window is a non-modal dialog (`role="dialog"`, `aria-modal="false"`). Focus goes into it when it opens, unless its app has
+    already put it inside, and back to what had it before when it closes. Esc is the app's to handle.
 - Folder windows have an info line (item count, view) and show their items by icon or by name (View menu). A folder holding more
   than it shows scrolls, with the 1-bit scroll bar (see Readme).
 - Dialogs have a 3px double border and no title bar. The default button has a second outline.
+  - An alert (Base UI's AlertDialog) is modal: the icon beside the message, the first line naming it, buttons at the bottom right.
+    Focus is on the default button; Enter presses it. A click outside doesn't close it. It sits in the same place as a dialog window.
 - Selection: one click selects, a second click or a double click opens, Enter opens the focused icon.
 - Arrows move between icons and select. A click on the bare desktop deselects. The clock is drawn on the
   client only (the page is prerendered); the menu bar's slot stays empty until the menus exist.
