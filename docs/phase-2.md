@@ -289,7 +289,8 @@ No Turnstile to start with: it is a third-party script and an iframe drawn in it
 needs a Cloudflare account and widget keys, and the CSP would add `script-src` and `frame-src https://challenges.cloudflare.com`.
 It stays the next step if spam gets through.
 
-**Privacy.** Nothing goes to `localStorage`; Vercel's runtime logs hold the status code only; Resend is the processor and keeps the
+**Privacy.** Nothing goes to `localStorage`; the function logs the status code only, while Vercel, the host, sees each request's IP
+address and keeps the site's logs 30 days (N1); Resend is the processor and keeps the
 e-mail 30 days; the inbox keeps the message. The notice (Q8, N1's words, approved by the user) says so where the visitor writes:
 on `/contact` and in the window. (Not legal advice.)
 
@@ -447,7 +448,9 @@ ask to see, correct or delete it at max@jellycat.fr. Facts only, no legal boiler
 width. A unit test: no em dash, the address from `CONTACT_EMAIL`, the processor and the 30 days present.
 
 **Ends with** the text sent to the opener, which asks the user to approve it (Q8). The region comes from U1 through the opener;
-until U1 has picked it, the notice names it as a placeholder that says so, and the approval waits. C2 waits for that approval.
+until U1 has picked it, the notice names it as a placeholder that says so. The user chose to land the words with the placeholder
+and the region later (Q8's follow-up), approving the final text with the push to `phase-2`; C2 waits for that approval, and the
+region is a one-constant change once U1 gives it. F1 checks that no placeholder is left before the merge.
 
 **Files:** `app/core/privacy.ts` and its test.
 
@@ -595,6 +598,7 @@ Each feature came with its own gates; this pass looks across them on `phase-2`'s
 - `pnpm check`, `pnpm e2e` and both Lighthouse configs over every page kind on the tip.
 - The walk on `phase-2`'s preview: the headers, `/contact` sending a real message, the Lab, sound.
 - `plan.md`'s decisions (this file's), its Phase 2 marked done; README; `design.md` read through once.
+- The privacy notice's region is Resend's real one, not N1's placeholder (`SENDING_REGION` in `app/core/privacy.ts`).
 - Fixes for what it finds.
 - The release packet over `origin/main..HEAD` at the tip, read by the reviewer and recorded with `--again`; then the report that
   the merge is ready (M), with the tip's sha.
@@ -631,7 +635,16 @@ Given on 22 Nov 2026, through the opener, the recommended option first; the user
    program halts; the alert's beep only.)
 8. **The words the plan proposes, and a privacy notice?** "Lines + notice (Recommended)": the proposed lines, and a short notice
    under the form, worded by an Opus pass (N1); the user approves the final text before the form ships. (Not taken: the lines
-   only; the notice on a page of its own; rewriting the lines.)
+   only; the notice on a page of its own; rewriting the lines.) On N1's text (26 Nov 2026): "Add both lines (Recommended)", the
+   legal basis (answering the visitor's request) and the right to complain to the CNIL, France's data protection authority, by
+   name with no link; and "Push now, region later (Recommended)": the notice lands on `phase-2` with the region a placeholder,
+   and F1 checks that none is left before the merge. Resend stores what it keeps in the United States whatever the sending
+   region (its regions page, "Data Residency"), so the notice says so. Then, on the final text: "Legitimate interest
+   (Recommended)", the basis worded as the studio's interest in answering messages sent to it; and both extra lines, the
+   transfer's safeguard (the EU's standard contractual clauses, which Resend's DPA relies on) and Vercel's logs: worded as
+   Vercel seeing each request's IP address and keeping the site's logs 30 days (Observability Plus is on for the team and for
+   this project, read 26 Nov 2026; Vercel's docs don't say the logs hold the IP, so the notice doesn't either). With the
+   interest as the basis, the rights line names the right to object (GDPR Art. 21).
 9. **Do the features go live one at a time?** "All at once". Everything ships together from a release branch after F1
    ([the release branch](#the-release-branch)). (Not taken: each feature on `main` as it is done, which was the recommendation.)
 10. **A preview push in C1, before anything calls the function?** "Yes, push for a preview (Recommended)". C1's branch is pushed
