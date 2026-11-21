@@ -1,0 +1,321 @@
+/* The phone's page (docs/design.md Phone), from mockups/phosphor-phone.html. The tube's colours are app.css's tokens; the glow, the
+   dim tone and inverse video come from its utilities. The README's text is readme/readme.css. The document scrolls (there is no box
+   of its own), so the header and the folder bars stick to the viewport. */
+.ph {
+  min-height: 100dvh;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  font-size: 20px;
+  /* 24px lines, as the shell's text: a name on a line of its own is a 24px target. */
+  line-height: 1.2;
+  font-variant-ligatures: none;
+  text-align: left;
+}
+.ph a {
+  color: inherit;
+  text-decoration: none;
+}
+.ph button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ph :focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}
+/* An address (a link, the e-mail, GitHub) is underlined. */
+.ph .ph-lk {
+  text-decoration: underline;
+}
+
+/* The CRT layer, fixed over the viewport: the page scrolls under it. `100lvh` keeps it covering while iOS hides its toolbar. It has
+   no rounded corners (the desktop's, inside `Crt`, does). The utilities give it the effects and `pointer-events: none`. */
+.ph-crt {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  height: 100lvh;
+}
+
+/* The header: the desktop's menu bar, sticky. Its content lines up with the 640px column. */
+.ph-hd {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 max(16px, calc((100% - 608px) / 2));
+  border-bottom: 1px solid var(--phosphor-fg);
+  background: var(--phosphor-bg);
+}
+.ph-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding-right: 8px;
+}
+/* The Control Panel's button: the icon (32px) in a 44px target, pulled so the icon lines up with the column's edge. Pressed, and while
+   its sheet is open, it is inverse video, the icon's inside turned with it. */
+.ph .ph-cpb {
+  margin-left: auto;
+  margin-right: -6px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ph .ph-cpb:active,
+.ph .ph-cpb[aria-expanded="true"] {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+}
+.ph .ph-cpb:active svg path:first-child,
+.ph .ph-cpb[aria-expanded="true"] svg path:first-child {
+  fill: var(--phosphor-fg);
+}
+
+.ph-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 28px;
+}
+.ph-h1 {
+  font-size: 40px;
+}
+/* A label and its value, as the Info window lists them. */
+.ph-kv {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr);
+  column-gap: 10px;
+}
+.ph-kv dd {
+  overflow-wrap: anywhere;
+}
+.ph-kv a {
+  display: inline-block;
+  min-height: 24px;
+}
+
+/* The folders, as tabs that jump to each. */
+.ph-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+.ph-tabs a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--phosphor-fg);
+}
+.ph-tabs a:active {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.ph-tabs a:active .text-phosphor-dim {
+  color: var(--phosphor-bg);
+}
+
+/* A folder: its title bar in inverse video, sticky under the header, and its projects as cards. */
+.ph-fold {
+  margin-top: 30px;
+  scroll-margin-top: 44px;
+}
+.ph-fh {
+  position: sticky;
+  top: 44px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+/* An icon in an inverse bar: its inside is the phosphor, its outline the tube's black. */
+.ph-fh svg path:first-child {
+  fill: var(--phosphor-fg);
+}
+.ph-fh-n {
+  margin-left: auto;
+}
+.ph-cards {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0 3px 3px 0;
+  display: grid;
+  gap: 16px;
+}
+/* A card is a window's frame: 1px and the hard 3px shadow in the dim tone. Its name's link covers it; pressed, it is inverse video. */
+.ph-card {
+  position: relative;
+  border: 1px solid var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+  background: var(--phosphor-bg);
+  padding: 8px 12px 10px;
+}
+.ph-card h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 24px;
+}
+.ph-card h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+/* The card shows the focus around itself, not around the name. */
+.ph-card h3 a:focus-visible {
+  outline: none;
+}
+.ph-card:has(a:focus-visible) {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 4px;
+}
+.ph-card:has(a:active) {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.ph-card:has(a:active) .text-phosphor-dim {
+  color: var(--phosphor-bg);
+}
+
+/* A project's page. */
+.ph-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: -8px 0 6px;
+  padding-right: 10px;
+}
+.ph-back:active,
+.ph-pn a:active {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.ph-facts {
+  padding: 8px 0;
+  border-top: 1px solid var(--phosphor-fg);
+  border-bottom: 1px solid var(--phosphor-fg);
+}
+.ph-h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--phosphor-fg);
+  padding-bottom: 2px;
+}
+.ph-shots {
+  margin-top: 26px;
+}
+.ph-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+/* A desktop picture takes the column's width, a phone picture half of it. */
+.ph-shot {
+  flex: 1 1 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ph-shot.ph-phone {
+  flex: 0 1 calc(50% - 8px);
+}
+.ph-shot button {
+  display: block;
+  border: 1px solid var(--phosphor-fg);
+  line-height: 0;
+}
+.ph-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+.ph-shot figcaption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+/* The README in the shell's double-bordered pane, its path set in the border. */
+.ph-pane {
+  position: relative;
+  border: 4px double var(--phosphor-fg);
+  padding: 14px 10px 10px;
+  margin-top: 40px;
+}
+.ph-pt {
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  max-width: calc(100% - 28px);
+  padding: 0 6px;
+  background: var(--phosphor-bg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Previous and next: two framed buttons. */
+.ph-pn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 0 3px 3px 0;
+}
+.ph-pn a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 56px;
+  padding: 4px 10px;
+  border: 1px solid var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+}
+.ph-pn a.ph-nx {
+  text-align: right;
+  align-items: flex-end;
+}
+.ph-pn a:active .text-phosphor-dim {
+  color: var(--phosphor-bg);
+}
+.ph-lb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The foot of every page. */
+.ph-ft {
+  border-top: 1px solid var(--phosphor-fg);
+}
+.ph-ft .ph-wrap {
+  padding-top: 14px;
+  padding-bottom: 20px;
+}

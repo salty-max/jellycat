@@ -1,0 +1,58 @@
+/* A README's text (docs/design.md Readme), drawn the same in the shell, the Readme window and the phone's page. The marks are drawn dim
+   here, so the HTML holds the words alone. The layout around it sets the size, the line height and the colour of its links. */
+.rd-md {
+  white-space: normal;
+}
+.rd-md > * {
+  margin: 0;
+}
+.rd-md > * + * {
+  margin-top: 1lh;
+}
+.rd-md > h2 + *,
+.rd-md > h3 + * {
+  margin-top: 0;
+}
+.rd-md h2,
+.rd-md h3 {
+  font: inherit;
+}
+.rd-md ul {
+  list-style: none;
+  padding: 0;
+}
+.rd-md li {
+  display: grid;
+  grid-template-columns: 2ch minmax(0, 1fr);
+}
+.rd-md h2::before,
+.rd-md h3::before,
+.rd-md li::before {
+  color: var(--phosphor-dim);
+}
+.rd-md h2::before {
+  content: "# " / "";
+}
+.rd-md h3::before {
+  content: "## " / "";
+}
+.rd-md li::before {
+  content: "-" / "";
+}
+.rd-md code {
+  font: inherit;
+}
+.rd-md code::before,
+.rd-md code::after {
+  content: "`" / "";
+  color: var(--phosphor-dim);
+}
+.rd-md p,
+.rd-md li > span {
+  overflow-wrap: anywhere;
+}
+/* Every link in a README's text is underlined. */
+.rd-md a {
+  color: inherit;
+  text-decoration: underline;
+}

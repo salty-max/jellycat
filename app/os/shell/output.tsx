@@ -1,12 +1,11 @@
 import { Component, Suspense, use, useLayoutEffect, type MouseEvent, type ReactNode } from "react";
 import { readmePath } from "../../core/fs";
 import { projectBySlug } from "../../core/projects";
-import { loadReadme, type Block, type Inline } from "../../core/readme";
+import { loadReadme } from "../../core/readme";
 import type { Line, Segment } from "../../core/shell";
+import { plainClick } from "../readme/click";
+import { ReadmeBlocks } from "../readme/readme-blocks";
 import { useShell } from "./context";
-
-// A plain click runs the name; a click with a modifier (a new tab, a copy of the address) is the browser's.
-const plainClick = (event: MouseEvent) => !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0);
 
 // A name in the output keeps the prompt's focus: pressing it must not take the focus from the input.
 const keepFocus = (event: MouseEvent) => event.preventDefault();
@@ -88,74 +87,14 @@ function Card({ slug, heading }: { slug: string; heading: boolean }) {
   );
 }
 
-function Inlines({ content }: { content: readonly Inline[] }) {
-  return content.map((part, index) => {
-    switch (part.kind) {
-      case "text":
-        return part.text;
-      case "code":
-        return <code key={index}>{part.text}</code>;
-      case "link":
-        return (
-          <ExternalLink key={index} href={part.href}>
-            {part.text}
-          </ExternalLink>
-        );
-      case "project":
-        return (
-          <ProjectLink key={index} slug={part.slug}>
-            {part.text}
-          </ProjectLink>
-        );
-    }
-  });
-}
-
-/**
- * A README as `docs/design.md` Readme draws it: real headings, lists and `code`; their marks (`#`, `##`, `-`, the backticks) are
- * drawn dim by the CSS, so the text a crawler or a screen reader gets is the words alone. The title is an `h2` and a heading an
- * `h3`: the page's `h1` is the project's name.
- */
-export function ReadmeBlocks({ blocks }: { blocks: readonly Block[] }) {
-  return (
-    <div className="sh-md">
-      {blocks.map((block, index) => {
-        switch (block.kind) {
-          case "title":
-            return <h2 key={index}>{block.text}</h2>;
-          case "heading":
-            return <h3 key={index}>{block.text}</h3>;
-          case "paragraph":
-            return (
-              <p key={index}>
-                <Inlines content={block.content} />
-              </p>
-            );
-          case "list":
-            return (
-              <ul key={index}>
-                {block.items.map((item, at) => (
-                  <li key={at}>
-                    <span>
-                      <Inlines content={item} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            );
-        }
-      })}
-    </div>
-  );
-}
-
 function ReadmeLoaded({ slug }: { slug: string }) {
-  const { readmes, settled } = useShell();
+  const { run, readmes, settled } = useShell();
   const given = readmes[slug];
   const loading = given ? undefined : loadReadme(slug);
   const blocks = given ?? (loading ? use(loading) : undefined);
   useLayoutEffect(settled, [settled]);
-  return blocks ? <ReadmeBlocks blocks={blocks} /> : <div>-</div>;
+  // A link to another project runs `open <slug>`, as a pressed name does; the links keep the prompt's focus.
+  return blocks ? <ReadmeBlocks blocks={blocks} onOpenProject={(target) => run(`open ${target}`)} linkClassName="sh-lk" onLinkMouseDown={keepFocus} /> : <div>-</div>;
 }
 
 class Failed extends Component<{ children: ReactNode }, { failed: boolean }> {

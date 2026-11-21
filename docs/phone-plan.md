@@ -147,8 +147,8 @@ browser's pan. The user chose size over a mouse-only rule ([the answers](#the-us
   `app/os/readme/`. Its link to another project stops calling the shell's `run` itself and takes the action from its host: the
   shell and the desktop's Readme window keep `open <slug>` (the window parses it today), the phone page passes the router's
   `navigate`. `Readme`, the wrapper that reads the shell's context, waits for the chunk and says when it failed, stays in
-  `output.tsx` for the Terminal, `browse`, the pager and the Readme window. The `sh-lk` and `sh-md` classes and the kept focus
-  are the shell's; the phone page brings its own.
+  `output.tsx` for the Terminal, `browse`, the pager and the Readme window. The README's CSS (`sh-md`) moved with it, renamed `rd-md`, in `app/os/readme/readme.css`, shared by both layouts. The `sh-lk` class
+  and the kept focus are the shell's, passed in as the links' class and mouse-down handler; the phone page brings its own.
 - `Picture` and `usePictures`, which the phone's pages and viewer reuse; `Picture` gains a `loading` prop (lazy by default) for
   the page's first picture. The desktop's viewer window.
 - The routes, their loaders, the URL that follows the project, the prerender list, `buildEnd`, the CSP step.

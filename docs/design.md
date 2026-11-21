@@ -1,7 +1,7 @@
 # Jelly-OS design rules
 
-What the mockups (`mockups/phosphor-desktop.html`, `mockups/phosphor-shell.html`) settled. A component that breaks one of these
-rules changes this file in the same pull request.
+What the mockups (`mockups/phosphor-desktop.html`, `mockups/phosphor-shell.html`, `mockups/phosphor-phone.html`) settled. A
+component that breaks one of these rules changes this file in the same pull request.
 
 ## Screen
 
@@ -38,6 +38,8 @@ rules changes this file in the same pull request.
 - They are SVG components (`app/os/icons/`), one square path per pixel, never scaled to a fraction, and hidden from screen readers:
   the label next to an icon names it. Their grids are the mockup's.
 - All four project folders (web, addons, engines, tools) use the folder icon.
+- The Control Panel's icon is the one icon with no label beside it: in the phone's header it is a 44px button named Control Panel
+  (`aria-label`), the 32px icon centred in it, and inverse video (its inside turned with it) while pressed and while its sheet is open.
 
 ## Desktop
 
@@ -78,6 +80,55 @@ rules changes this file in the same pull request.
   client only (the page is prerendered).
 - The boot screen is the cat at 4× (64px), the OS name as the page's `h1`, and "Starting up" in the dim tone; the shut-down screen is
   one button, "Click to restart".
+
+## Phone
+
+On a phone Jelly-OS is a page that scrolls like any site, in the same phosphor (`mockups/phosphor-phone.html`; the decisions are in
+`docs/phone-plan.md`). The document scrolls, not a box inside the screen, so the browser's bars hide on scroll and back restores the
+position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the README's text is the shared `app/os/readme/`.
+
+- Text 20px on 24px lines, as the shell. The page is the tube's black (`--phosphor-bg`), the text the phosphor, the glow on all of it.
+  It sits outside `Crt`: `Crt`'s `overflow: hidden` makes it a scroll container, and a sticky header sticks to its nearest one.
+- The page's CRT layer (scanlines, vignette, flicker) is `position: fixed` over the viewport, `100lvh` tall so it still covers while
+  iOS hides its toolbar, so the page scrolls under it. It has no rounded corners (the screen has its own), takes no clicks and is
+  hidden from screen readers. The desktop's layer stays absolute inside the rounded `Crt`.
+- A column at most 640px wide, centred, with a 16px gutter: a phone sideways or a small tablet gets a centred column, and the header's
+  content lines up with it.
+- The header, on every page: the desktop's menu bar, sticky, 44px tall with a 1px rule under it. On the left the cat at 2× and
+  `Jellycat Studio`, a link home; on the right the Control Panel's button (see Icons). Both are 44px targets.
+- The home page: `Jellycat Studio` as the `h1` (40px), the studio Readme's line, and `contact.txt`'s two rows (Email, GitHub) as a
+  dim label and an underlined link. Then the folders as tabs that jump to each (`Web 4`, `Addons 11`, `Engines 1`, `Tools 3`: a 36px
+  framed link, the count dim; `Link to="#<folder>"`, so back after a tab works as after any move). Each folder is a section with an
+  `h2` title bar in inverse video (the folder icon inverted, its name, `11 items` as the folder window's info line says it), 32px
+  tall and sticky under the header while its projects scroll by, then the projects as cards in the data's order.
+- A card is a window's frame (1px, the hard 3px shadow in the dim tone): the name (24px) with a pixel arrow, the kind (dim), the
+  description, and `3 pictures` (dim) when it has some. The name is the card's one link, its hit area the whole card; the description
+  is text outside it. Pressed, the card is inverse video; keyboard focus draws the dashed ring around the card.
+- A project's page: `< Web`, a 40px-tall link back to the home page at that folder (`/#web`); the name as the `h1`, the kind (dim),
+  the description. Stack, Link and Source as the Info window lists them, between two 1px rules; an unknown Link or Source is `-`.
+  Screenshots, when it has some: an `h2` with the count at the right, then the pictures stacked, each in its own colours in a 1px frame
+  with its alt text as the caption (three lines at most, hidden from screen readers, since the picture's button carries it). A
+  desktop picture takes the column's width, a phone picture half of it, centred. Pressing one opens the viewer (see Viewer). The
+  first picture loads eagerly, the rest when they are near.
+- The README in the shell's double-bordered pane (`border: 4px double`), its path (`~/projects/web/hundo/README`) set in the top
+  border and hidden from screen readers, the pane a section labelled README. It is drawn as everywhere (see Readme); a link to
+  another project moves to its page in the browser. When the README's chunk could not be loaded the pane says `README: could not
+  be loaded`.
+- Previous and Next: the neighbouring projects in the data's order, two framed buttons (1px, the hard 3px shadow, 56px tall at
+  least), Previous with its arrow at the left and Next at the right; at the ends the missing one is left empty.
+- The footer, on every page: `Jelly-OS 1.0` in the dim tone under a 1px rule.
+- The Control Panel's sheet: a window docked at the bottom, 8px from the screen's edges and at most 640px wide, with the window's
+  1px frame, hard shadow and an inverse title bar (`Control Panel`, and a close box: the desktop's glyph in a dark square, a 44×32
+  target). Under it the desktop Control Panel's Phosphor (Green, Amber, White) and Effects (Scanlines, Glow, Flicker) in 44px rows;
+  the Dither pattern is left out, a phone has no desktop. It is a modal dialog: a 1-bit dither dims the page behind it, and a tap on
+  that, Esc, Android's back gesture or the close box closes it; focus goes to the checked phosphor and comes back to the header's
+  button. It appears and goes at once, as a window does: no slide. The settings are the desktop's, so a choice holds on both.
+- Pressed, a folder tab, a card, the back link, Previous and Next and the Control Panel's button are inverse video (the dim tone
+  inside them turns with it); the other links and the pictures' buttons show nothing. Every tab stop shows its focus on keyboard
+  focus only: the desktop's 1px dashed ring, 2px off its edge (a card's, 4px off, around the card). The phone has no text field.
+- Landmarks: the header, `main`, the footer, a `nav` for the folder tabs and one for Previous and Next. One `h1` a page; an `h2` per
+  folder and for Screenshots; the README's own title is an `h2` and its headings `h3`.
+- No smooth scrolling, and no motion but the flicker, which is off by default and never runs under `prefers-reduced-motion`.
 
 ## Shell
 

@@ -1,4 +1,4 @@
-/* The shell's own CSS (docs/design.md Shell, Readme). The tube's colours are app.css's tokens; the glow comes from the `crt-glow` utility. */
+/* The shell's own CSS (docs/design.md Shell; the README's text is readme/readme.css). The tube's colours are app.css's tokens; the glow comes from the `crt-glow` utility. */
 .sh {
   position: relative;
   width: 100%;
@@ -19,10 +19,9 @@
 .sh a {
   color: inherit;
 }
-/* As the mockup draws them: an address (https, the e-mail) and any link in a README's text are underlined; a project's name in a
-   listing (`ls`, `tree`) and a command (a button) aren't. */
-.sh a:not([href^="/projects/"]),
-.sh-md a {
+/* As the mockup draws them: an address (https, the e-mail) is underlined, and any link in a README's text (readme/readme.css); a
+   project's name in a listing (`ls`, `tree`) and a command (a button) aren't. */
+.sh a:not([href^="/projects/"]) {
   text-decoration: underline;
 }
 .sh :focus-visible {
@@ -63,7 +62,7 @@
 }
 .sh-term .sh-lk:only-child,
 .sh-kr .sh-lk,
-.sh-md .sh-lk {
+.rd-md .sh-lk {
   white-space: inherit;
 }
 .sh-lk:hover {
@@ -126,59 +125,6 @@
 .sh-h1 {
   margin: 0;
   font: inherit;
-}
-
-/* A README: the marks are drawn dim here, so the HTML holds the words alone. */
-.sh-md {
-  white-space: normal;
-}
-.sh-md > * {
-  margin: 0;
-}
-.sh-md > * + * {
-  margin-top: 1lh;
-}
-.sh-md > h2 + *,
-.sh-md > h3 + * {
-  margin-top: 0;
-}
-.sh-md h2,
-.sh-md h3 {
-  font: inherit;
-}
-.sh-md ul {
-  list-style: none;
-  padding: 0;
-}
-.sh-md li {
-  display: grid;
-  grid-template-columns: 2ch minmax(0, 1fr);
-}
-.sh-md h2::before,
-.sh-md h3::before,
-.sh-md li::before {
-  color: var(--phosphor-dim);
-}
-.sh-md h2::before {
-  content: "# " / "";
-}
-.sh-md h3::before {
-  content: "## " / "";
-}
-.sh-md li::before {
-  content: "-" / "";
-}
-.sh-md code {
-  font: inherit;
-}
-.sh-md code::before,
-.sh-md code::after {
-  content: "`" / "";
-  color: var(--phosphor-dim);
-}
-.sh-md p,
-.sh-md li > span {
-  overflow-wrap: anywhere;
 }
 
 /* Full screen (the pager, and the host's browse and viewer): a double-bordered pane with its title set in the border, and a key bar. */
