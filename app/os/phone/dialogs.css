@@ -1,0 +1,205 @@
+/* The phone's two modal dialogs (docs/design.md Viewer; mockups/phosphor-phone.html .vw, .sheet, .bd). Each is a native <dialog> that
+   fills the screen, so its own CRT layer covers the whole of it; what shows is a child of it. */
+.dlg {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  /* iOS would otherwise scroll the page under a dialog that has nothing left to scroll. */
+  overscroll-behavior: contain;
+  background: transparent;
+  color: var(--phosphor-fg);
+  font-size: 20px;
+  line-height: 1.2;
+}
+.dlg:focus {
+  outline: none;
+}
+.dlg::backdrop {
+  background: transparent;
+}
+.dlg :focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}
+
+/* A pressable of the dialogs: no browser chrome, a 1px frame, a 44px target. */
+.dlg-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  border: 1px solid var(--phosphor-fg);
+  cursor: pointer;
+}
+.dlg-btn:active:not([aria-disabled="true"]) {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.dlg-btn[aria-disabled="true"] {
+  color: var(--phosphor-dim);
+  border-color: var(--phosphor-dim);
+  cursor: default;
+}
+
+/* The viewer: the pane in a double border with its title set in the top edge, the buttons under it. */
+.dlg-viewer {
+  background: var(--phosphor-bg);
+}
+.dlg-viewer[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 16px 16px;
+}
+.dlg-pane {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 10px 10px;
+  border: 4px double var(--phosphor-fg);
+}
+.dlg-pt {
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.dlg-pt > span {
+  padding: 0 6px;
+  background: var(--phosphor-bg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dlg-pt > span:last-child {
+  flex: none;
+}
+/* The picture box takes sideways swipes for itself and leaves the vertical pan and the pinch to the browser. */
+.dlg-box {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y pinch-zoom;
+}
+.dlg-box picture {
+  display: contents;
+}
+.dlg-box img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.dlg-cap {
+  flex: none;
+  min-height: 2.4em;
+}
+.dlg-btns {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+/* The Control Panel's sheet: the page behind is dimmed by a 1-bit dither, the window docked at the bottom as a window is drawn. */
+.dlg-sheet {
+  background: repeating-conic-gradient(rgb(0 0 0 / 0.72) 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+}
+.dlg-window {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  max-width: 624px;
+  margin: 0 auto;
+  background: var(--phosphor-bg);
+  border: 1px solid var(--phosphor-fg);
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+}
+.dlg-tb {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-left: 12px;
+}
+.dlg-tb h2 {
+  flex: 1;
+  margin: 0;
+  font: inherit;
+}
+.dlg-x {
+  all: unset;
+  box-sizing: border-box;
+  width: 44px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.dlg-x > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+}
+.dlg-x:active > span {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  outline: 1px solid var(--phosphor-bg);
+}
+.dlg .dlg-x:focus-visible {
+  outline: 1px dashed var(--phosphor-bg);
+  outline-offset: -3px;
+}
+/* The settings take 44px rows here, with a 16px box (the desktop's controls are 14px on 18px text). */
+.dlg-cp {
+  display: grid;
+  grid-template-columns: 8ch 1fr;
+  column-gap: 10px;
+  padding: 8px 12px 10px;
+}
+.dlg-cp .ctl-label {
+  line-height: 44px;
+}
+.dlg-cp .ctl-opts {
+  gap: 0 18px;
+}
+.dlg-cp .ctl-opt {
+  height: 44px;
+  gap: 8px;
+  cursor: pointer;
+}
+.dlg-cp .ctl-box {
+  width: 16px;
+  height: 16px;
+  padding: 3px;
+}

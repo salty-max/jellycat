@@ -158,7 +158,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 
 ## Viewer
 
-- A project's screenshots open in a viewer: a window on the desktop, full screen in the shell (`view <project>`, like `browse`).
+- A project's screenshots open in a viewer: a window on the desktop, a full-screen dialog on a phone (below), and, until the phone's
+  shell goes, full screen in the shell (`view <project>`, like `browse`).
 - The picture is shown whole, scaled to fit, in its own colours, with the CRT layer on top. Desktop-sized and phone-sized pictures
   share one window (desktop) or one full-screen pane (shell), which keeps its size from one picture to the next. On the desktop the
   picture box is fixed, so the buttons stay put; in the shell the caption sits right under the picture.
@@ -167,6 +168,23 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 - Previous and next are buttons with pixel arrows on the desktop and `h`/`l` in the shell's key bar; ← and → work in both. At the
   first or last picture the control is dim. Esc closes the window; `q` or Esc returns the shell to the prompt as it was.
 - In the desktop's Terminal, `view <project>` opens the viewer's window and prints `opened <Name> Screenshots`; it is not full screen there.
+- The phone's viewer (`app/os/phone/viewer-dialog.tsx`) is a native modal `<dialog>` that fills the screen, labelled `<Name> screenshots`
+  and opened on the picture that was tapped. The pane is a 4px double border with the name set in its top edge on the left and the
+  count (`2 of 3`, a polite status) on the right; the picture is shown whole inside it with its caption (the alt text, hidden from
+  screen readers, who have it on the picture) right under it. Under the pane, three 44px buttons in a row: Previous and Next with pixel
+  arrows, dim (`aria-disabled`, so the focus stays on the button pressed) at the ends, and Close, which has the focus when it opens.
+  ← and → work from anywhere in the dialog; a swipe of 40px or more, further across than down, on the picture steps (the box is
+  `touch-action: pan-y pinch-zoom`, so a vertical pan and a pinch stay the browser's). Esc, Android's back gesture and Close return to
+  the page, with the focus back on what had it when the viewer opened. It appears and goes at once.
+- The phone's dialogs (the viewer and the Control Panel's sheet) share one component, `app/os/phone/dialog.tsx`: `showModal()` on
+  mount gives the top layer, the focus trap, the inert page behind, Esc and the back gesture; the page's scroll is locked while one is
+  open (`overscroll-behavior: contain` on the dialog keeps iOS from scrolling the page behind it); each carries its own CRT layer
+  (`crt-overlay`, `crt-flicker`, over the whole screen, taking no clicks, hidden from screen readers), since the page's layer sits below
+  the top layer. The sheet's window is docked inside a full-screen dialog
+  (8px from the screen's edges, at most 640px wide, the window's 1px frame and its hard 3px shadow in the dim tone); the dialog's
+  background is a 1-bit dither of the tube's black at 72% (a 2px checkerboard), which dims the page behind it. Its title bar is 32px in
+  inverse video, with the close box on the right, the desktop's glyph in a 22px dark square inside a 44x32 target. Under it the
+  Phosphor and Effects settings the desktop's Control Panel has, in rows 44px tall with 16px boxes.
 - The Info window and the `open` card list Stack, Link, Source and Screenshots, and the card a README row after them. An unknown
   Link or Source is `-`; a project with no pictures has no Screenshots row.
 

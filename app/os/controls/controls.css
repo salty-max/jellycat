@@ -1,0 +1,35 @@
+/* The settings controls the desktop's Control Panel and the phone's sheet share (docs/design.md Desktop, Phone): the phosphor radios
+   and the effect checkboxes. Their sizes here are the desktop's; the sheet's own CSS takes 44px rows. */
+.ctl-label {
+  color: var(--phosphor-dim);
+}
+.ctl-opts {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ctl-opt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ctl-box {
+  all: unset;
+  box-sizing: border-box;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--phosphor-fg);
+  padding: 2px;
+  background-clip: content-box;
+}
+.ctl-box[data-radio] {
+  border-radius: 50%;
+}
+.ctl-box[data-checked] {
+  background-color: var(--phosphor-fg);
+}
+.ctl-box:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}

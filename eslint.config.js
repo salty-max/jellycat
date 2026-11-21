@@ -50,6 +50,8 @@ export default tseslint.config(
             "^menubar(-|$)",
             "^rd(-|$)",
             "^ph(-|$)",
+            "^ctl(-|$)",
+            "^dlg(-|$)",
           ],
         },
       ],

@@ -207,39 +207,9 @@
   user-select: text;
 }
 
-/* The Control Panel: phosphor radios and effect checkboxes. */
+/* The Control Panel's grid: a label and its controls (app/os/controls/). */
 .app-cp {
   display: grid;
   grid-template-columns: 84px 1fr;
   gap: 12px 10px;
-}
-.app-opts {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.app-opt {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.app-box {
-  all: unset;
-  box-sizing: border-box;
-  flex: none;
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--phosphor-fg);
-  padding: 2px;
-  background-clip: content-box;
-}
-.app-box[data-radio] {
-  border-radius: 50%;
-}
-.app-box[data-checked] {
-  background-color: var(--phosphor-fg);
-}
-.app-box:focus-visible {
-  outline: 1px dashed var(--phosphor-fg);
-  outline-offset: 2px;
 }
