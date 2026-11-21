@@ -45,7 +45,7 @@ export const Viewer: Story = {
     const viewer = await canvas.findByRole("dialog", { name: "Hundo screenshots" });
     // Modal, in the top layer: the browser inerts the page behind it.
     expect(viewer.matches(":modal")).toBe(true);
-    await expect(within(viewer).getByRole("button", { name: "Close" })).toHaveFocus();
+    await waitFor(() => expect(within(viewer).getByRole("button", { name: "Close" })).toHaveFocus());
     await expect(within(viewer).getByText("1 of 3")).toBeInTheDocument();
     await expect(within(viewer).getByRole("button", { name: "Previous" })).toHaveAttribute("aria-disabled", "true");
 
@@ -94,7 +94,13 @@ export const Sheet: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Open" }));
     const sheet = await canvas.findByRole("dialog", { name: "Control Panel" });
     expect(sheet.matches(":modal")).toBe(true);
-    await expect(within(sheet).getByRole("radio", { name: "Green" })).toHaveFocus();
+    await waitFor(() => expect(within(sheet).getByRole("radio", { name: "Green" })).toHaveFocus());
+    // The group's tab stop, so the first arrow moves: the focus came once the group knew its radios.
+    await expect(within(sheet).getByRole("radio", { name: "Green" })).toHaveAttribute("tabindex", "0");
+    await userEvent.keyboard("{ArrowRight}");
+    await expect(within(sheet).getByRole("radio", { name: "Amber" })).toBeChecked();
+    await userEvent.keyboard("{ArrowLeft}");
+    await expect(within(sheet).getByRole("radio", { name: "Green" })).toBeChecked();
     await userEvent.click(within(sheet).getByRole("radio", { name: "Amber" }));
     await expect(within(sheet).getByRole("radio", { name: "Amber" })).toBeChecked();
     await userEvent.click(within(sheet).getByRole("checkbox", { name: "Flicker" }));

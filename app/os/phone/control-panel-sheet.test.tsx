@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
@@ -41,10 +41,14 @@ test("it is a modal dialog named by its title, with the phosphor and the effects
   expect(panel.queryByText("Dither pattern")).not.toBeInTheDocument();
 });
 
-test("the focus goes to the checked phosphor, the saved one", () => {
+test("the focus goes to the checked phosphor, the saved one, which is the group's tab stop", async () => {
   useSettings.setState({ phosphor: "amber" });
   render(<ControlPanelSheet onClose={() => {}} />);
-  expect(screen.getByRole("radio", { name: "Amber" })).toHaveFocus();
+  const amber = screen.getByRole("radio", { name: "Amber" });
+  // A frame after it opens, once the radio group knows its radios (dialog.tsx says why): focused any sooner, it stays out of the tab
+  // order and the first arrow does nothing.
+  await waitFor(() => expect(amber).toHaveFocus());
+  expect(amber).toHaveAttribute("tabindex", "0");
 });
 
 test("choosing a phosphor and toggling an effect write the settings store the desktop's Control Panel writes", async () => {

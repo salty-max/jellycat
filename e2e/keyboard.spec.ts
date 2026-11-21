@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-// The OS with no mouse: every app opened and closed from the keyboard alone, on the desktop and in the shell. Nothing here clicks.
+// The OS with no mouse: every app opened and closed from the keyboard alone, on the desktop and on the phone. Nothing here clicks.
 // Focus moves only by the keys a visitor has (Tab, Shift+Tab, the arrows, Enter, Esc), so each step also proves that what it
 // reaches is in the tab order.
 
@@ -44,7 +44,7 @@ test.describe("the desktop", () => {
 
   test("every app opens and closes with no mouse", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
 
     // Projects opens at boot with the focus on its first item; Enter opens a folder, then a project's Info window.
     await expect(win(page, "Projects").getByRole("option", { name: "Web" })).toBeFocused();
@@ -155,68 +155,74 @@ test.describe("the desktop", () => {
     await pick(page, "Special", "Shut Down...");
     await expect(ask.getByRole("button", { name: "Shut Down" })).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "off");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "off");
     // The shut-down screen is one button: Tab reaches it, Enter restarts.
     await tabTo(page, page.getByRole("button", { name: /has shut down/ }));
     await page.keyboard.press("Enter");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
     await expect(win(page, "Projects")).toBeVisible();
   });
 });
 
-test.describe("the shell", () => {
-  test.skip(({ isMobile }) => !isMobile, "the shell is the phone's");
+test.describe("the phone", () => {
+  test.skip(({ isMobile }) => !isMobile, "the phone's page");
 
-  test("every view opens and closes with no mouse, and Tab leaves the prompt", async ({ page }) => {
+  test("a project, the viewer and the Control Panel's sheet work with no pointer", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "shell");
-    const input = page.getByLabel("Terminal input");
-    const run = async (line: string) => {
-      await page.keyboard.type(line);
-      await page.keyboard.press("Enter");
-    };
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
 
-    // The welcome's names come first, then the prompt.
-    await tabTo(page, input);
-    await run("help");
-    await expect(page.getByRole("log").getByText("browse")).not.toHaveCount(0);
-
-    // open: the project's card and its address; the README row pages it, q comes back.
-    await run("open hundo");
-    await expect(page).toHaveURL(/\/projects\/hundo$/);
-    const path = page.getByRole("button", { name: "~/projects/web/hundo/README" }).last();
-    await tabTo(page, path, { back: true });
+    // A folder tab, then a card's link: Enter follows each.
+    await tabTo(page, page.getByRole("navigation", { name: "Folders" }).getByRole("link", { name: /Engines/ }));
     await page.keyboard.press("Enter");
-    const pager = page.getByRole("region", { name: "~/projects/web/hundo/README" });
-    await expect(pager.getByRole("heading", { name: "Hundo" })).toBeVisible();
-    await page.keyboard.press("j");
-    await page.keyboard.press("q");
-    await expect(pager).toHaveCount(0);
-
-    // view: the screenshots full screen; l steps, q comes back.
-    await tabTo(page, input);
-    await run("view hundo");
-    await expect(page.getByText("1 of 3")).toBeVisible();
-    await page.keyboard.press("l");
-    await expect(page.getByText("2 of 3")).toBeVisible();
-    await page.keyboard.press("q");
-    await expect(page.getByText("2 of 3")).toHaveCount(0);
-
-    // browse: Enter goes into a directory, q comes back to the prompt.
-    await run("browse");
-    const directory = page.getByRole("group", { name: "Directory" });
-    await expect(directory.getByRole("button", { name: "projects/" })).toBeVisible();
+    await expect(page).toHaveURL(/\/#engines$/);
+    await tabTo(page, page.getByRole("link", { name: "Gero", exact: true }));
     await page.keyboard.press("Enter");
-    await expect(directory.getByRole("button", { name: "web/" })).toBeVisible();
-    await page.keyboard.press("q");
-    await expect(directory).toHaveCount(0);
-    await expect(input).toBeFocused();
+    await expect(page).toHaveURL(/\/projects\/gero$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Gero" })).toBeVisible();
 
-    // A name in a listing is a link: Shift+Tab from an empty prompt reaches it, Enter opens the project.
-    await run("ls ~/projects/web");
-    await tabTo(page, page.getByRole("link", { name: "farseer/" }).last(), { back: true });
+    // A picture opens the viewer, with the focus on Close; the arrows step, Esc closes and gives the focus back to the picture.
+    const picture = page.getByRole("region", { name: /Screenshots/ }).getByRole("button").first();
+    await tabTo(page, picture);
     await page.keyboard.press("Enter");
-    await expect(page).toHaveURL(/\/projects\/farseer$/);
+    const viewer = page.getByRole("dialog", { name: "Gero screenshots" });
+    await expect(viewer.getByRole("button", { name: "Close" })).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(viewer.getByRole("status")).toHaveText("2 of 2");
+    await page.keyboard.press("ArrowLeft");
+    await expect(viewer.getByRole("status")).toHaveText("1 of 2");
+    // Tab stays inside it: round its three buttons (and, past the last, the browser's own controls), never to the page behind.
+    for (let presses = 0; presses < 5; presses++) {
+      await page.keyboard.press("Tab");
+      expect(await page.evaluate(() => document.activeElement === document.body || !!document.activeElement?.closest("dialog"))).toBe(true);
+    }
+    await tabTo(page, viewer.getByRole("button", { name: "Close" }));
+    await page.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    await expect(picture).toBeFocused();
+
+    // The header's button opens the sheet with the focus on the checked phosphor; the arrows pick one, Space an effect.
+    const button = page.getByRole("button", { name: "Control Panel" });
+    await tabTo(page, button, { back: true });
+    await page.keyboard.press("Enter");
+    const sheet = page.getByRole("dialog", { name: "Control Panel" });
+    await expect(sheet.getByRole("radio", { name: "Green" })).toBeFocused();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("html")).toHaveAttribute("data-phosphor", "amber");
+    await tabTo(page, sheet.getByRole("checkbox", { name: "Glow" }));
+    await page.keyboard.press("Space");
+    await expect(page.locator("html")).toHaveAttribute("data-glow", "false");
+    await page.keyboard.press("Escape");
+    await expect(sheet).toHaveCount(0);
+    await expect(button).toBeFocused();
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+
+    // The close box closes it too.
+    await page.keyboard.press("Enter");
+    await tabTo(page, sheet.getByRole("button", { name: "Close" }), { back: true });
+    await page.keyboard.press("Enter");
+    await expect(sheet).toHaveCount(0);
+    await expect(button).toBeFocused();
   });
 });
 
@@ -224,5 +230,5 @@ test("404.html: Tab reaches the way home", async ({ page }, info) => {
   await page.goto("/no/such/page");
   await tabTo(page, page.getByRole("link", { name: "Go to the home page" }));
   await page.keyboard.press("Enter");
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", info.project.name === "phone" ? "shell" : "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", info.project.name === "phone" ? "phone" : "desktop");
 });

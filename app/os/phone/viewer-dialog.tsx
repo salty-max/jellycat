@@ -12,9 +12,9 @@ const SWIPE = 40;
  * The phone's screenshot viewer: a full-screen modal dialog named for the project. The name and the count (`2 of 3`) are set in the
  * pane's double border, the picture is shown whole with its caption under it, and three buttons follow: Previous and Next (dim at the
  * ends) and Close. A swipe on the picture and ← → step; Esc, Android's back gesture and Close call `onClose`, which unmounts it.
- * `start` is the index of the picture that opened it.
+ * `start` is the index of the picture that opened it, and `returnFocus` that picture, which takes the focus back.
  */
-export function PhoneViewer({ slug, start, onClose }: { slug: string; start: number; onClose: () => void }) {
+export function PhoneViewer({ slug, start, onClose, returnFocus }: { slug: string; start: number; onClose: () => void; returnFocus?: HTMLElement | null }) {
   const { pictures, index, shot, hasPrevious, hasNext, go } = usePictures(slug, start);
   const project = projectBySlug(slug);
   // Where a finger went down on the picture, until it comes up or the browser takes the gesture for a scroll.
@@ -46,7 +46,7 @@ export function PhoneViewer({ slug, start, onClose }: { slug: string; start: num
   };
 
   return (
-    <Dialog onClose={onClose} label={`${project.name} screenshots`} initialFocus="[data-close]" onKeyDown={onKeyDown} className="dlg-viewer">
+    <Dialog onClose={onClose} label={`${project.name} screenshots`} initialFocus="[data-close]" returnFocus={returnFocus} onKeyDown={onKeyDown} className="dlg-viewer">
       <figure className="dlg-pane">
         <div className="dlg-pt">
           <span>{project.name}</span>

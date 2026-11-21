@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
@@ -43,12 +43,13 @@ function swipe(from: [number, number], to: [number, number]) {
   fireEvent.pointerUp(box, { pointerId: 1, clientX: to[0], clientY: to[1] });
 }
 
-test("it is a modal dialog named for the project, with the name and the count in the pane's border and Close focused", () => {
+test("it is a modal dialog named for the project, with the name and the count in the pane's border and Close focused", async () => {
   render(<PhoneViewer slug="hundo" start={0} onClose={() => {}} />);
   const viewer = within(dialog());
   expect(viewer.getByText("Hundo")).toBeInTheDocument();
   expect(viewer.getByText("1 of 3")).toHaveAttribute("role", "status");
-  expect(viewer.getByRole("button", { name: "Close" })).toHaveFocus();
+  // A frame after it opens (dialog.tsx says why).
+  await waitFor(() => expect(viewer.getByRole("button", { name: "Close" })).toHaveFocus());
 });
 
 test("the picture is whole, in AVIF and WebP with its size, and the alt text is its caption", () => {

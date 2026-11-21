@@ -9,7 +9,7 @@ const window = (page: Page, name: string) => page.getByRole("dialog", { name });
 
 async function boot(page: Page, path = "/") {
   await page.goto(path);
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
 }
 
 test("a project opens from the icons, at its address, and back and forward follow it", async ({ page }) => {

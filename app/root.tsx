@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useMatches } from "react-router";
 import { DEFAULT_SETTINGS, HEAD_SCRIPT, settingsAttributes, useSettingsSync } from "./core/settings";
 import { Crt } from "./os/crt";
-import { OsLayout } from "./os/layout";
+import { NOSCRIPT_CSS, OsLayout } from "./os/layout";
 import { showsOs } from "./os/os-route";
 import { NotFoundScreen } from "./os/not-found-screen";
 import type { Route } from "./+types/root";
@@ -22,11 +22,17 @@ export function Layout({ children }: { children: ReactNode }) {
     <html lang="en" {...settingsAttributes(DEFAULT_SETTINGS)} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* `resizes-visual`: an on-screen keyboard covers the page instead of shrinking it, so a tablet's desktop isn't swapped for the
+            phone's page while the Terminal is typed in. Chrome on Android does this already and Safari ignores it; the guard is the
+            layout's keyboard hold (app/os/layout.tsx). */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-visual" />
         {/* Applies the saved phosphor and effects as <html data-*> before first paint. Inline, so scripts/csp.ts hashes it at build. */}
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
         <Meta />
         <Links />
+        <noscript>
+          <style>{NOSCRIPT_CSS}</style>
+        </noscript>
       </head>
       <body>
         {children}

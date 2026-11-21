@@ -99,8 +99,8 @@ try {
     // The phosphor is the page's saved setting, as a visitor's would be.
     await page.addInitScript((phosphor) => localStorage.setItem("jelly-os:settings", JSON.stringify({ state: { phosphor }, version: 1 })), phosphor);
     await page.goto(`http://127.0.0.1:${targetPort}${values.page}`);
-    // Hydrated: the layout has left the server's "unknown" for the shell or the desktop.
-    await page.waitForSelector('main[data-layout]:not([data-layout="unknown"])');
+    // Hydrated: the layout has left the server's "unknown" for the phone's page or the desktop.
+    await page.waitForSelector('[data-layout]:not([data-layout="unknown"])');
   } else {
     await page.goto(`http://localhost:${targetPort}/iframe.html?id=${story}&viewMode=story&globals=phosphor:${phosphor}`);
     await page.waitForSelector("#storybook-root > *");

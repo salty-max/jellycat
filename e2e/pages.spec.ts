@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { PROJECTS } from "../app/core/projects";
+import { FOLDERS, FOLDER_NAMES, PROJECTS } from "../app/core/projects";
 import { pageUrl } from "../app/core/site";
 import { STUDIO_NAME } from "../app/core/studio";
 
@@ -53,4 +53,80 @@ test("an unknown project answers 404 and the browser shows the not-found page", 
   // Hydrated over 404.html's markup, not beside it: the root's HydrateFallback draws the same screen until the loader's 404.
   await expect(page.locator("main")).toHaveCount(1);
   expect(problems).toEqual([]);
+});
+
+// The phone's pages (app/os/phone): what a visitor on a phone reads and taps, once the page is up.
+test.describe("on a phone", () => {
+  test.skip(({ isMobile }) => !isMobile, "the phone's page");
+  const main = (page: import("@playwright/test").Page) => page.getByRole("main");
+
+  test("the home page: the studio, its contact, the folders as tabs and each folder's projects as cards", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1, name: STUDIO_NAME })).toBeVisible();
+    await expect(main(page).getByRole("link", { name: "max@jellycat.fr" })).toHaveAttribute("href", "mailto:max@jellycat.fr");
+    await expect(main(page).getByRole("link", { name: "github.com/salty-max" })).toHaveAttribute("href", "https://github.com/salty-max");
+    const tabs = page.getByRole("navigation", { name: "Folders" }).getByRole("link");
+    await expect(tabs).toHaveText(FOLDERS.map((folder) => `${FOLDER_NAMES[folder]} ${PROJECTS.filter((project) => project.folder === folder).length}`));
+    await expect(main(page).getByRole("heading", { level: 2 })).toHaveCount(FOLDERS.length);
+    // One link a card, named by the project alone.
+    await expect(main(page).getByRole("listitem").getByRole("link")).toHaveText(PROJECTS.map((project) => project.name));
+    await expect(page.getByRole("contentinfo")).toHaveText("Jelly-OS 1.0");
+  });
+
+  test("every project page: the name, the facts and the README's headings", async ({ page }) => {
+    await page.goto("/");
+    for (const project of PROJECTS) {
+      await page.goto(`/projects/${project.slug}`);
+      await expect(page.getByRole("heading", { level: 1, name: project.name, exact: true })).toBeVisible();
+      await expect(main(page).locator("dt")).toHaveText(["Stack", "Link", "Source"]);
+      await expect(main(page).locator("dd").first()).toHaveText(project.stack);
+      const readme = page.getByRole("region", { name: "README" });
+      await expect(readme.getByRole("heading", { level: 2 })).toHaveText(project.name);
+      expect(await readme.getByRole("heading", { level: 3 }).count(), project.slug).toBeGreaterThan(0);
+    }
+  });
+
+  test("a card opens its page; the back link, Previous and Next move as links do", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Farseer", exact: true }).click();
+    await expect(page).toHaveURL("/projects/farseer");
+    await expect(page.getByRole("heading", { level: 1, name: "Farseer" })).toBeVisible();
+    const neighbours = page.getByRole("navigation", { name: "Projects" });
+    await neighbours.getByRole("link", { name: /Next/ }).click();
+    await expect(page).toHaveURL("/projects/lucarne");
+    // A new page starts at its top.
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await neighbours.getByRole("link", { name: /Previous/ }).click();
+    await expect(page).toHaveURL("/projects/farseer");
+    await page.getByRole("link", { name: "Web", exact: true }).click();
+    await expect(page).toHaveURL("/#web");
+    await expect(page.getByRole("heading", { level: 2, name: /^Web/ })).toBeInViewport();
+  });
+
+  test("a folder tab jumps to its folder, and back returns to the top", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("navigation", { name: "Folders" }).getByRole("link", { name: /Tools/ }).click();
+    await expect(page).toHaveURL("/#tools");
+    await expect(page.getByRole("heading", { level: 2, name: /^Tools/ })).toBeInViewport();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+    await page.goBack();
+    await expect(page).toHaveURL("/");
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test("the header and a folder's bar stay at the top while the page scrolls", async ({ page }) => {
+    await page.goto("/");
+    const bar = page.getByRole("heading", { level: 2, name: /^Addons/ });
+    const top = (await bar.boundingBox())!.y + (await page.evaluate(() => window.scrollY));
+    await page.evaluate((y) => window.scrollTo(0, y + 600), top);
+    await expect.poll(async () => (await page.getByRole("banner").boundingBox())?.y).toBe(0);
+    expect((await bar.boundingBox())!.y).toBe(44);
+  });
+
+  test("a README's link to another project moves to its page", async ({ page }) => {
+    await page.goto("/projects/hundo");
+    await page.getByRole("region", { name: "README" }).getByRole("link", { name: "harness" }).click();
+    await expect(page).toHaveURL("/projects/harness");
+    await expect(page.getByRole("heading", { level: 1, name: "harness" })).toBeVisible();
+  });
 });

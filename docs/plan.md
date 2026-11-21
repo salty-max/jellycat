@@ -1,29 +1,32 @@
 # Plan
 
 Jellycat Studio's portfolio is a made-up operating system, Jelly-OS, on a phosphor CRT. On a computer it is a desktop: a menu bar,
-icons, windows. On a phone it is a shell: a prompt, commands, a two-pane browser. Both read the same project data and the same
-file system, and the shell is also the desktop's Terminal app.
+icons, windows, and a shell (a prompt, commands, a two-pane browser) as its Terminal app. On a phone it is a page in the same
+phosphor that scrolls like any site: a header, the projects by folder as cards, a page per project with its README. Both read the
+same project data ([phone-plan.md](phone-plan.md) has the phone's record).
 
 The mockups that settled the look are in [`mockups/`](../mockups) (`pnpm` isn't needed: open them in a browser, or start the
-`mockups` server in `.claude/launch.json`). `phosphor-desktop.html` and `phosphor-shell.html` are the reference; `win95-desktop.html`
-was the alternative, kept for its record.
+`mockups` server in `.claude/launch.json`). `phosphor-desktop.html` and `phosphor-phone.html` are the reference, and
+`phosphor-shell.html` for the Terminal's shell; `win95-desktop.html` was the alternative, kept for its record.
 
 ## Decisions
 
 - **Look**: a monochrome phosphor CRT (green by default, amber and white as settings). Our own OS: no Fallout, Vault-Tec, RobCo or
   Pip-Boy assets, no Apple or Microsoft logos, fonts, icons or sounds. [design.md](design.md) has the rules.
-- **Desktop on computers, shell on phones.** One layout per kind of screen, chosen by screen size, not two sites.
+- **Desktop on computers, a page on phones.** One layout per kind of screen, chosen by screen size (768x520), not two sites. While
+  a text field has the focus the layout holds, so a tablet whose browser shrinks the page for its keyboard keeps the desktop.
 - **Real pages**: every project has its own URL, prerendered to HTML at build time (React Router's `prerender` with `ssr: false`),
   so search engines and link previews read real text. The text on screen is HTML, never pixels in a canvas.
-- **Pages are shell-first.** Every page prerenders the shell's session as its text (on `/projects/<slug>`, `open <slug>` and `cat`
-  of its README have already run) and the desktop's boot screen. A screen at least 768px wide and 520px tall mounts the desktop on
-  the client; phones never download its code. First paint is the end state: the typed login plays on `logout` and `exit` only, and
-  nothing that changes between build and visit (the clock, "Last login", the date) is prerendered.
+- **Pages are page-first.** Every page prerenders the phone's page as its text (on `/projects/<slug>`, the project's facts and its
+  README) and the desktop's boot screen; the CSS shows one before any script. A screen at least 768px wide and 520px tall mounts
+  the desktop on the client; phones never download its code, the shell's included, and a screen without JavaScript shows the page.
+  First paint is the end state: the typed login plays on `logout` and `exit` only, and nothing that changes between build and
+  visit (the clock, "Last login", the date) is prerendered.
 - **The URL follows the project**: `/projects/<slug>` while a project is open, `/` once it's closed.
 - **CSP in the page**: the build hashes each page's inline scripts into a `<meta>` Content-Security-Policy; the header carries
   what a meta tag can't (`frame-ancestors`). Inline styles are allowed, as in hundo.
-- **Screenshots stay in colour.** The phosphor look covers the OS; the work itself is shown as it is, in a viewer window, with the
-  CRT layer still on top.
+- **Screenshots stay in colour.** The phosphor look covers the OS; the work itself is shown as it is, in a viewer window on the
+  desktop and a full-screen viewer on the phone, with the CRT layer still on top.
 - **Copy**: facts from each project's own repository: its README, or its code where the README is stale. No taglines, jokes,
   invented numbers or statuses. An unknown fact is written `-`.
 - **Projects**: 19, in four folders (web, addons, engines, tools). A project's Link is its own site and its Source its public

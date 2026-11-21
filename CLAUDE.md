@@ -1,7 +1,7 @@
 # Jellycat
 
-Jellycat Studio's portfolio: Jelly-OS on a phosphor CRT, a desktop on computers and a shell on phones. The README has the layout
-and the scripts, `docs/plan.md` the decisions and the phases, `docs/design.md` the design rules.
+Jellycat Studio's portfolio: Jelly-OS on a phosphor CRT, a desktop on computers and a page in the same phosphor on phones. The
+README has the layout and the scripts, `docs/plan.md` the decisions and the phases, `docs/design.md` the design rules.
 
 ## Rules
 

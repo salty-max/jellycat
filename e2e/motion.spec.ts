@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// prefers-reduced-motion: the desktop's boot screen doesn't wait its 1.3s, the shell's typed login doesn't play, and the CRT's
-// flicker never runs. Each check runs with the setting and without it, so it also shows the motion is there when allowed.
+// prefers-reduced-motion: the desktop's boot screen doesn't wait its 1.3s, the Terminal's typed login doesn't play, and the CRT's
+// flicker never runs (on the phone's page too). Each check runs with the setting and without it, so it also shows the motion is there when allowed.
 
-const layout = (page: Page) => page.locator("main[data-layout]");
+const layout = (page: Page) => page.locator("[data-layout]");
 
 for (const reduced of [true, false]) {
   const name = reduced ? "with reduced motion" : "without reduced motion";
@@ -31,9 +31,10 @@ for (const reduced of [true, false]) {
     });
 
     test(`the typed login ${reduced ? "doesn't play" : "plays"} on logout`, async ({ page, isMobile }) => {
-      test.skip(!isMobile, "the shell is the phone's");
+      test.skip(isMobile, "the shell is the desktop's Terminal");
       await page.goto("/");
-      await expect(layout(page)).toHaveAttribute("data-layout", "shell");
+      await expect(layout(page)).toHaveAttribute("data-layout", "desktop");
+      await page.getByRole("option", { name: "Terminal" }).dblclick();
       // When each login line first shows (the user name typed one letter at a time, then "Last login"), by the page's clock.
       await page.evaluate(() => {
         const seen: Record<string, number> = {};
@@ -61,6 +62,8 @@ for (const reduced of [true, false]) {
       await page.addInitScript(() => localStorage.setItem("jelly-os:settings", JSON.stringify({ state: { flicker: true }, version: 1 })));
       await page.goto("/");
       await expect(page.locator("html")).toHaveAttribute("data-flicker", "true");
+      // Hydrated: one layout's CRT layer left, the phone's page's or the tube's.
+      await expect(layout(page)).not.toHaveAttribute("data-layout", "unknown");
       const flicker = page.locator(".crt-flicker");
       await expect(flicker).toHaveCSS("animation-name", reduced ? "none" : "crt-flicker");
       await expect(flicker).toHaveCSS("display", reduced ? "none" : "block");

@@ -1,13 +1,14 @@
 # Jellycat Studio
 
-The studio's portfolio: Jelly-OS, a made-up operating system on a phosphor CRT. A desktop on computers, a shell on phones, one
-page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases, [docs/design.md](docs/design.md) the design rules.
+The studio's portfolio: Jelly-OS, a made-up operating system on a phosphor CRT. A desktop on computers, a page in the same
+phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases, [docs/design.md](docs/design.md) the design rules.
 
 ## Layout
 
-- `app/`: the site. `root.tsx` is the page shell and draws the OS on the home and project pages (`os/layout.tsx`: the shell on
-  phones, the desktop from 768x520), `routes.ts` the routes, `routes/` one module per route, `os/` the OS's parts,
-  `app.css` Tailwind and the phosphor tokens.
+- `app/`: the site. `root.tsx` is the page shell and draws the OS on the home and project pages (`os/layout.tsx`: the phone's
+  page under 768x520, the desktop from there, held while a text field has the focus), `routes.ts` the routes, `routes/` one
+  module per route, `os/` the OS's parts (`os/phone/` the phone's page and its two dialogs, the viewer and the Control Panel's
+  sheet; `os/desktop/` the desktop, whose Terminal is the shell, `os/shell/`), `app.css` Tailwind and the phosphor tokens.
 - `app/core/`: what both layouts read. `projects.ts` is the project data (every fact from the project's own repository, its
   README or its code where the README is stale, a link perhaps from its GitHub homepage field, an unknown fact `-`),
   `studio.ts` the studio's Readme and `contact.txt`, `site.ts` the OS's name and the site's address, `readme.ts` the
@@ -19,7 +20,8 @@ page per project. [docs/plan.md](docs/plan.md) has the decisions and the phases,
   `projects.ts` lists with their alt text and size.
 - `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
   screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
-  focus seen on screen (`focus.spec.ts`), and reduced motion (`motion.spec.ts`).
+  focus seen on screen (`focus.spec.ts`), and reduced motion (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
+  login) run in the desktop's Terminal; the phone's pages, viewer and sheet run on the phone project, with the real Esc.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
 - `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side), `csp.ts` (the build step that

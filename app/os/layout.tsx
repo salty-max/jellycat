@@ -1,23 +1,21 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ComponentType } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type ComponentType } from "react";
 import { useLocation, useMatches, useNavigate } from "react-router";
-import { readmePath } from "../core/fs";
 import { projectBySlug } from "../core/projects";
 import type { Block } from "../core/readme";
 import { BootScreen, ShutDownScreen } from "./boot-screen";
 import { Crt } from "./crt";
 import type { DesktopProps } from "./desktop/desktop";
 import { isOsMatch } from "./os-route";
-import { fullScreenViews } from "./full-screen-views";
-import { Shell } from "./shell/shell";
+import { PhoneLayout } from "./phone/phone-layout";
 
 /**
- * The desktop from 768px wide and 520px tall; anything smaller, a phone turned sideways included, gets the shell
- * (docs/phase-1.md). The one string both the page's CSS and `matchMedia` read.
+ * The desktop from 768px wide and 520px tall; anything smaller, a phone turned sideways included, gets the phone's page
+ * (docs/phone-plan.md). The one string both the page's CSS and `matchMedia` read.
  */
 export const DESKTOP_QUERY = "(min-width: 768px) and (min-height: 520px)";
 
-/** What the layout shows: before hydration both the shell and the boot screen are in the page and the CSS picks one. */
-type LayoutName = "unknown" | "shell" | "boot" | "desktop" | "off";
+/** What the layout shows: before hydration both the phone's page and the boot screen are in the page and the CSS picks one. */
+type LayoutName = "unknown" | "phone" | "boot" | "desktop" | "off";
 
 type Media = "unknown" | "narrow" | "wide";
 type ProjectData = { blocks: readonly Block[] | null };
@@ -26,29 +24,73 @@ type DesktopComponent = ComponentType<DesktopProps>;
 /** The mockup's boot: the boot screen stays at least this long from the first paint, none under reduced motion. */
 const BOOT_MS = 1300;
 
-// Only the server snapshot ("unknown") renders this wrapper's value, so the rule holds until hydration and never after: a wide
-// screen whose desktop chunk failed falls back to the shell with nothing hiding it.
-const LAYOUT_CSS = `[data-layout="unknown"] [data-os="boot"]{display:none}@media ${DESKTOP_QUERY}{[data-layout="unknown"] [data-os="shell"]{display:none}[data-layout="unknown"] [data-os="boot"]{display:block}}`;
+// Only the server snapshot ("unknown") renders this wrapper's value, so the rules on it hold until hydration and never after: a wide
+// screen whose desktop chunk failed falls back to the phone's page with nothing hiding it. Above the breakpoint the wrapper is one
+// screen tall from the first paint (the class takes over once hydrated), so nothing shifts when the desktop replaces the boot
+// screen; below it the page is as tall as its content. Wherever the phone's page shows, the page's own background is the tube's,
+// not the black around the desktop's rounded screen, so iOS's overscroll and the end of a short page stay in the phosphor.
+const LAYOUT_CSS = `[data-layout="unknown"] [data-os="tube"]{display:none}body:has([data-layout="phone"]){background:var(--phosphor-bg)}@media not all and ${DESKTOP_QUERY}{body:has([data-layout="unknown"]){background:var(--phosphor-bg)}}@media ${DESKTOP_QUERY}{[data-layout="unknown"]{height:100dvh}[data-layout="unknown"] [data-os="phone"]{display:none}[data-layout="unknown"] [data-os="tube"]{display:block}}`;
+
+/**
+ * Without JavaScript a wide screen would show the boot screen forever: it shows the phone's page instead, its column centred. Inline,
+ * as the layout's own CSS is, so the CSP doesn't change.
+ */
+export const NOSCRIPT_CSS = `@media ${DESKTOP_QUERY}{[data-layout="unknown"]{height:auto}[data-layout="unknown"] [data-os="phone"]{display:block}[data-layout="unknown"] [data-os="tube"]{display:none}body:has([data-layout="unknown"]){background:var(--phosphor-bg)}}`;
 
 const wide = () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(DESKTOP_QUERY).matches;
 
 let desktopChunk: Promise<DesktopComponent> | null = null;
-/** The desktop's code, a chunk of its own: one request a page, kept even when it fails (the layout then stays on the shell). */
+/** The desktop's code, a chunk of its own: one request a page, kept even when it fails (the layout then stays on the phone's page). */
 function loadDesktop() {
   desktopChunk ??= import("./desktop/desktop").then((module) => module.Desktop);
   return desktopChunk;
 }
 // On a wide screen the chunk starts with this module, before React hydrates, on a page that draws the OS (its prerendered
-// `main[data-layout]`; 404.html has none); a phone never asks for it.
-if (wide() && document.querySelector("main[data-layout]")) loadDesktop().catch(() => {});
+// `[data-layout]`; 404.html has none); a phone never asks for it.
+if (wide() && document.querySelector("[data-layout]")) loadDesktop().catch(() => {});
+
+/** A field an on-screen keyboard comes up for. */
+const TEXT_FIELD =
+  'input:not([type="button"],[type="checkbox"],[type="color"],[type="file"],[type="hidden"],[type="image"],[type="radio"],[type="range"],[type="reset"],[type="submit"]),textarea,[contenteditable]:not([contenteditable="false"])';
+const typing = () => document.activeElement?.matches(TEXT_FIELD) === true;
+
+// The keyboard hold: while a text field has the focus the layout keeps what it showed, and a change waits for the blur and then
+// `HOLD_MS` more, while the keyboard goes and the page grows back. A tablet whose browser shrinks the page for its on-screen keyboard
+// would otherwise take the page under 520px while the Terminal is being typed in, and swap the desktop out (and in again once the
+// keyboard is gone). The hold is in the snapshot, not in `subscribe`: React reads the snapshot on every render, so any render while
+// typing (a move back changes the address) would read the new size.
+const HOLD_MS = 1000;
+let media: Media | null = null;
+let heldUntil = 0;
+function getSnapshot(): Media {
+  if (media === null || (!typing() && performance.now() >= heldUntil)) media = wide() ? "wide" : "narrow";
+  return media;
+}
+const getServerSnapshot = (): Media => "unknown";
 
 function subscribe(onChange: () => void) {
   const query = window.matchMedia(DESKTOP_QUERY);
+  // A change that waited is delivered once the hold is over (if the focus went to another text field, it waits on).
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const onFocusOut = (event: FocusEvent) => {
+    if (!(event.target instanceof Element && event.target.matches(TEXT_FIELD))) return;
+    heldUntil = performance.now() + HOLD_MS;
+    clearTimeout(timer);
+    // The hold ends here, whatever the clock reads: a timer may fire a hair before `heldUntil`, and the snapshot would then hold on
+    // with nothing left to deliver the change.
+    timer = setTimeout(() => {
+      heldUntil = 0;
+      onChange();
+    }, HOLD_MS);
+  };
   query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
+  document.addEventListener("focusout", onFocusOut);
+  return () => {
+    clearTimeout(timer);
+    query.removeEventListener("change", onChange);
+    document.removeEventListener("focusout", onFocusOut);
+  };
 }
-const getSnapshot = (): Media => (wide() ? "wide" : "narrow");
-const getServerSnapshot = (): Media => "unknown";
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 // A boot on the page's first wide layout counts from the navigation (the prerendered boot screen was there since the first
@@ -62,17 +104,15 @@ function useProjectRoute() {
   return { project, blocks: (match?.loaderData as ProjectData | undefined)?.blocks ?? null };
 }
 
-/** Every README a page loader has given so far, by slug: a deep link's stays, so its `cat` never waits for the chunk again. */
-function useReadmes(slug: string | undefined, blocks: readonly Block[] | null) {
-  const [readmes, setReadmes] = useState<Readonly<Record<string, readonly Block[]>>>(() => (slug && blocks ? { [slug]: blocks } : {}));
-  if (slug && blocks && !readmes[slug]) setReadmes({ ...readmes, [slug]: blocks });
-  return readmes;
-}
-
 /**
- * The OS, drawn by the root so moving between its pages never remounts it. The server renders both the shell's session and the
- * boot screen and the CSS shows one; once hydrated, a wide screen loads the desktop (the boot screen meanwhile, at least
- * `BOOT_MS`) and a narrow one keeps the shell. A failed desktop chunk falls back to the shell; crossing the breakpoint swaps them.
+ * The OS, drawn by the root so moving between its pages never remounts it. The server renders both the phone's page and the boot
+ * screen and the CSS shows one; once hydrated, a wide screen loads the desktop (the boot screen meanwhile, at least `BOOT_MS`) and
+ * a narrow one keeps the phone's page. A failed desktop chunk falls back to the phone's page; crossing the breakpoint swaps them,
+ * unless a text field has the focus (the keyboard hold above).
+ *
+ * The phone's page sits outside `Crt`: `Crt` clips, which makes it a scroll container, and the page's sticky header and folder bars
+ * would stick to it instead of to the viewport. It brings its own landmarks (`header`, `main`, `footer`), so the wrapper is a
+ * `div` and the tube has a `main` of its own.
  */
 export function OsLayout() {
   const media = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -114,12 +154,11 @@ export function OsLayout() {
   }, [media, boots]);
 
   const layout: LayoutName =
-    media === "unknown" ? "unknown" : media === "narrow" || desktop === "failed" ? "shell" : off ? "off" : desktop && booted ? "desktop" : "boot";
+    media === "unknown" ? "unknown" : media === "narrow" || desktop === "failed" ? "phone" : off ? "off" : desktop && booted ? "desktop" : "boot";
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { project, blocks } = useProjectRoute();
-  const readmes = useReadmes(project?.slug, blocks);
   // The address follows the project: an `open` (or a pressed name) goes to its page, and back and forward walk the pages.
   const openProject = useCallback(
     (slug: string) => {
@@ -130,31 +169,30 @@ export function OsLayout() {
   );
   // Closing the Info window the address names (or one an open is waiting on) goes back to the desktop at `/`.
   const closeProject = useCallback(() => navigate("/"), [navigate]);
-  // A project's page opens on its card and its README, as if typed: the text phones, crawlers and link previews read.
-  const initialCommand = useMemo(() => (project ? [`open ${project.slug}`, `cat ${readmePath(project)}`] : undefined), [project]);
   const Desktop = desktop && desktop !== "failed" ? desktop.Desktop : null;
 
   return (
-    <main className="h-dvh" data-layout={layout}>
+    // The wrapper's height: one screen for the tube (the class), the content's for the phone's page, and before hydration the CSS's.
+    <div data-layout={layout} className={layout === "unknown" || layout === "phone" ? undefined : "h-dvh"}>
       <style href="jelly-os-layout" precedence="default">
         {LAYOUT_CSS}
       </style>
-      <Crt>
-        {(layout === "unknown" || layout === "shell") && (
-          <div data-os="shell" className="size-full">
-            <Shell onOpenProject={openProject} initialCommand={initialCommand} readmes={readmes} fullScreen={fullScreenViews} autoFocus={layout === "shell"} />
-          </div>
-        )}
-        {(layout === "unknown" || layout === "boot") && (
-          <div data-os="boot" className="size-full">
-            <BootScreen />
-          </div>
-        )}
-        {layout === "off" && <ShutDownScreen onRestart={restart} />}
-        {layout === "desktop" && Desktop && (
-          <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} onRestart={restart} onShutDown={shutDown} />
-        )}
-      </Crt>
-    </main>
+      {(layout === "unknown" || layout === "phone") && (
+        <div data-os="phone">
+          <PhoneLayout project={project} blocks={blocks} />
+        </div>
+      )}
+      {layout !== "phone" && (
+        <main data-os="tube" className="h-full">
+          <Crt>
+            {(layout === "unknown" || layout === "boot") && <BootScreen />}
+            {layout === "off" && <ShutDownScreen onRestart={restart} />}
+            {layout === "desktop" && Desktop && (
+              <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} onRestart={restart} onShutDown={shutDown} />
+            )}
+          </Crt>
+        </main>
+      )}
+    </div>
   );
 }

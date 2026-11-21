@@ -28,7 +28,7 @@ function Neighbour({ project, side }: { project: Project | undefined; side: "pre
  * (Stack, Link and Source; an unknown one is `-`), the screenshots, the README in the shell's double-bordered pane with its path set
  * in the border, and the neighbouring projects. `blocks` is the route loader's README, or null when its chunk could not be loaded.
  */
-export function PhoneProject({ project, blocks, onOpenPicture }: { project: Project; blocks: readonly Block[] | null; onOpenPicture: (index: number) => void }) {
+export function PhoneProject({ project, blocks, onOpenPicture }: { project: Project; blocks: readonly Block[] | null; onOpenPicture: (index: number, opener: HTMLElement) => void }) {
   const navigate = useNavigate();
   const at = PROJECTS.findIndex((each) => each.slug === project.slug);
   return (

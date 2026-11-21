@@ -57,7 +57,8 @@ describe("the header", () => {
     expect(button).toHaveAttribute("aria-haspopup", "dialog");
     expect(button).toHaveAttribute("aria-expanded", "false");
     await userEvent.click(button);
-    expect(onOpenPanel).toHaveBeenCalledOnce();
+    // The button itself goes with it, so the sheet gives the focus back to it (iOS doesn't focus a tapped button).
+    expect(onOpenPanel).toHaveBeenCalledExactlyOnceWith(button);
   });
 
   it("says when its sheet is open", () => {
@@ -169,7 +170,7 @@ describe("a project's page", () => {
     expect(images.map((image) => image.getAttribute("loading"))).toEqual(["eager", "lazy", "lazy"]);
     expect(images[2]).toHaveAttribute("width", String(hundo.screenshots[2].width));
     await userEvent.click(buttons[2]);
-    expect(onOpenPicture).toHaveBeenCalledExactlyOnceWith(2);
+    expect(onOpenPicture).toHaveBeenCalledExactlyOnceWith(2, buttons[2]);
   });
 
   it("has no Screenshots heading for a project with none", () => {

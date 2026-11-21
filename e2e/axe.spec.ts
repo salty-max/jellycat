@@ -1,9 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-// axe on whole pages, which the stories' axe never sees: before any script runs, the shell's session and the desktop's boot screen
-// are both in the page (the CSS shows one), where two h1s, a landmark or an id twice would break; then the OS once it's up. Each
-// test runs on both Playwright projects. The rules are WCAG 2.2 A and AA (target-size included) and axe's best practices.
+// axe on whole pages, which the stories' axe never sees: before any script runs, the phone's page and the desktop's boot screen are
+// both in the page (the CSS shows one), where two h1s, a landmark or an id twice would break; then the OS once it's up, and on the
+// phone its two dialogs. Each test runs on both Playwright projects. The rules are WCAG 2.2 A and AA (target-size included) and axe's best practices.
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
@@ -26,14 +26,28 @@ for (const [name, address] of PAGES) {
     await page.route(/\/assets\/[^/]+\.js$/, (route) => route.abort());
     await page.goto(address);
     // Only the server snapshot says "unknown": still there, React never ran.
-    if (!address.startsWith("/no/")) await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "unknown");
+    if (!address.startsWith("/no/")) await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "unknown");
     await expectNoViolations(page);
   });
 
   test(`${name}, once the OS is up`, async ({ page }, info) => {
     await page.goto(address);
     if (address.startsWith("/no/")) await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
-    else await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", info.project.name === "phone" ? "shell" : "desktop");
+    else await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", info.project.name === "phone" ? "phone" : "desktop");
+    await expectNoViolations(page);
+  });
+}
+
+for (const [name, open] of [
+  ["the viewer", (page: Page) => page.getByRole("region", { name: /Screenshots/ }).getByRole("button").first().tap()],
+  ["the Control Panel's sheet", (page: Page) => page.getByRole("button", { name: "Control Panel" }).tap()],
+] as const) {
+  test(`the phone's ${name}`, async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the phone's dialogs");
+    await page.goto("/projects/hundo");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    await open(page);
+    await expect(page.getByRole("dialog")).toBeVisible();
     await expectNoViolations(page);
   });
 }

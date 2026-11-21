@@ -19,8 +19,13 @@ component that breaks one of these rules changes this file in the same pull requ
 - The glow is `0 0 2px` in the dim tone. The desktop mockup used that and the shell mockup `0 0 3px` in the text's own colour;
   one value now serves both, the softer one, which keeps 18px and 20px text crisp. Inverse video (`inverse`) takes the glow off.
 - The dither is the desktop's 2px checkerboard of the phosphor at 20% over the tube's black (`dither` utility); it can be turned off.
-- The screen has rounded corners, 22px as the mockups' frames (`Crt`). The text is never warped: curvature would take it out of
-  the DOM.
+- On a computer the screen has rounded corners, 22px as the mockups' frames (`Crt`), on the black of the page around it. On a phone
+  there are none: the page is the screen, its background the tube's black (also where iOS overscrolls and under a short page), and
+  its CRT layer is fixed over the viewport (see Phone). The text is never warped: curvature would take it out of the DOM.
+- The layout is chosen by screen size: the desktop from 768px wide and 520px tall, the phone's page under that. Both are
+  prerendered and the page's CSS shows one before any script; a screen without JavaScript gets the phone's page. While a text field
+  has the focus (the Terminal's input) the layout holds, and a change waits for the blur and a second more, so a tablet whose
+  browser shrinks the page for its keyboard never swaps the desktop out mid-line.
 
 ## Type
 
@@ -91,7 +96,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   It sits outside `Crt`: `Crt`'s `overflow: hidden` makes it a scroll container, and a sticky header sticks to its nearest one.
 - The page's CRT layer (scanlines, vignette, flicker) is `position: fixed` over the viewport, `100lvh` tall so it still covers while
   iOS hides its toolbar, so the page scrolls under it. It has no rounded corners (the screen has its own), takes no clicks and is
-  hidden from screen readers. The desktop's layer stays absolute inside the rounded `Crt`.
+  hidden from screen readers. The desktop's layer stays absolute inside the rounded `Crt`. While a dialog is open the page's layer
+  goes, since the dialog brings its own: two would double the scanlines over the dimmed page.
 - A column at most 640px wide, centred, with a 16px gutter: a phone sideways or a small tablet gets a centred column, and the header's
   content lines up with it.
 - The header, on every page: the desktop's menu bar, sticky, 44px tall with a 1px rule under it. On the left the cat at 2× and
@@ -121,8 +127,9 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   1px frame, hard shadow and an inverse title bar (`Control Panel`, and a close box: the desktop's glyph in a dark square, a 44×32
   target). Under it the desktop Control Panel's Phosphor (Green, Amber, White) and Effects (Scanlines, Glow, Flicker) in 44px rows;
   the Dither pattern is left out, a phone has no desktop. It is a modal dialog: a 1-bit dither dims the page behind it, and a tap on
-  that, Esc, Android's back gesture or the close box closes it; focus goes to the checked phosphor and comes back to the header's
-  button. It appears and goes at once, as a window does: no slide. The settings are the desktop's, so a choice holds on both.
+  that, Esc, Android's back gesture or the close box closes it; focus goes to the checked phosphor (a frame after it opens, once the
+  radio group knows its radios, so the arrows move from the first press) and comes back to the header's button, iOS included,
+  where a tap doesn't focus the button. It appears and goes at once, as a window does: no slide. The settings are the desktop's, so a choice holds on both.
 - Pressed, a folder tab, a card, the back link, Previous and Next and the Control Panel's button are inverse video (the dim tone
   inside them turns with it); the other links and the pictures' buttons show nothing. Every tab stop shows its focus on keyboard
   focus only: the desktop's 1px dashed ring, 2px off its edge (a card's, 4px off, around the card). The phone has no text field.
@@ -175,7 +182,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   arrows, dim (`aria-disabled`, so the focus stays on the button pressed) at the ends, and Close, which has the focus when it opens.
   ← and → work from anywhere in the dialog; a swipe of 40px or more, further across than down, on the picture steps (the box is
   `touch-action: pan-y pinch-zoom`, so a vertical pan and a pinch stay the browser's). Esc, Android's back gesture and Close return to
-  the page, with the focus back on what had it when the viewer opened. It appears and goes at once.
+  the page, with the focus back on the picture that opened it. Back in the browser leaves the page, and the viewer with it. It
+  appears and goes at once.
 - The phone's dialogs (the viewer and the Control Panel's sheet) share one component, `app/os/phone/dialog.tsx`: `showModal()` on
   mount gives the top layer, the focus trap, the inert page behind, Esc and the back gesture; the page's scroll is locked while one is
   open (`overscroll-behavior: contain` on the dialog keeps iOS from scrolling the page behind it); each carries its own CRT layer
@@ -207,15 +215,17 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 - The `open` card's README row shows the path and runs `less`. In `browse`, a project's directory shows its card and its README
   the text; Enter on the README pages it.
 - In the desktop's Terminal, `less` opens the README's window; any other file is printed, as `more` prints a file that fits. From `browse` in the Terminal a README or a file pages inside the window, so `q` comes back to `browse`.
-- `/projects/<slug>` prerenders the session with `open <slug>` and `cat ~/projects/<folder>/<slug>/README` already run, each at
-  its own prompt, scrolled to the `open` line. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the
-  README's headings its `h2` and `h3`.
+- Phone: the project's page shows it in the shell's double-bordered pane (see Phone); a link to another project moves to its page.
+- `/projects/<slug>` prerenders the phone's page: the project's facts as a list and the README in the pane, with the desktop's boot
+  screen beside it. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the README's
+  title its `h2` and its headings `h3`.
 
 ## Keyboard and motion
 
-- Everything works with no mouse: each app opens and closes from the keyboard, on the desktop and in the shell (`e2e/keyboard.spec.ts`).
+- Everything works with no mouse: each app opens and closes from the keyboard on the desktop, its Terminal included, and on the
+  phone a project, the viewer and the sheet do too, Esc closing a dialog (`e2e/keyboard.spec.ts`).
 - Every tab stop shows its focus, on keyboard focus only (`:focus-visible`): a 1px dashed ring in the phosphor on the desktop,
-  dotted in the shell. The shell's input is the exception: its cursor shows any focus, a tap's too, solid when focused and hollow
+  dotted in the shell, dashed on the phone. The shell's input is the exception: its cursor shows any focus, a tap's too, solid when focused and hollow
   when not (`e2e/focus.spec.ts`).
 - Under `prefers-reduced-motion` the boot screen doesn't wait, the typed login doesn't play and the flicker never runs
   (`e2e/motion.spec.ts`).

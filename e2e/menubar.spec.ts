@@ -13,7 +13,7 @@ const pick = async (page: Page, menu: string, item: string, role: "menuitem" | "
 
 async function boot(page: Page, path = "/") {
   await page.goto(path);
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
 }
 
 test("the cat menu: About names the OS, Control Panel opens its window", async ({ page }) => {
@@ -101,8 +101,8 @@ test("Restart closes the windows and boots again", async ({ page }) => {
   await boot(page);
   await pick(page, "Jelly-OS", "Control Panel");
   await pick(page, "Special", "Restart");
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "boot");
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "boot");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
   await expect(win(page, "Control Panel")).toHaveCount(0);
   await expect(win(page, "Projects")).toBeVisible();
 });
@@ -113,14 +113,14 @@ test("Shut Down... asks first, then shows the shut-down screen, and a click rest
   const ask = page.getByRole("alertdialog", { name: "Shut down Jelly-OS?" });
   await ask.getByRole("button", { name: "Cancel" }).click();
   await expect(ask).toHaveCount(0);
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
 
   await pick(page, "Special", "Shut Down...");
   await expect(ask.getByRole("button", { name: "Shut Down" })).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "off");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "off");
   await expect(page.getByText("Jelly-OS has shut down.")).toBeVisible();
   await page.getByRole("button", { name: /has shut down/ }).click();
-  await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
   await expect(win(page, "Projects")).toBeVisible();
 });

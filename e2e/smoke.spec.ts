@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// The OS once hydrated: the shell on a phone, the desktop's boot screen then its icons on a computer (e2e/layout.spec.ts has the rest).
+// The OS once hydrated: the phone's page on a phone, the desktop's boot screen then its icons on a computer (e2e/layout.spec.ts has
+// the rest).
 async function expectOs(page: Page, phone: boolean) {
-  if (phone) await expect(page.getByRole("log", { name: "Terminal output" })).toBeVisible();
+  if (phone) await expect(page.getByRole("heading", { level: 1, name: "Jellycat Studio" })).toBeVisible();
   else {
     await expect(page.getByRole("heading", { name: "Jelly-OS 1.0" })).toBeVisible();
     await expect(page.getByRole("listbox", { name: "Desktop" })).toBeVisible();
@@ -14,12 +15,12 @@ test("the home page is prerendered HTML", async ({ request }) => {
   expect(res.status()).toBe(200);
   const html = await res.text();
   expect(html).toContain("<title>Jellycat Studio</title>");
-  // Both layouts are in the page before any script runs: the shell's welcome and the desktop's boot screen.
-  expect(html).toContain("Type help for the commands, or click a name.");
+  // Both layouts are in the page before any script runs: the phone's page and the desktop's boot screen.
+  expect(html).toContain("Web apps, World of Warcraft addons, engines and tools.");
   expect(html).toContain("Jelly-OS 1.0");
 });
 
-test("the home page boots in the browser: the phone sees the shell, a computer the desktop", async ({ page }, info) => {
+test("the home page boots in the browser: the phone sees its page, a computer the desktop", async ({ page }, info) => {
   await page.goto("/");
   await expect(page).toHaveTitle("Jellycat Studio");
   await expectOs(page, info.project.name === "phone");

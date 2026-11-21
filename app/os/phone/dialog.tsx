@@ -30,6 +30,9 @@ type DialogProps = {
   labelledBy?: string;
   /** A selector inside the dialog for what takes the focus when it opens; without one, the browser picks the first control. */
   initialFocus?: string;
+  /** What takes the focus back when it goes: the control that opened it. Without one, whatever had the focus when it opened, which on iOS is
+      nothing after a tap (Safari doesn't focus a tapped button). Read once, when it opens. */
+  returnFocus?: HTMLElement | null;
   /** A tap on the screen around the content closes it (the sheet); the viewer fills the screen and has no such place. */
   dismissOnBackdrop?: boolean;
   /** Keys pressed with the focus anywhere inside it. The dialog itself takes the focus when a tap leaves it on nothing, so these keep working. */
@@ -43,9 +46,9 @@ type DialogProps = {
  * (above any z-index), the focus trap, the inert page behind and Esc and Android's back gesture, which the browser answers by closing
  * it (a `cancel`, then a `close` event). It carries its own copy of the CRT layer, since the page's sits below the top layer, and locks
  * the page's scroll while it is open. The host owns whether it is open: the `close` event tells it to unmount, and the focus goes back to
- * what had it when it opened.
+ * what opened it (`returnFocus`), else to what had it when it opened.
  */
-export function Dialog({ onClose, label, labelledBy, initialFocus, dismissOnBackdrop = false, onKeyDown, className, children }: DialogProps) {
+export function Dialog({ onClose, label, labelledBy, initialFocus, returnFocus, dismissOnBackdrop = false, onKeyDown, className, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   // The latest handler, so the listeners below attach once and the effect doesn't restart when the host's callback changes.
   const close = useRef(onClose);
@@ -60,7 +63,7 @@ export function Dialog({ onClose, label, labelledBy, initialFocus, dismissOnBack
   useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const opener = returnFocus ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const unlock = lockScroll();
     // Whatever closes it (Esc, the back gesture, a script) ends here: the host is told once, by the browser's own close. The event
     // arrives as a task of its own, so one from a previous mount (Strict Mode's, say) reaches a dialog that has opened again: skip it.
@@ -69,13 +72,25 @@ export function Dialog({ onClose, label, labelledBy, initialFocus, dismissOnBack
     };
     dialog.addEventListener("close", onClosed);
     if (!dialog.open) dialog.showModal();
-    if (initialFocus) dialog.querySelector<HTMLElement>(initialFocus)?.focus();
+    // Until the chosen control takes the focus (below), the dialog holds it, so no other control shows a ring for a frame.
+    if (initialFocus) dialog.focus();
     return () => {
       dialog.removeEventListener("close", onClosed);
       if (dialog.open) dialog.close();
       unlock();
       if (opener?.isConnected) opener.focus();
     };
+    // The opener is read once, when the dialog opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The chosen control takes the focus a frame later: a composite control inside (the sheet's radio group) learns its items' places
+  // in a render of its own after they mount, and a radio focused before that leaves the group with no item to rove from (Tab skips
+  // it, the first arrow does nothing).
+  useEffect(() => {
+    if (!initialFocus) return;
+    const frame = requestAnimationFrame(() => ref.current?.querySelector<HTMLElement>(initialFocus)?.focus());
+    return () => cancelAnimationFrame(frame);
     // The selector is read once, when the dialog opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

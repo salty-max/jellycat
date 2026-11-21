@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // Visible focus everywhere: on each main screen, Tab goes round every stop, and each stop must look different focused and not. The
-// test compares pixels, not styles, so a ring that's there but drawn the same as the unfocused state (or hidden) fails. The shell's
+// test compares pixels, not styles, so a ring that's there but drawn the same as the unfocused state (or hidden) fails. The Terminal's
 // input is 1px and clear: its focus is the prompt's cursor, solid when focused and hollow when not, so the prompt is compared.
 
 type Stop = { name: string; changed: boolean };
@@ -16,8 +16,8 @@ async function stops(page: Page): Promise<Stop[]> {
       // A modal's focus guards (Base UI's invisible spans) only hand the focus on; blurring one would break the trap.
       if (!element || element === document.body || element.hasAttribute("data-base-ui-focus-guard")) return null;
       element.dataset.focusStop ??= String(document.querySelectorAll("[data-focus-stop]").length);
-      // The input shows its focus in the prompt it sits under.
-      const shown = element.matches(".sh-input") ? (element.closest(".sh")?.querySelector(".sh-term") as HTMLElement) : element;
+      // The input shows its focus in the prompt it sits under, a phone's card around the whole card.
+      const shown = element.matches(".sh-input") ? (element.closest(".sh")?.querySelector(".sh-term") as HTMLElement) : (element.closest<HTMLElement>(".ph-card") ?? element);
       const box = shown.getBoundingClientRect();
       const label = element.getAttribute("aria-label") ?? element.textContent?.trim().slice(0, 40) ?? "";
       return { id: element.dataset.focusStop, name: `${element.getAttribute("role") ?? element.tagName.toLowerCase()} "${label}"`, box: { x: box.x, y: box.y, width: box.width, height: box.height } };
@@ -26,9 +26,10 @@ async function stops(page: Page): Promise<Stop[]> {
     if (seen.has(stop.id)) break;
     seen.add(stop.id);
     const viewport = page.viewportSize()!;
-    const x = Math.max(0, stop.box.x - 4);
-    const y = Math.max(0, stop.box.y - 4);
-    const clip = { x, y, width: Math.min(viewport.width - x, stop.box.width + 8), height: Math.min(viewport.height - y, stop.box.height + 8) };
+    // The ring sits up to 5px outside the box (a card's is 4px off it).
+    const x = Math.max(0, stop.box.x - 6);
+    const y = Math.max(0, stop.box.y - 6);
+    const clip = { x, y, width: Math.min(viewport.width - x, stop.box.width + 12), height: Math.min(viewport.height - y, stop.box.height + 12) };
     if (clip.width <= 0 || clip.height <= 0) {
       found.push({ name: stop.name, changed: false });
       continue;
@@ -48,34 +49,36 @@ async function expectEveryStopShown(page: Page, least: number) {
   expect(found.filter((stop) => !stop.changed).map((stop) => stop.name)).toEqual([]);
 }
 
-const shellRun = async (page: Page, line: string) => {
-  const input = page.getByLabel("Terminal input");
-  await input.fill(line);
-  await input.press("Enter");
-  await input.blur();
-};
-
-test.describe("the shell", () => {
-  test.skip(({ isMobile }) => !isMobile, "the shell is the phone's");
+test.describe("the phone", () => {
+  test.skip(({ isMobile }) => !isMobile, "the phone's page");
   test.use({ reducedMotion: "reduce" });
 
   test("the home page and a project page", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "shell");
-    await expectEveryStopShown(page, 5);
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    // The header's two, the contact's two, the four tabs and a card a project.
+    await expectEveryStopShown(page, 27);
     await page.goto("/projects/hundo");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "shell");
-    await expectEveryStopShown(page, 9);
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    // The header's two, the back link, the two addresses, three pictures, the README's link and Next.
+    await expectEveryStopShown(page, 10);
   });
 
-  test("browse, the pager and the viewer", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "shell");
-    for (const line of ["browse", "less ~/README", "view hundo"]) {
-      await shellRun(page, line);
-      await expectEveryStopShown(page, 3);
-      await page.getByLabel("Terminal input").press("q");
-    }
+  test("the viewer and the Control Panel's sheet", async ({ page }) => {
+    await page.goto("/projects/hundo");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    await page.getByRole("region", { name: /Screenshots/ }).getByRole("button").first().press("Enter");
+    // Close takes the focus a frame after the dialog opens: the round starts from there.
+    await expect(page.getByRole("dialog", { name: "Hundo screenshots" }).getByRole("button", { name: "Close" })).toBeFocused();
+    await expectEveryStopShown(page, 3);
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Control Panel" }).press("Enter");
+    const sheet = page.getByRole("dialog", { name: "Control Panel" });
+    await expect(sheet.getByRole("radio", { name: "Green" })).toBeFocused();
+    // The round starts at the close box, the first stop, so it goes on to the checked phosphor (a radio group is one stop) and the
+    // three effects; past the last, the browser's own controls, then the close box again.
+    await sheet.getByRole("button", { name: "Close" }).focus();
+    await expectEveryStopShown(page, 5);
   });
 });
 
@@ -85,7 +88,7 @@ test.describe("the desktop", () => {
 
   test("the desktop, a project's Info window, its README and its screenshots", async ({ page }) => {
     await page.goto("/projects/hundo");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
     await page.getByRole("dialog", { name: "Hundo Info" }).getByRole("button", { name: "Open Readme" }).press("Enter");
     await expect(page.getByRole("dialog", { name: "Hundo Readme" }).getByRole("heading", { name: "Hundo" })).toBeVisible();
     await page.getByRole("dialog", { name: "Hundo Info" }).getByRole("button", { name: "View" }).press("Enter");
@@ -95,7 +98,7 @@ test.describe("the desktop", () => {
 
   test("the Control Panel, the Terminal and the folders by name", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
     await page.getByRole("option", { name: "Jelly HD" }).press("Enter");
     const hd = page.getByRole("dialog", { name: "Jelly HD" });
     await hd.getByRole("option", { name: "Control Panel" }).press("Enter");
@@ -109,7 +112,7 @@ test.describe("the desktop", () => {
     // A modal alert keeps the focus on its buttons (Base UI's guards hand it back); blurring one there and going on with Tab would
     // break that trap, so its buttons are shot before and after one Tab, each move waited for.
     await page.goto("/");
-    await expect(page.locator("main[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
     for (const [menu, item, name, buttons] of [
       ["Jelly-OS", "About Jelly-OS", "Jelly-OS 1.0", ["OK"]],
       ["Special", "Shut Down...", "Shut down Jelly-OS?", ["Shut Down", "Cancel"]],

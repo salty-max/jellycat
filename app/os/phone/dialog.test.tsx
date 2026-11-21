@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StrictMode, useState } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
@@ -51,7 +51,34 @@ test("the focus goes to the chosen control, and back to what had it when the dia
   render(<Host />);
   const opener = screen.getByRole("button", { name: "Open" });
   await user.click(opener);
-  expect(screen.getByRole("button", { name: "First" })).toHaveFocus();
+  // The dialog holds the focus until the next frame, then the chosen control takes it.
+  await waitFor(() => expect(screen.getByRole("button", { name: "First" })).toHaveFocus());
+  await cancelDialog(dialog());
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(opener).toHaveFocus();
+});
+
+test("the focus goes back to the opener it was given, even when the tap left the focus on nothing (iOS)", async () => {
+  function Opened() {
+    const [opener, setOpener] = useState<HTMLElement | null>(null);
+    return (
+      <>
+        <button type="button" onClick={(event) => setOpener(event.currentTarget)}>
+          Open
+        </button>
+        {opener && (
+          <Dialog onClose={() => setOpener(null)} label="Things" returnFocus={opener}>
+            <button type="button">First</button>
+          </Dialog>
+        )}
+      </>
+    );
+  }
+  render(<Opened />);
+  const opener = screen.getByRole("button", { name: "Open" });
+  // A tap as Safari does it: the click, with the focus left where it was.
+  fireEvent.click(opener);
+  expect(opener).not.toHaveFocus();
   await cancelDialog(dialog());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(opener).toHaveFocus();

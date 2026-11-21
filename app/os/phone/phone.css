@@ -42,6 +42,11 @@
   left: 0;
   height: 100lvh;
 }
+/* A dialog carries its own CRT layer, in the top layer: the page's goes while one is open, or its scanlines would double over the
+   dimmed page (the sheet's dither is clear in half its pixels). */
+:root:has(dialog[open]) .ph-crt {
+  display: none;
+}
 
 /* The header: the desktop's menu bar, sticky. Its content lines up with the 640px column. */
 .ph-hd {
