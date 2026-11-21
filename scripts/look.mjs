@@ -77,8 +77,11 @@ try {
     await start("node", ["scripts/serve.mjs"], `http://127.0.0.1:${targetPort}/`, { PORT: String(targetPort), SERVE_HOST: "127.0.0.1" });
   } else await start("pnpm", ["exec", "storybook", "dev", "-p", String(targetPort), "--no-open", "--ci"], `http://localhost:${targetPort}/`);
 
-  // The system Chrome, as the tests use, and a device scale of 1 so a pixel is a pixel.
-  const browser = await chromium.launch({ channel: "chrome" });
+  // The system Chrome, as the tests use, and a device scale of 1 so a pixel is a pixel. Playwright launches it with
+  // --hide-scrollbars; dropping that shows the 1-bit scroll bars docs/design.md describes
+  // (where the system draws scroll bars as overlays, as macOS does by default: with "always show", or on Linux, unstyled areas get
+  // Chrome's own bar too).
+  const browser = await chromium.launch({ channel: "chrome", ignoreDefaultArgs: ["--hide-scrollbars"] });
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
 
   await page.goto(`http://127.0.0.1:${mockupsPort}/${mockup}`);

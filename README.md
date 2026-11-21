@@ -70,6 +70,7 @@ with axe failing the run on a violation. The others:
   It waits for the mockup's boot screen or typed login to end (`--boot keep` captures it); `--mockup-run` runs a script in the
   mockup first (`"A.readme()"` opens a window, `"page('hundo')"` the shell's project page); `--page /projects/hundo` compares a page
   of the build instead of a story (after `pnpm build`), and `--type 'ls\n'` and `--wait-for` bring the story or the page to a state.
+  Chrome keeps its scroll bars (Playwright's `--hide-scrollbars` is dropped), so a look shows the 1-bit ones (on a system that always draws scroll bars, unstyled areas show Chrome's own too).
 - `pnpm build-storybook`: the static Storybook, which CI builds too.
 
 ## Build
