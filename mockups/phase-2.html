@@ -1,0 +1,358 @@
+<!doctype html><html><head><meta charset="utf-8"><title>phase 2</title></head><body style="margin:20px;width:1240px;font-family:sans-serif">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<!--
+Phase 2's mockup (docs/phase-2.md): the Lab's window on the desktop (the Lab is the desktop's only), the contact form on the desktop
+and the phone, Special's and the Control Panel's Sound, the phone's home below the folders, and two link preview images. Static
+frames, no behaviour: the look each task matches. Words: the program is gero's examples/lang/fizzbuzz.gr as samples.json holds it in
+release v0.5.5, and its output and step count are what gero.wasm v0.5.5 printed when run (21 Nov 2026); projects and studio lines
+come from app/core/; the Gero Lab card's line is gero-lab's README's first line. The privacy notice is a placeholder until N1 words
+it and the user approves it.
+-->
+<style>
+.frames{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.frames>figure{margin:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:#555}
+/* ---------- the desktop, as mockups/phosphor-desktop.html draws it ---------- */
+.jd{--dith:color-mix(in srgb,var(--fg) 20%,var(--bg));position:relative;width:652px;height:480px;border-radius:22px;overflow:hidden;background:var(--bg);color:var(--fg);font:18px/1.1 VT323,monospace;font-variant-ligatures:none;user-select:none;cursor:default;text-align:left;text-shadow:0 0 2px var(--dim)}
+.jd::after{content:"";position:absolute;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6) 100%)}
+.jd p{margin:0}
+.jd a{color:inherit}
+.jd img{image-rendering:pixelated;flex:none}
+.jd button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:72px;height:24px;padding:0 12px;border:1px solid var(--fg);background:var(--bg);color:var(--fg);font:inherit;line-height:22px;white-space:nowrap}
+.jd button.dflt{outline:1px solid var(--fg);outline-offset:2px}
+.jd input[type=text],.jd textarea{all:unset;box-sizing:border-box;border:1px solid var(--fg);background:var(--bg);color:var(--fg);font:inherit;padding:2px 6px;caret-color:var(--fg)}
+.jd input[type=checkbox],.jd input[type=radio]{all:unset;box-sizing:border-box;flex:none;width:14px;height:14px;border:1px solid var(--fg);padding:2px;background-clip:content-box}
+.jd input[type=radio]{border-radius:50%}
+.jd input:checked{background-color:var(--fg)}
+.jd label{display:flex;align-items:center;gap:7px}
+.dim{color:var(--dim)}
+.mbar{position:absolute;top:0;left:0;right:0;height:24px;box-sizing:border-box;display:flex;align-items:stretch;padding:0 10px;border-bottom:1px solid var(--fg);background:var(--bg);z-index:9000}
+.mt{display:flex;align-items:center;padding:0 9px}
+.clk{margin-left:auto;display:flex;align-items:center}
+.desk{position:absolute;inset:24px 0 0 0;background-image:repeating-conic-gradient(var(--dith) 0 25%,transparent 0 50%);background-size:2px 2px}
+.dicons{position:absolute;right:8px;top:10px;bottom:10px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ic{width:88px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ic span{background:var(--bg);padding:0 4px;line-height:18px;text-align:center}
+.ic.on span{background:var(--fg);color:var(--bg);text-shadow:none}
+.win{position:absolute;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim)}
+.tb{flex:none;height:22px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 3px 0 7px;border-bottom:1px solid var(--fg)}
+.win.act .tb{background:var(--fg);color:var(--bg);text-shadow:none}
+.tt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbc{display:flex;gap:8px}
+.jd .tbc button{min-width:0;width:16px;height:16px;padding:0;background:var(--bg)}
+.win.act .tbc button{border-color:var(--bg)}
+.info{flex:none;display:flex;justify-content:space-between;padding:0 8px;border-bottom:1px solid var(--fg);color:var(--dim)}
+.wb{flex:1;min-height:0;overflow:hidden;padding:10px;display:flex;flex-direction:column}
+.grip{position:absolute;right:1px;bottom:1px;width:12px;height:12px;background:linear-gradient(135deg,transparent 0 45%,var(--fg) 45% 55%,transparent 55% 70%,var(--fg) 70% 80%,transparent 80%)}
+.cp{display:grid;grid-template-columns:84px 1fr;gap:12px 10px}
+.opts{display:flex;gap:16px;flex-wrap:wrap}
+.btns{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:auto;padding-top:10px}
+.scr::-webkit-scrollbar{width:14px;height:14px}
+.scr::-webkit-scrollbar-track{border-left:1px solid var(--fg);background:repeating-conic-gradient(var(--dim) 0 25%,transparent 0 50%) 0 0/2px 2px}
+.scr::-webkit-scrollbar-track:horizontal{border-left:0;border-top:1px solid var(--fg)}
+.scr::-webkit-scrollbar-thumb{background:var(--bg);border:1px solid var(--fg);border-right:0}
+.scr::-webkit-scrollbar-thumb:horizontal{border:1px solid var(--fg);border-bottom:0}
+.scr::-webkit-scrollbar-corner{background:var(--bg);border-left:1px solid var(--fg);border-top:1px solid var(--fg)}
+/* the Lab's window */
+.lab{gap:8px}
+.lrow{display:flex;align-items:center;gap:12px}
+.jd .pick{min-width:150px;justify-content:space-between}
+.jd .ed{flex:1;min-height:0;width:100%;white-space:pre;overflow:auto;padding:2px 6px;user-select:text}
+.ohead{display:flex;justify-content:space-between}
+.out{flex:none;height:121px;box-sizing:border-box;border:1px solid var(--fg);padding:0 6px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;white-space:pre}
+/* the Contact window */
+.cf{flex:1;display:flex;flex-direction:column;gap:8px;margin:0}
+.kvf{display:grid;grid-template-columns:64px 1fr;gap:8px 8px;align-items:center}
+.kvf textarea{height:104px;white-space:pre-wrap;align-self:stretch}
+.kvf .ta{align-self:start;padding-top:3px}
+.jd .kvf input,.jd .kvf textarea{height:24px;width:100%}
+.jd .kvf textarea{height:104px}
+.jd .notice{max-height:80px;overflow-y:auto;padding-right:4px}
+.caret{display:inline-block;width:1px;height:18px;background:var(--fg);vertical-align:-3px}
+/* ---------- the phone, as mockups/phosphor-phone.html draws it ---------- */
+.ph{position:relative;width:412px;height:839px;overflow:hidden;background:var(--bg);color:var(--fg);font:20px/1.2 VT323,monospace;font-variant-ligatures:none;text-align:left}
+.ph *{box-sizing:border-box}
+.ph a{color:inherit;text-decoration:none}
+.ph p,.ph h1,.ph h2,.ph h3,.ph ul,.ph dl,.ph dd,.ph figure{margin:0}
+.ph h1,.ph h2,.ph h3{font:inherit;font-weight:400}
+.ph button{all:unset;box-sizing:border-box;cursor:pointer}
+.ph .sc{text-shadow:0 0 2px var(--dim)}
+.inv{background:var(--fg);color:var(--bg);text-shadow:none!important}
+.u{text-decoration:underline!important}
+.sc{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.sc::-webkit-scrollbar{display:none}
+.crt{position:absolute;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6) 100%)}
+.hd{position:sticky;top:0;z-index:20;height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--fg);background:var(--bg)}
+.brand{display:flex;align-items:center;gap:10px;height:44px;padding-right:8px}
+.ph .cpb{margin-left:auto;margin-right:-6px;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.ph .cpb.on{background:var(--fg)}
+/* the menu bar's drop-down, as the desktop mockup draws it */
+.mt.open{background:var(--fg);color:var(--bg);text-shadow:none}
+.mt{position:relative}
+.dd{position:absolute;top:23px;left:0;min-width:180px;padding:3px 0;background:var(--bg);color:var(--fg);border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim);z-index:9100;text-shadow:0 0 2px var(--dim)}
+.mi{position:relative;height:21px;display:flex;align-items:center;padding:0 24px;white-space:nowrap}
+.mi.chk::before{content:"";position:absolute;left:9px;top:8px;width:6px;height:6px;background:currentColor}
+.msep{border-top:1px dashed var(--dim);margin:3px 0}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 28px}
+.h1{font-size:40px!important;line-height:40px}
+.kv{display:grid;grid-template-columns:8ch minmax(0,1fr);column-gap:10px}
+.kv dt{color:var(--dim)}
+.kv dd{overflow-wrap:anywhere}
+.intro p{margin-top:8px}
+.intro .kv{margin-top:14px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.tabs a,.tabs button{display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid var(--fg)}
+.ph .tabs .inv{background:var(--fg);color:var(--bg);text-shadow:none}
+.tabs .inv .dim{color:var(--bg)}
+.fold{margin-top:30px}
+.ph .fh{position:sticky;top:44px;z-index:10;display:flex;align-items:center;gap:8px;height:32px;margin:0 -16px;padding:0 16px}
+.fh .n{margin-left:auto}
+.cards{list-style:none;padding:0 3px 3px 0;margin-top:14px!important;display:grid;gap:16px}
+.card{position:relative;border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim);background:var(--bg);padding:8px 12px 10px}
+.card h3{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:24px!important;line-height:28px}
+.card .ds{margin-top:6px}
+.ft{border-top:1px solid var(--fg)}
+.ft .wrap{padding-top:14px;padding-bottom:20px}
+.ph .h2{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--fg);padding-bottom:2px;margin-top:26px}
+.ph .run{display:flex;align-items:center;justify-content:center;width:calc(100% - 3px);min-height:56px;margin-top:24px;border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim)}
+.field{display:flex;flex-direction:column;gap:4px;margin-top:14px}
+.ph input[type=text],.ph textarea{all:unset;box-sizing:border-box;width:100%;min-height:44px;border:1px solid var(--fg);background:var(--bg);color:var(--fg);font:inherit;padding:8px 10px}
+.ph textarea{height:160px;white-space:pre-wrap}
+.ph .note{margin-top:14px}
+.ph .status{margin-top:14px}
+/* the Control Panel's sheet */
+.bd{position:absolute;inset:0;z-index:8500;background:repeating-conic-gradient(rgba(0,0,0,.72) 0 25%,transparent 0 50%) 0 0/2px 2px}
+.sheet{position:absolute;left:8px;right:8px;bottom:8px;z-index:8600;background:var(--bg);border:1px solid var(--fg);box-shadow:3px 3px 0 var(--dim);text-shadow:0 0 2px var(--dim)}
+.sheet .tb{height:32px;padding-left:12px;border-bottom:0}
+.sheet .tb h2{flex:1}
+.ph .sheet .xb{width:44px;height:32px;display:flex;align-items:center;justify-content:center}
+.sheet .xb span{display:flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--bg)}
+.sheet .cp{grid-template-columns:8ch 1fr;column-gap:10px;row-gap:0;padding:8px 12px 10px}
+.sheet .cp>.dim{line-height:44px}
+.sheet .opts{column-gap:18px;gap:0 18px}
+.sheet .opts label{display:flex;align-items:center;gap:8px;height:44px}
+.ph input[type=checkbox],.ph input[type=radio]{all:unset;box-sizing:border-box;flex:none;width:16px;height:16px;border:1px solid var(--fg);padding:3px;background-clip:content-box}
+.ph input[type=radio]{border-radius:50%}
+.ph input:checked{background-color:var(--fg)}
+/* ---------- the link preview images: 1200x630, the scanlines at twice the screen's pitch, so a preview shown at half size keeps them ---------- */
+.og{position:relative;width:1200px;height:630px;overflow:hidden;background:var(--bg);color:var(--fg);font:48px/1.15 VT323,monospace;font-variant-ligatures:none;text-shadow:0 0 4px var(--dim)}
+.og::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.28) 0 2px,transparent 2px 6px)}
+.og .bar{height:80px;display:flex;align-items:center;gap:18px;padding:0 56px;border-bottom:2px solid var(--fg)}
+.og .bar .r{margin-left:auto}
+.og .body{padding:44px 56px 0}
+.og .nm{font-size:128px;line-height:120px}
+.og .kd{margin-top:10px}
+.og .ds{margin-top:26px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;max-width:1088px}
+.og .ft2{position:absolute;left:56px;right:56px;bottom:40px;display:flex;justify-content:space-between;color:var(--dim);font-size:40px}
+.og .otabs{display:flex;gap:20px;margin-top:40px}
+.og .otabs span{border:2px solid var(--fg);padding:6px 18px;box-shadow:6px 6px 0 var(--dim)}
+.og .otabs i{font-style:normal;color:var(--dim)}
+</style>
+<h1 style="font-size:20px">Phase 2 mockup</h1>
+<p style="font-size:13px;color:#555;max-width:900px">Static frames at 1:1 for docs/phase-2.md. The program and its output are gero's own (fizzbuzz.gr, gero.wasm v0.5.5). The privacy notice is a placeholder until N1's words are approved.</p>
+<div class="frames">
+
+<!-- 1. The desktop: the Lab after a run of fizzbuzz -->
+<figure><div id="d-lab" class="jd" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="mbar"><div class="mt"><img data-i="cat" data-s="1" alt=""></div><div class="mt">File</div><div class="mt">Edit</div><div class="mt">View</div><div class="mt">Special</div><div class="mt">Window</div><div class="clk">21:40</div></div>
+<div class="desk"><div class="dicons">
+<div class="ic"><img data-i="disk" data-s="2" alt=""><span>Jelly HD</span></div>
+<div class="ic"><img data-i="folder" data-s="2" alt=""><span>Projects</span></div>
+<div class="ic"><img data-i="doc" data-s="2" alt=""><span>Readme</span></div>
+<div class="ic"><img data-i="term" data-s="2" alt=""><span>Terminal</span></div>
+<div class="ic"><img data-i="lab" data-s="2" alt=""><span>Lab</span></div>
+<div class="ic"><img data-i="mail" data-s="2" alt=""><span>Contact</span></div>
+<div class="ic" style="margin-top:auto"><img data-i="trash" data-s="2" alt=""><span>Trash</span></div>
+</div>
+<div class="win act" style="left:10px;top:10px;width:532px;height:432px">
+<div class="tb"><span class="tt">Lab</span><span class="tbc"><button aria-label="Collapse"><img data-i="min" data-s="1" alt=""></button><button aria-label="Zoom"><img data-i="max" data-s="1" alt=""></button><button aria-label="Close"><img data-i="x" data-s="1" alt=""></button></span></div>
+<div class="info"><span>fizzbuzz.gr</span><span>gero 0.5.5</span></div>
+<div class="wb lab">
+<div class="lrow"><button class="pick" aria-haspopup="menu">fizzbuzz.gr <img data-i="down" data-s="1" alt=""></button><span style="flex:1"></span><button>Reset</button><button class="dflt">Run</button></div>
+<textarea class="ed scr" aria-label="Program" spellcheck="false" wrap="off" data-src="fizzbuzz" data-scroll="11"></textarea>
+<div class="ohead"><span class="dim">Output</span><span class="dim">halted, 1076 steps</span></div>
+<div class="out" role="log">Fizz
+Buzz
+11
+Fizz
+13
+14
+FizzBuzz</div>
+</div>
+<div class="grip"></div>
+</div>
+</div></div><figcaption>#d-lab: the Lab window after Run (652x480)</figcaption></figure>
+
+<!-- 2. The desktop: the Contact window, and the Control Panel with its Sound row -->
+<figure><div id="d-contact" class="jd" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="mbar"><div class="mt"><img data-i="cat" data-s="1" alt=""></div><div class="mt">File</div><div class="mt">Edit</div><div class="mt">View</div><div class="mt">Special</div><div class="mt">Window</div><div class="clk">21:40</div></div>
+<div class="desk"><div class="dicons">
+<div class="ic"><img data-i="disk" data-s="2" alt=""><span>Jelly HD</span></div>
+<div class="ic"><img data-i="folder" data-s="2" alt=""><span>Projects</span></div>
+<div class="ic"><img data-i="doc" data-s="2" alt=""><span>Readme</span></div>
+<div class="ic"><img data-i="term" data-s="2" alt=""><span>Terminal</span></div>
+<div class="ic"><img data-i="lab" data-s="2" alt=""><span>Lab</span></div>
+<div class="ic on"><img data-i="mail" data-s="2" data-v="1" alt=""><span>Contact</span></div>
+<div class="ic" style="margin-top:auto"><img data-i="trash" data-s="2" alt=""><span>Trash</span></div>
+</div>
+<div class="win act" style="left:86px;top:30px;width:380px;height:370px">
+<div class="tb"><span class="tt">Contact</span><span class="tbc"><button aria-label="Collapse"><img data-i="min" data-s="1" alt=""></button><button aria-label="Zoom"><img data-i="max" data-s="1" alt=""></button><button aria-label="Close"><img data-i="x" data-s="1" alt=""></button></span></div>
+<div class="wb"><form class="cf">
+<div class="kvf">
+<span class="dim">To</span><span>max@jellycat.fr</span>
+<label class="dim" for="c-n">Name</label><input id="c-n" type="text">
+<label class="dim" for="c-e">Email</label><input id="c-e" type="text">
+<label class="dim ta" for="c-m">Message</label><textarea id="c-m"></textarea>
+</div>
+<p class="dim notice scr">Placeholder: the privacy notice, in N1's words once the user approves them: who collects the message and why, Resend in the United States and its 30 days, the visitor's rights, max@jellycat.fr.</p>
+<div class="btns"><button class="dflt" type="button">Send</button></div>
+</form></div>
+<div class="grip"></div>
+</div>
+</div></div><figcaption>#d-contact: the Contact window (652x480)</figcaption></figure>
+
+<!-- 3. The desktop: Special's Sound item, and the Control Panel's Sound row -->
+<figure><div id="d-panel" class="jd" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="mbar"><div class="mt"><img data-i="cat" data-s="1" alt=""></div><div class="mt">File</div><div class="mt">Edit</div><div class="mt">View</div><div class="mt open">Special<div class="dd"><div class="mi chk">Green phosphor</div><div class="mi">Amber phosphor</div><div class="mi">White phosphor</div><div class="msep"></div><div class="mi chk">CRT effects</div><div class="mi chk">Dither pattern</div><div class="mi chk">Sound</div><div class="msep"></div><div class="mi">Restart</div><div class="mi">Shut Down...</div></div></div><div class="mt">Window</div><div class="clk">21:40</div></div>
+<div class="desk"><div class="dicons">
+<div class="ic"><img data-i="disk" data-s="2" alt=""><span>Jelly HD</span></div>
+<div class="ic"><img data-i="folder" data-s="2" alt=""><span>Projects</span></div>
+<div class="ic"><img data-i="doc" data-s="2" alt=""><span>Readme</span></div>
+<div class="ic"><img data-i="term" data-s="2" alt=""><span>Terminal</span></div>
+<div class="ic"><img data-i="lab" data-s="2" alt=""><span>Lab</span></div>
+<div class="ic"><img data-i="mail" data-s="2" alt=""><span>Contact</span></div>
+<div class="ic" style="margin-top:auto"><img data-i="trash" data-s="2" alt=""><span>Trash</span></div>
+</div>
+<div class="win act" style="left:140px;top:244px;width:400px;height:196px">
+<div class="tb"><span class="tt">Control Panel</span><span class="tbc"><button aria-label="Collapse"><img data-i="min" data-s="1" alt=""></button><button aria-label="Zoom"><img data-i="max" data-s="1" alt=""></button><button aria-label="Close"><img data-i="x" data-s="1" alt=""></button></span></div>
+<div class="wb"><div class="cp">
+<span class="dim">Phosphor</span><div class="opts"><label><input type="radio" name="p1" checked>Green</label><label><input type="radio" name="p1">Amber</label><label><input type="radio" name="p1">White</label></div>
+<span class="dim">Effects</span><div class="opts"><label><input type="checkbox" checked>Scanlines</label><label><input type="checkbox" checked>Glow</label><label><input type="checkbox">Flicker</label></div>
+<span class="dim">Desktop</span><div class="opts"><label><input type="checkbox" checked>Dither pattern</label></div>
+<span class="dim">Sound</span><div class="opts"><label><input type="checkbox" checked>On</label></div>
+</div></div>
+<div class="grip"></div>
+</div>
+</div></div><figcaption>#d-panel: Special's Sound item and the Control Panel's Sound row (652x480)</figcaption></figure>
+
+<!-- 4. The phone's home, at its end: the last folder, then the Lab and Contact sections -->
+<figure><div id="p-home" class="ph" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208"><div class="sc" data-bottom>
+<header class="hd"><a class="brand"><img data-i="cat" data-s="2" alt=""><span>Jellycat Studio</span></a><button class="cpb" aria-label="Control Panel"><img data-i="panel" data-s="2" alt=""></button></header>
+<div class="wrap">
+<section class="fold"><h2 class="fh inv"><img data-i="folder" data-s="1" data-v="1" alt=""><span>Tools</span><span class="n">3 items</span></h2>
+<ul class="cards">
+<li class="card"><h3><a>addon-kit</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">Lua kit</p><p class="ds">The Lua code shared by most of the addons here, a copy in each: the books' windows and look, events, settings, achievements, the minimap button and the translations. Its scripts package, test and release them.</p></li>
+<li class="card"><h3><a>wow-data</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">Game data</p><p class="ds">The World of Warcraft game data the addons are built from: the game client's tables, QuestieDB and the Classic database, pinned in one place, downloaded once and built into one SQLite database per game, with an explorer in the browser.</p></li>
+<li class="card"><h3><a>harness</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">Dev tool</p><p class="ds">A small harness for working with Claude Code sessions on a project: a task board, a quiet runner for checks, a review packet and verdict before each commit, and git hooks that refuse to push an unchecked or unreviewed tree.</p></li>
+</ul></section>
+<section class="fold"><h2 class="fh inv"><img data-i="lab" data-s="1" data-v="1" alt=""><span>Lab</span></h2>
+<ul class="cards"><li class="card"><h3><a href="https://gero-lab.vercel.app" target="_blank" rel="noopener">Gero Lab</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">gero-lab.vercel.app</p><p class="ds">Browser playground for the Gero VM.</p></li></ul></section>
+<section class="fold"><h2 class="fh inv"><img data-i="mail" data-s="1" data-v="1" alt=""><span>Contact</span></h2>
+<ul class="cards"><li class="card"><h3><a>Contact</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">Email</p><p class="ds">A message from this page goes by email to max@jellycat.fr.</p></li></ul></section>
+</div>
+<footer class="ft"><div class="wrap dim">Jelly-OS 1.0</div></footer>
+</div><div class="crt" aria-hidden="true"></div></div><figcaption>#p-home: the home page's end (412x839)</figcaption></figure>
+
+<!-- 5. The phone's /contact, once sent -->
+<figure><div id="p-contact" class="ph" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208"><div class="sc">
+<header class="hd"><a class="brand"><img data-i="cat" data-s="2" alt=""><span>Jellycat Studio</span></a><button class="cpb" aria-label="Control Panel"><img data-i="panel" data-s="2" alt=""></button></header>
+<div class="wrap">
+<section class="intro"><h1 class="h1">Contact</h1>
+<dl class="kv"><dt>Email</dt><dd><a class="u">max@jellycat.fr</a></dd><dt>GitHub</dt><dd><a class="u">github.com/salty-max</a></dd></dl></section>
+<form style="margin-top:12px">
+<div class="field"><label for="p-n">Name</label><input id="p-n" type="text"></div>
+<div class="field"><label for="p-e">Email</label><input id="p-e" type="text"></div>
+<div class="field"><label for="p-m">Message</label><textarea id="p-m"></textarea></div>
+<p class="note dim">A message from this page goes by email to max@jellycat.fr.</p>
+<p class="note dim">Placeholder: the privacy notice, in N1's words once the user approves them: who collects the message and why, Resend in the United States and its 30 days, the visitor's rights, max@jellycat.fr.</p>
+<button class="run" type="button">Send</button>
+<p class="status" role="status">Message sent.</p>
+</form>
+</div>
+<footer class="ft"><div class="wrap dim">Jelly-OS 1.0</div></footer>
+</div><div class="crt" aria-hidden="true"></div></div><figcaption>#p-contact: /contact once sent (412x839)</figcaption></figure>
+
+<!-- 6. The phone's Control Panel sheet with its Sound row, over the home page -->
+<figure><div id="p-sheet" class="ph" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208"><div class="sc">
+<header class="hd"><a class="brand"><img data-i="cat" data-s="2" alt=""><span>Jellycat Studio</span></a><button class="cpb on" aria-label="Control Panel" aria-expanded="true"><img data-i="panel" data-s="2" data-v="1" alt=""></button></header>
+<div class="wrap">
+<section class="intro"><h1 class="h1">Jellycat Studio</h1><p>Web apps, World of Warcraft addons, engines and tools.</p>
+<dl class="kv"><dt>Email</dt><dd><a class="u">max@jellycat.fr</a></dd><dt>GitHub</dt><dd><a class="u">github.com/salty-max</a></dd></dl></section>
+<nav class="tabs"><a>Web <span class="dim">4</span></a><a>Addons <span class="dim">11</span></a><a>Engines <span class="dim">1</span></a><a>Tools <span class="dim">3</span></a></nav>
+<section class="fold"><h2 class="fh inv"><img data-i="folder" data-s="1" data-v="1" alt=""><span>Web</span><span class="n">4 items</span></h2>
+<ul class="cards"><li class="card"><h3><a>Hundo</a><img data-i="next" data-s="2" alt=""></h3><p class="dim">Web app</p><p class="ds">Spoiler-aware, installable completion guides for single-player games: one app per game, all built on one shared core.</p><p class="dim" style="margin-top:6px">3 pictures</p></li></ul></section>
+</div></div>
+<div class="bd"></div>
+<div class="sheet" role="dialog" aria-label="Control Panel"><div class="tb inv"><h2>Control Panel</h2><button class="xb" aria-label="Close"><span><img data-i="x" data-s="1" alt=""></span></button></div>
+<div class="cp">
+<span class="dim">Phosphor</span><div class="opts"><label><input type="radio" name="p2" checked>Green</label><label><input type="radio" name="p2">Amber</label><label><input type="radio" name="p2">White</label></div>
+<span class="dim">Effects</span><div class="opts"><label><input type="checkbox" checked>Scanlines</label><label><input type="checkbox" checked>Glow</label><label><input type="checkbox">Flicker</label></div>
+<span class="dim">Sound</span><div class="opts"><label><input type="checkbox">On</label></div>
+</div></div>
+<div class="crt" aria-hidden="true"></div></div><figcaption>#p-sheet: the sheet's Sound row (412x839)</figcaption></figure>
+
+<!-- 7. A project's link preview image -->
+<figure><div id="og-hundo" class="og" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="bar"><img data-i="cat" data-s="3" alt=""><span>Jellycat Studio</span></div>
+<div class="body"><div class="nm">Hundo</div><div class="kd dim">Web app</div><div class="ds">Spoiler-aware, installable completion guides for single-player games: one app per game, all built on one shared core.</div></div>
+<div class="ft2"><span>jellycat.fr/projects/hundo</span><span>Jelly-OS 1.0</span></div>
+</div><figcaption>#og-hundo: /og/projects/hundo.png (1200x630)</figcaption></figure>
+
+<!-- 8. The home page's link preview image -->
+<figure><div id="og-home" class="og" style="--fg:#33ff66;--dim:#1a9c40;--bg:#031208">
+<div class="bar"><img data-i="cat" data-s="3" alt=""><span>Jellycat Studio</span></div>
+<div class="body"><div class="nm">Jellycat Studio</div><div class="ds">Web apps, World of Warcraft addons, engines and tools.</div>
+<div class="otabs"><span>Web <i>4</i></span><span>Addons <i>11</i></span><span>Engines <i>1</i></span><span>Tools <i>3</i></span></div></div>
+<div class="ft2"><span>jellycat.fr</span><span>Jelly-OS 1.0</span></div>
+</div><figcaption>#og-home: /og/index.png (1200x630)</figcaption></figure>
+
+</div>
+<script>
+// gero's examples/lang/fizzbuzz.gr, as samples.json holds it in release v0.5.5.
+const SRC={fizzbuzz:`-- fizzbuzz.gr — the classic, in Gero.
+--
+-- Prints 1..15, replacing multiples of 3 with "Fizz", of 5 with
+-- "Buzz", and of both with "FizzBuzz". Exercises a \`for\` range loop,
+-- the \`if\`/\`elif\`/\`else\` chain, the \`%\` operator, and \`print\` of both
+-- integers and strings.
+--
+-- Run:
+--   gero compile fizzbuzz.gr -o fizzbuzz.gx
+--   gero run fizzbuzz.gx
+def main()
+  for i in 1..16
+    if i % 15 == 0
+      print "FizzBuzz"
+    elif i % 3 == 0
+      print "Fizz"
+    elif i % 5 == 0
+      print "Buzz"
+    else
+      print i
+    end
+  end
+end
+`};
+// The 1-bit grids: the desktop mockup's, and two new icons (the Lab's flask, Contact's envelope) and the picker's 8x8 arrow.
+const IC={
+disk:['','','','','################','#oooooooooooooo#','#o############o#','#oooooooooooooo#','#oooooooooooooo#','#o##ooooooooooo#','#oooooooooooooo#','################','.##..........##.'],
+folder:['','','.#####..........','#ooooo#.........','################','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','#oooooooooooooo#','################'],
+doc:['','..#########.....','..#ooooooo##....','..#ooooooo#o#...','..#ooooooo####..','..#oooooooooo#..','..#o######ooo#..','..#oooooooooo#..','..#o########o#..','..#oooooooooo#..','..#o#######oo#..','..#oooooooooo#..','..#o########o#..','..#oooooooooo#..','..############..'],
+term:['','################','#oooooooooooooo#','#o############o#','#o#o##########o#','#o##o#########o#','#o#o###oooo###o#','#o############o#','#o############o#','#o############o#','#oooooooooooooo#','################','....########....','...##########...'],
+trash:['','......####......','..############..','..#oooooooooo#..','..############..','...#oooooooo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oo#oo#oo#...','...#oooooooo#...','...##########...'],
+panel:['','','################','#oooooooooooooo#','#oo#ooo#ooo#ooo#','#o###oo#ooo#ooo#','#oo#ooo#ooo#ooo#','#oo#ooo#oo###oo#','#oo#ooo#ooo#ooo#','#oo#oo###oo#ooo#','#oo#ooo#ooo#ooo#','#oooooooooooooo#','################'],
+cat:['','..#..........#..','.#o#........#o#.','.#oo########oo#.','.#oooooooooooo#.','#oooooooooooooo#','#oo##oooooo##oo#','#oo##oooooo##oo#','#oooooo##oooooo#','#oooooooooooooo#','.#ooo#oooo#ooo#.','..#ooo####ooo#..','...##oooooo##...','.....######.....'],
+lab:['','.....######.....','......#oo#......','......#oo#......','......#oo#......','.....#oooo#.....','....#oooooo#....','...#oooooooo#...','...##########...','..###o########..','..#########o##..','.##############.','.######o#######.','.##############.'],
+mail:['','','','################','##oooooooooooo##','#o#oooooooooo#o#','#oo#oooooooo#oo#','#ooo#oooooo#ooo#','#oooo#oooo#oooo#','#ooooo####ooooo#','#oooooooooooooo#','#oooooooooooooo#','################']};
+const GL={x:['##....##','###..###','.######.','..####..','..####..','.######.','###..###','##....##'],min:['','','','########','########','','',''],max:['########','########','#......#','#......#','#......#','#......#','#......#','########'],next:['..#.....','..##....','..###...','..####..','..####..','..###...','..##....','..#.....'],down:['','','#######.','.#####..','..###...','...#....','','']};
+// Draws a grid as an image in a frame's colours: the outline in --fg, the inside in --bg; inverted (data-v="1") swaps them.
+function draw(img){const fr=img.closest('.jd,.ph,.og'),cs=getComputedStyle(fr),F=cs.getPropertyValue('--fg').trim(),B=cs.getPropertyValue('--bg').trim();
+const n=img.dataset.i,s=+img.dataset.s,v=img.dataset.v==='1',m=IC[n]||GL[n],sz=IC[n]?16:8,c=document.createElement('canvas');c.width=c.height=sz*s;const g=c.getContext('2d');
+m.forEach((r,y)=>{for(let x=0;x<r.length;x++){const ch=r[x];if(ch==='.')continue;g.fillStyle=(ch==='#')!==v?F:B;g.fillRect(x*s,y*s,s,s)}});img.src=c.toDataURL();img.width=img.height=sz*s}
+document.querySelectorAll('[data-src]').forEach(e=>{const t=SRC[e.dataset.src];if(e.tagName==='TEXTAREA')e.value=t;else e.textContent=t});
+document.querySelectorAll('img[data-i]').forEach(draw);
+document.fonts.ready.then(()=>{
+document.querySelectorAll('textarea[data-scroll]').forEach(t=>{t.scrollTop=(+t.dataset.scroll)*19.8});
+document.querySelectorAll('.sc[data-bottom]').forEach(s=>{s.scrollTop=s.scrollHeight});
+document.body.dataset.ready='1'});
+</script>
+</body></html>
