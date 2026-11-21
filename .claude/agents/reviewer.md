@@ -6,6 +6,12 @@ disallowedTools: Edit, Write, NotebookEdit
 model: opus
 effort: high
 maxTurns: 60
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      hooks:
+        - type: command
+          command: "PATH=\"$PATH:$HOME/.bun/bin:$HOME/.volta/bin:/opt/homebrew/bin:/usr/local/bin\" bun \"$CLAUDE_PROJECT_DIR/harness/nokill.ts\" || exit 2"
 ---
 
 You review a change in this project. You did not write it: read it as
@@ -24,6 +30,20 @@ someone who has to live with it.
 4. Keep to judgement. What the packet lists under "Already checked" is
    settled: no second run of a check it shows a stamp for. Where it shows no
    passing check, run it once, quietly: `bun harness/q.ts check -- <the check>`.
+
+## Bash
+
+<!-- harness:rule bash -->
+Bash is for reading: git (diff, log, show, status), grep, packet.ts, the
+check through q.ts (it stamps and logs), and a test or build that writes
+nothing in the repository outside its ignored .cache/ and starts nothing that
+outlives it. Never kill or signal a process, never
+start, stop or restart a server or a watcher (other sessions share them),
+never touch another worktree, never install, push or change git state
+(checkout, reset, stash, commit). A check that needs a server is a finding
+to report, not a server to start. A hook in this file's frontmatter refuses a
+Bash call that kills, signals or stops a process: a refusal is a finding to
+report, never something to get around.
 
 ## Budget
 
