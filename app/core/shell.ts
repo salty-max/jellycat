@@ -99,7 +99,7 @@ const HELP = [
   "ls [dir]          list a directory",
   "cd [dir]          change directory",
   "cat <file>        print a file",
-  "less <file>       page through a file (q to quit)",
+  "less <file>       open a file",
   "open <project>    show a project",
   "view <project>    screenshot viewer",
   "tree              show ~/projects as a tree",

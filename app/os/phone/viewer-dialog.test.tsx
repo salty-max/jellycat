@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
-import { beforeEach, expect, test, vi } from "vitest";
+import { StrictMode, useState } from "react";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { projectBySlug } from "../../core/projects";
 import { cancelDialog, stubDialog } from "./test-dialog";
 import { PhoneViewer } from "./viewer-dialog";
@@ -9,6 +9,8 @@ import { PhoneViewer } from "./viewer-dialog";
 const hundo = projectBySlug("hundo")!.screenshots;
 
 beforeEach(() => void stubDialog());
+// jsdom has no `decode`: a test that defines one lets it go here, even when it fails.
+afterEach(() => void Reflect.deleteProperty(HTMLImageElement.prototype, "decode"));
 
 const dialog = () => screen.getByRole("dialog", { name: "Hundo screenshots" });
 const previous = () => screen.getByRole("button", { name: "Previous" });
@@ -147,4 +149,37 @@ test("a project with no pictures, and an unknown one, draw nothing", () => {
   expect(none.container).toBeEmptyDOMElement();
   const unknown = render(<PhoneViewer slug="nope" start={0} onClose={() => {}} />);
   expect(unknown.container).toBeEmptyDOMElement();
+});
+
+test("the pictures either side of the one shown are decoded ahead, each once, and their count is on the box", async () => {
+  const decoded: string[] = [];
+  // jsdom has no `decode`.
+  Object.defineProperty(HTMLImageElement.prototype, "decode", {
+    configurable: true,
+    value(this: HTMLImageElement) {
+      decoded.push(this.getAttribute("src")!);
+      return Promise.resolve();
+    },
+  });
+  const user = userEvent.setup();
+  render(<PhoneViewer slug="hundo" start={0} onClose={() => {}} />);
+  const box = () => dialog().querySelector(".dlg-box")!;
+  await waitFor(() => expect(box()).toHaveAttribute("data-ahead", "1"));
+  expect(decoded).toEqual([`${hundo[1].src}.webp`]);
+  await user.click(next());
+  await waitFor(() => expect(box()).toHaveAttribute("data-ahead", "2"));
+  expect(decoded).toEqual([`${hundo[1].src}.webp`, `${hundo[0].src}.webp`, `${hundo[2].src}.webp`]);
+  await user.click(next());
+  await user.click(previous());
+  expect(decoded).toHaveLength(3);
+});
+
+test("under StrictMode, where the effect runs twice, the decoded neighbours are still counted", async () => {
+  Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: () => Promise.resolve() });
+  render(
+    <StrictMode>
+      <PhoneViewer slug="hundo" start={0} onClose={() => {}} />
+    </StrictMode>,
+  );
+  await waitFor(() => expect(dialog().querySelector(".dlg-box")).toHaveAttribute("data-ahead", "1"));
 });

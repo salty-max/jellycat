@@ -56,6 +56,37 @@ test("viewer: a picture opens the phone's dialog at it; the buttons, the arrows 
   expect(errors).toEqual([]);
 });
 
+test("viewer: Next shows the next picture at once: on the frame after the tap it is complete and already decoded", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "the phone's dialog");
+  await page.goto("/projects/hundo");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+  await page.getByRole("region", { name: /Screenshots/ }).getByRole("button").nth(1).tap();
+  const viewer = page.getByRole("dialog", { name: "Hundo screenshots" });
+  // The neighbour is decoded ahead: the box says so.
+  await expect(viewer.locator(".dlg-box")).toHaveAttribute("data-ahead", "2");
+  // A slower CPU, so a decode still to do is long enough to tell from one that is done.
+  await (await page.context().newCDPSession(page)).send("Emulation.setCPUThrottlingRate", { rate: 6 });
+  await viewer.getByRole("button", { name: "Next" }).tap();
+  const stepped = await viewer.getByRole("img").evaluate(
+    (img: HTMLImageElement) =>
+      new Promise<{ complete: boolean; width: number; src: string; decode: number }>((resolve) =>
+        requestAnimationFrame(async () => {
+          // Read before the decode, which only settles once the image has loaded.
+          const seen = { complete: img.complete, width: img.naturalWidth, src: img.currentSrc };
+          const start = performance.now();
+          await img.decode();
+          resolve({ ...seen, decode: performance.now() - start });
+        }),
+      ),
+  );
+  expect(stepped.src).toMatch(/\/screenshots\/hundo\/.*phone.*\.(avif|webp)$/);
+  expect(stepped.complete).toBe(true);
+  expect(stepped.width).toBeGreaterThan(0);
+  // A decode that has nothing left to do settles at once; one that has the work still to do takes longer (6ms against 0.4ms here, on a throttled CPU).
+  expect(stepped.decode).toBeLessThan(3);
+  await expect(shotCount(page)).toHaveText("3 of 3");
+});
+
 test("viewer: back in the browser with the viewer open leaves the page, and the next page scrolls", async ({ page }, info) => {
   test.skip(info.project.name !== "phone", "the phone's dialog");
   await page.goto("/");

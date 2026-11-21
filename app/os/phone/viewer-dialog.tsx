@@ -2,6 +2,7 @@ import { useRef, type KeyboardEvent, type PointerEvent } from "react";
 import { projectBySlug } from "../../core/projects";
 import { Glyph } from "../icons/icon";
 import { Picture } from "../viewer/picture";
+import { useDecodeAhead } from "../viewer/use-decode-ahead";
 import { usePictures } from "../viewer/use-pictures";
 import { Dialog } from "./dialog";
 
@@ -12,10 +13,11 @@ const SWIPE = 40;
  * The phone's screenshot viewer: a full-screen modal dialog named for the project. The name and the count (`2 of 3`) are set in the
  * pane's double border, the picture is shown whole with its caption under it, and three buttons follow: Previous and Next (dim at the
  * ends) and Close. A swipe on the picture and ← → step; Esc, Android's back gesture and Close call `onClose`, which unmounts it.
- * `start` is the index of the picture that opened it, and `returnFocus` that picture, which takes the focus back.
+ * The pictures either side of the one shown are decoded ahead, so a step shows the next at once. `start` is the index of the picture that opened it, and `returnFocus` that picture, which takes the focus back.
  */
 export function PhoneViewer({ slug, start, onClose, returnFocus }: { slug: string; start: number; onClose: () => void; returnFocus?: HTMLElement | null }) {
   const { pictures, index, shot, hasPrevious, hasNext, go } = usePictures(slug, start);
+  const ahead = useDecodeAhead(pictures, index);
   const project = projectBySlug(slug);
   // Where a finger went down on the picture, until it comes up or the browser takes the gesture for a scroll.
   const swipe = useRef<{ x: number; y: number } | null>(null);
@@ -52,7 +54,7 @@ export function PhoneViewer({ slug, start, onClose, returnFocus }: { slug: strin
           <span>{project.name}</span>
           <span role="status">{`${index + 1} of ${pictures.length}`}</span>
         </div>
-        <div className="dlg-box" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => (swipe.current = null)} onDragStart={(event) => event.preventDefault()}>
+        <div className="dlg-box" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => (swipe.current = null)} onDragStart={(event) => event.preventDefault()} data-ahead={ahead}>
           <Picture shot={shot} />
         </div>
         <figcaption className="dlg-cap" aria-hidden="true">
