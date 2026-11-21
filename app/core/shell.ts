@@ -101,7 +101,7 @@ const HELP = [
   "cat <file>        print a file",
   "less <file>       page through a file (q to quit)",
   "open <project>    show a project",
-  "view <project>    screenshot viewer (q to quit)",
+  "view <project>    screenshot viewer",
   "tree              show ~/projects as a tree",
   "browse            two-pane file browser (q to quit)",
   "theme <color>     green, amber or white",

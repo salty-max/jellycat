@@ -6,10 +6,8 @@ import { Crt } from "../crt";
 import { Desktop } from "../desktop/desktop";
 import { openViewer } from "../desktop/apps/launch";
 import { useWindows } from "../desktop/windows/store";
-import { fullScreenViews } from "../full-screen-views";
-import { Shell } from "../shell/shell";
 
-// The viewer in the desktop's 652x480 frame, and full screen in the shell.
+// The viewer in the desktop's 652x480 frame.
 function ViewerDesk({ slug }: { slug: string }) {
   useState(() => {
     useWindows.setState(useWindows.getInitialState(), true);
@@ -54,17 +52,5 @@ export const WindowPhonePicture: Story = {
     await userEvent.click(within(viewer).getByRole("button", { name: "Next picture" }));
     await expect(within(viewer).getByText("3 of 3")).toBeInTheDocument();
     await expect(within(viewer).getByRole("button", { name: "Next picture" })).toBeDisabled();
-  },
-};
-
-/** `view hundo` in the shell: full screen, the count in the top border, the caption under the picture. */
-export const FullScreen: Story = {
-  render: () => <Shell fullScreen={fullScreenViews} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const input = canvas.getByLabelText("Terminal input");
-    await userEvent.click(input);
-    await userEvent.type(input, "view hundo{Enter}");
-    await expect(canvas.getByText("1 of 3")).toBeInTheDocument();
   },
 };

@@ -34,7 +34,7 @@ test("an unknown command, and the rest of the line still runs", () => {
 
 test("help lists the commands, view included", () => {
   const out = words(go("help").lines);
-  expect(out).toContain("view <project>    screenshot viewer (q to quit)");
+  expect(out).toContain("view <project>    screenshot viewer");
   expect(out.at(-1)).toBe("clear  history  pwd  whoami  date  uname  echo  logout");
 });
 

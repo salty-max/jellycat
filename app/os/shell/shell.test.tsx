@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { vi } from "vitest";
-import { loadReadme, parseReadme } from "../../core/readme";
+import { loadReadme } from "../../core/readme";
 import { useSettings } from "../../core/settings";
 import { settle } from "../../test-act";
 import type { FullScreenSlot } from "./full-screen";
@@ -153,14 +153,6 @@ test("cat prints a README as real headings, lists and code", async () => {
   expect(within(log).getAllByRole("list").length).toBeGreaterThan(0);
 });
 
-test("cat prints the blocks the host gave it, without loading the chunk", async () => {
-  const readmes = { hundo: parseReadme("# Given\n\nA paragraph with `code`.\n") };
-  const { log, type } = setup({ readmes });
-  await type("cat ~/projects/web/hundo/README");
-  expect(within(log).getByRole("heading", { name: "Given" })).toBeInTheDocument();
-  expect(within(log).getByText("code")).toBeInTheDocument();
-});
-
 test("a view opened by Enter on a name in the log gives the focus to the prompt's input, so its keys reach it", async () => {
   const { user, type, input } = setup();
   await type("open hundo");
@@ -194,13 +186,12 @@ test("the key bar works without a keyboard", async () => {
   expect(screen.getByRole("log")).toBeVisible();
 });
 
-test("in the pager a project link closes it and runs open; an https link opens in a new tab", async () => {
+test("in the pager a project link closes it and runs open", async () => {
   const onOpenProject = vi.fn();
-  const { user, type } = setup({ onOpenProject, readmes: { hundo: parseReadme("# Hundo\n\nSee [Farseer](/projects/farseer) and [the site](https://hundo.quest).\n") } });
-  await type("less ~/projects/web/hundo/README");
-  expect(screen.getByRole("link", { name: "the site" })).toHaveAttribute("target", "_blank");
-  await user.click(screen.getByRole("link", { name: "Farseer" }));
-  expect(onOpenProject).toHaveBeenCalledWith("farseer");
+  const { user, typeSettled } = setup({ onOpenProject });
+  await typeSettled("less ~/projects/web/hundo/README");
+  await user.click(await screen.findByRole("link", { name: "harness" }));
+  expect(onOpenProject).toHaveBeenCalledWith("harness");
   expect(screen.getByRole("log")).toBeVisible();
 });
 
@@ -217,9 +208,9 @@ test("less pages a text file's lines; more prints a file that fits", async () =>
   expect(within(log).getAllByText(/Email/).length).toBe(1);
 });
 
-test("browse and view go to the host's full-screen slot, and q comes back", async () => {
+test("browse goes to the host's full-screen slot, and q comes back", async () => {
   const fullScreen = vi.fn<FullScreenSlot>((view) => <p>host: {view.kind}</p>);
-  const { type, user, input } = setup({ fullScreen });
+  const { type } = setup({ fullScreen });
   await type("browse");
   expect(screen.getByText("host: browse")).toBeInTheDocument();
   expect(screen.getByText(/^\[jellycat\] 0:browse\*$/)).toBeInTheDocument();
@@ -228,9 +219,6 @@ test("browse and view go to the host's full-screen slot, and q comes back", asyn
   const api = fullScreen.mock.calls.at(-1)![1];
   act(() => api.close());
   expect(screen.getByRole("log")).toBeVisible();
-  await user.click(input);
-  await type("view hundo");
-  expect(fullScreen).toHaveBeenLastCalledWith({ kind: "view", slug: "hundo" }, expect.anything());
 });
 
 test("without a host the full-screen views are a placeholder, and q leaves it", async () => {
@@ -257,39 +245,6 @@ test("logout plays the typed login, and any key skips to the end", async () => {
   await waitFor(() => expect(within(log).getByText(/^Last login: /)).toBeInTheDocument());
   expect(within(log).getByText("jellycat login: guest")).toBeInTheDocument();
   expect(within(log).getByText(/Type help for the commands/)).toBeInTheDocument();
-});
-
-test("the initial command is printed at first paint, as typed, with the project's name as the h1", () => {
-  const onOpenProject = vi.fn();
-  const html = renderToString(<Shell initialCommand="open hundo" onOpenProject={onOpenProject} />);
-  expect(html).toContain("guest@jellycat:~$ open hundo");
-  expect(html).toMatch(/<h1[^>]*>Hundo<\/h1>/);
-  expect(onOpenProject).not.toHaveBeenCalled();
-});
-
-test("several initial commands run one after the other, each at its own prompt, as a project's page opens", async () => {
-  const readmes = { hundo: parseReadme("# Hundo\n\n## How it's built\n\nA paragraph.\n") };
-  const html = renderToString(<Shell initialCommand={["open hundo", "cat ~/projects/web/hundo/README"]} readmes={readmes} />);
-  expect(html).toContain("guest@jellycat:~$ open hundo<");
-  expect(html).toContain("guest@jellycat:~$ cat ~/projects/web/hundo/README<");
-  // The card's name is the page's h1, the README's title and headings its h2 and h3, from the blocks given (no chunk to wait for).
-  expect(html).toMatch(/<h1[^>]*>Hundo<\/h1>/);
-  expect(html).toContain("<h2>Hundo</h2>");
-  expect(html).toContain("<h3>How it&#x27;s built</h3>");
-
-  const { user, input } = setup({ initialCommand: ["open hundo", "pwd"] });
-  await user.click(input);
-  await user.keyboard("{ArrowUp}");
-  expect(input).toHaveValue("pwd");
-  await user.keyboard("{ArrowUp}");
-  expect(input).toHaveValue("open hundo");
-});
-
-test("the history of the initial command is the session's", async () => {
-  const { user, input } = setup({ initialCommand: "pwd" });
-  await user.click(input);
-  await user.keyboard("{ArrowUp}");
-  expect(input).toHaveValue("pwd");
 });
 
 test("a host's onPage takes a paged file and prints its lines; null leaves it to the pager", async () => {

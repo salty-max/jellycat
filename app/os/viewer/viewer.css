@@ -1,4 +1,4 @@
-/* The screenshot viewer (docs/design.md Viewer), from the mockups' .shot/.sbox/.sbar (desktop) and .vp/.vbox/.vcap (shell). The picture
+/* The screenshot viewer (docs/design.md Viewer), from the mockups' .shot/.sbox/.sbar. The picture
    is in its own colours: the CRT layer is an overlay, so nothing here tints it. */
 .vw {
   outline: none;
@@ -61,38 +61,4 @@
 .vw-btn:active:not(:disabled) {
   background: var(--phosphor-bg);
   color: var(--phosphor-fg);
-}
-
-/* Full screen: the picture and its caption sit together in the middle of the pane. */
-.vw-pane {
-  flex: 1;
-  padding: 14px 10px 8px;
-  display: flex;
-  flex-direction: column;
-  white-space: normal;
-}
-.vw-vbox {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-}
-.vw-vbox picture {
-  flex: 0 1 auto;
-  min-height: 0;
-  display: flex;
-}
-.vw-img {
-  flex: 0 1 auto;
-  min-height: 0;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-.vw-vcap {
-  flex: none;
-  height: 2.3em;
-  overflow: hidden;
 }

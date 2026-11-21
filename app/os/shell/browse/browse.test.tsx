@@ -1,15 +1,16 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { parseReadme } from "../../../core/readme";
+import { loadReadme } from "../../../core/readme";
 import { Shell } from "../shell";
+import { settle } from "../../../test-act";
 import { fullScreenViews } from "../../full-screen-views";
 
-// The README's blocks come from the host, as a project's page gives them: no chunk to wait for.
-const readmes = { hundo: parseReadme("# Hundo\n\n## How it's built\n\nA paragraph.\n") };
+// The first load of a README chunk transforms it in jsdom: do it once, before the tests that read one.
+beforeAll(() => loadReadme("hundo"));
 
 async function open() {
   const user = userEvent.setup();
-  render(<Shell fullScreen={fullScreenViews} readmes={readmes} />);
+  render(<Shell fullScreen={fullScreenViews} />);
   const input = screen.getByLabelText("Terminal input");
   await user.click(input);
   await user.type(input, "browse{Enter}");
@@ -69,11 +70,12 @@ test("Enter goes into a directory, a project's directory shows its card, and Bac
 });
 
 test("`..` goes up, and a README in the right pane is its text", async () => {
-  const { user } = await open();
+  const { user, input } = await open();
   await user.keyboard("{Enter}");
   await enter(user, "web/", "hundo/");
-  await user.keyboard("j");
-  await waitFor(() => expect(within(right()).getByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument());
+  // The README's chunk is read in this render (see settle): the key goes through an awaited act.
+  await settle(() => fireEvent.keyDown(input, { key: "j" }));
+  expect(await within(right()).findByRole("heading", { level: 2, name: "Hundo" })).toBeInTheDocument();
   await user.keyboard("k{Enter}");
   expect(title()).toHaveTextContent("~/projects/web");
 });
@@ -129,7 +131,7 @@ test("the key bar works without a keyboard", async () => {
 
 test("browse opens in the directory the session was in", async () => {
   const user = userEvent.setup();
-  render(<Shell fullScreen={fullScreenViews} readmes={readmes} />);
+  render(<Shell fullScreen={fullScreenViews} />);
   const input = screen.getByLabelText("Terminal input");
   await user.click(input);
   await user.type(input, "cd projects/web{Enter}");
@@ -155,8 +157,7 @@ test("the status bar shows the browsed path, and the session's again once browse
 
 test("a project link pressed in the README closes browse, and the next browse starts in the cwd, not where this one was", async () => {
   const user = userEvent.setup();
-  const linked = { hundo: parseReadme("# Hundo\n\nSee [harness](/projects/harness).\n") };
-  render(<Shell fullScreen={fullScreenViews} readmes={linked} />);
+  render(<Shell fullScreen={fullScreenViews} />);
   const input = screen.getByLabelText("Terminal input");
   await user.click(input);
   await user.type(input, "browse{Enter}");

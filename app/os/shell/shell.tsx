@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { complete, historyStep } from "../../core/complete";
 import { homePath } from "../../core/fs";
-import type { Block } from "../../core/readme";
 import { useSettings } from "../../core/settings";
 import { banner, lastLogin, newSession, prompt, run, welcome, type Effect, type Line, type PageSource, type Session } from "../../core/shell";
 import { ShellContext } from "./context";
@@ -15,23 +14,13 @@ export interface ShellProps {
   /** An `open` ran (or a project's name was pressed): the host shows the project. The card is already printed. */
   onOpenProject?: (slug: string) => void;
   /**
-   * A line, or several one after the other, run at first paint after the welcome as if typed: a project's page passes
-   * `["open hundo", "cat ~/projects/web/hundo/README"]`. Their effects are not performed; the log opens on the first one.
-   */
-  initialCommand?: string | readonly string[];
-  /** README blocks the host already loaded, by slug: `cat` prints these instead of loading the chunk (a deep link's, from the page's loader). */
-  readmes?: Readonly<Record<string, readonly Block[]>>;
-  /**
    * `less` or `more` ran on a file. The host that shows files its own way (the desktop's Terminal opens a README's window) takes it
    * here and returns the lines to print in its place; null leaves it to the shell's pager.
    */
   onPage?: (page: { command: "less" | "more"; path: string; source: PageSource }) => readonly Line[] | null;
-  /**
-   * `view` ran on a project with pictures. The host that shows them its own way (the desktop's Terminal opens the viewer's window)
-   * takes it here and returns the lines to print in its place; null leaves it to the full-screen view.
-   */
+  /** `view` ran on a project with pictures. The host shows them its own way (the desktop's Terminal opens the viewer's window) and returns the lines to print. */
   onView?: (slug: string) => readonly Line[] | null;
-  /** The host's full-screen views, `browse` and the viewer. Without one the shell shows a placeholder saying so. */
+  /** The host's full-screen view, `browse`. Without one the shell shows a placeholder saying so. */
   fullScreen?: FullScreenSlot;
   /** Focus the prompt once mounted, on a screen with a pointer and a keyboard; never on a phone, where it would raise the keyboard. */
   autoFocus?: boolean;
@@ -40,8 +29,6 @@ export interface ShellProps {
 interface Item {
   id: number;
   line: Line;
-  /** Part of the session the page prerendered. */
-  initial?: boolean;
 }
 
 type PageView = { kind: "page"; command: "less" | "more"; path: string; source: PageSource };
@@ -54,27 +41,19 @@ interface Full {
 const MAX_LINES = 300;
 const text = (value: string): Line => [{ kind: "text", text: value }];
 
-/** The log at first paint: the welcome, and each initial command's echo and output. Pure, so server and client agree. */
-function firstPaint(initialCommand: string | readonly string[] | undefined): { items: Item[]; session: Session } {
-  let session = newSession();
-  const lines: Item[] = welcome().map((line, id) => ({ id, line }));
-  for (const command of typeof initialCommand === "string" ? [initialCommand] : (initialCommand ?? [])) {
-    const result = run(command, session, { now: new Date(0) });
-    const shown = [text(prompt(session.cwd) + command), ...result.lines];
-    shown.forEach((line) => lines.push({ id: lines.length, line, initial: true }));
-    session = result.session;
-  }
-  return { items: lines, session };
+/** The log at first paint: the welcome. Pure, so server and client agree. */
+function firstPaint(): { items: Item[]; session: Session } {
+  return { items: welcome().map((line, id) => ({ id, line })), session: newSession() };
 }
 
 const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * The terminal over `app/core/shell.ts`: it fills its box, full screen on a phone or inside the desktop's Terminal window. The
+ * The terminal over `app/core/shell.ts`: it fills its box, the desktop's Terminal window. The
  * runner is pure; this component prints what it returns, performs its effects and draws the prompt, the pager and the status bar.
  */
-export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, fullScreen, autoFocus = false }: ShellProps) {
-  const [first] = useState(() => firstPaint(initialCommand));
+export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = false }: ShellProps) {
+  const [first] = useState(() => firstPaint());
   const [items, setItems] = useState(first.items);
   const [session, setSession] = useState(first.session);
   const [value, setValue] = useState("");
@@ -96,7 +75,6 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
   const keyHandler = useRef<KeyHandler | null>(null);
   const skip = useRef(false);
   const wake = useRef<(() => void) | null>(null);
-  const echoed = useRef<HTMLDivElement>(null);
 
   const toItems = (lines: readonly Line[]): Item[] => lines.map((line) => ({ id: nextId.current++, line }));
   const print = (lines: readonly Line[]) => {
@@ -153,8 +131,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
         return onOpenProject?.(effect.slug);
       case "viewProject": {
         const taken = onView?.(effect.slug);
-        if (taken) return print(taken);
-        return setFull({ view: { kind: "view", slug: effect.slug }, back: null });
+        return taken ? print(taken) : undefined;
       }
       case "browse":
         return setFull({ view: { kind: "browse", cwd }, back: null });
@@ -172,13 +149,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
     }
   };
 
-  // The first command or keystroke lets the log follow its end again.
-  const unanchor = () => {
-    anchored.current = false;
-  };
-
   const exec = (line: string) => {
-    unanchor();
     const result = run(line, session, { now: new Date() });
     const cleared = result.effects.some((effect) => effect.kind === "clear");
     // `clear` empties the log first, the echo of its own line included.
@@ -272,21 +243,11 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
     fromLog.current = false;
   }, [full]);
 
-  // The log follows its end; a session that opens with a command starts at that command's line.
-  const started = useRef(false);
-  const anchored = useRef(first.items.some((item) => item.initial));
+  // The log follows its end.
   const stick = useCallback(() => {
-    if (anchored.current) return;
     if (terminal.current) terminal.current.scrollTop = terminal.current.scrollHeight;
   }, []);
-  useLayoutEffect(() => {
-    const view = terminal.current;
-    if (!view) return;
-    if (!started.current && echoed.current) {
-      view.scrollTop = echoed.current.offsetTop - parseFloat(getComputedStyle(view).paddingTop);
-    } else stick();
-    started.current = true;
-  }, [items, full, value, stick]);
+  useLayoutEffect(stick, [items, full, value, stick]);
 
   useLayoutEffect(() => {
     const field = input.current;
@@ -348,7 +309,7 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
     setCaret(field.selectionStart ?? field.value.length);
   };
 
-  const context = useMemo(() => ({ run: runLine, readmes: readmes ?? {}, settled: stick }), [runLine, readmes, stick]);
+  const context = useMemo(() => ({ run: runLine, settled: stick }), [runLine, stick]);
 
   const windowName = !full ? "jsh" : full.view.kind === "page" ? full.view.command : full.view.kind;
   const slot = full && full.view.kind !== "page" ? full.view : null;
@@ -375,9 +336,9 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
       >
         <div ref={terminal} className="sh-term" hidden={!!full}>
           <div role="log" aria-label="Terminal output">
-            {items.map((item, index) => (
-              <div key={item.id} ref={item.initial && !items[index - 1]?.initial ? echoed : undefined} className="sh-item">
-                <LineView line={item.line} heading={!!item.initial} />
+            {items.map((item) => (
+              <div key={item.id} className="sh-item">
+                <LineView line={item.line} />
               </div>
             ))}
           </div>
@@ -408,7 +369,6 @@ export function Shell({ onOpenProject, initialCommand, readmes, onPage, onView, 
           spellCheck={false}
           enterKeyHint="go"
           onChange={(event) => {
-            unanchor();
             setValue(event.target.value);
             pointInput(event.target);
           }}

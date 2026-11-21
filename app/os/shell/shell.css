@@ -122,12 +122,8 @@
 .sh-kr > span {
   overflow-wrap: anywhere;
 }
-.sh-h1 {
-  margin: 0;
-  font: inherit;
-}
 
-/* Full screen (the pager, and the host's browse and viewer): a double-bordered pane with its title set in the border, and a key bar. */
+/* Full screen (the pager, and the host's browse): a double-bordered pane with its title set in the border, and a key bar. */
 .sh-full {
   position: absolute;
   inset: 0 0 24px 0;
@@ -197,10 +193,4 @@
   background: var(--phosphor-fg);
   color: var(--phosphor-bg);
   text-shadow: none;
-}
-.sh-keys .sh-off {
-  color: var(--phosphor-dim);
-}
-.sh-keys .sh-off b {
-  background: var(--phosphor-dim);
 }

@@ -145,7 +145,7 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 - Prompt `guest@jellycat:<path>$`, a block cursor (hollow when the shell isn't focused), a status bar in inverse video:
   `[jellycat] 0:jsh*` on the left, the path and the clock on the right.
 - The input is a real, labelled `<input>`, 1px and clear, with a font size of 16px so iOS doesn't zoom in; the prompt's own text is
-  what shows. It is never focused on mount on a phone; a tap on the screen focuses it. Tab completes a line being typed; on an
+  what shows. A tap on the screen focuses it. Tab completes a line being typed; on an
   empty line, and with Shift, it moves the focus as anywhere else, so the keyboard can always leave the prompt. ↑ ↓ walk the
   history, Ctrl-C abandons the line (`^C`), Ctrl-L clears the log and Ctrl-U the line.
 - Every name in the output is clickable and runs the command it stands for, so the shell works without typing. A project's name
@@ -154,9 +154,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   in a listing and a command aren't. Hover is inverse video.
 - The output is `role="log"`. The first paint is the welcome and the prompt; the typed login (banner, `jellycat login: guest`, last
   login, welcome) plays on `logout` and `exit` only, and any key or click skips it, as does `prefers-reduced-motion`.
-- The shell fills its box: the screen on a phone, the Terminal window on the desktop. The host plugs in through props: `onOpenProject`,
-  `initialCommand` (one line or several, printed at first paint as if typed one after the other, their effects not run) and a full-screen slot for `browse` and the viewer; without one those
-  show a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
+- The shell fills its box, the Terminal window on the desktop. The host plugs in through props: `onOpenProject`, `onPage`, `onView`
+  and a full-screen slot for `browse`; without one it shows a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
 - The status bar's clock is client-only: it is not in the markup the server renders.
 - Messages read like a Unix shell's (`jsh: foo: command not found`), never chatty.
 - `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. It opens in the
@@ -165,16 +164,13 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 
 ## Viewer
 
-- A project's screenshots open in a viewer: a window on the desktop, a full-screen dialog on a phone (below), and, until the phone's
-  shell goes, full screen in the shell (`view <project>`, like `browse`).
+- A project's screenshots open in a viewer: a window on the desktop, a full-screen dialog on a phone (below).
 - The picture is shown whole, scaled to fit, in its own colours, with the CRT layer on top. Desktop-sized and phone-sized pictures
-  share one window (desktop) or one full-screen pane (shell), which keeps its size from one picture to the next. On the desktop the
-  picture box is fixed, so the buttons stay put; in the shell the caption sits right under the picture.
-- The count (`2 of 3`) is in the window's info line, or set in the top border in the shell. The caption is the picture's alt text,
-  kept to two lines.
-- Previous and next are buttons with pixel arrows on the desktop and `h`/`l` in the shell's key bar; ← and → work in both. At the
-  first or last picture the control is dim. Esc closes the window; `q` or Esc returns the shell to the prompt as it was.
-- In the desktop's Terminal, `view <project>` opens the viewer's window and prints `opened <Name> Screenshots`; it is not full screen there.
+  share one window, which keeps its size from one picture to the next. The picture box is fixed, so the buttons stay put.
+- The count (`2 of 3`) is in the window's info line. The caption is the picture's alt text, kept to two lines.
+- Previous and next are buttons with pixel arrows; ← and → work too. At the first or last picture the control is dim. Esc closes
+  the window.
+- In the desktop's Terminal, `view <project>` opens the viewer's window and prints `opened <Name> Screenshots`.
 - The phone's viewer (`app/os/phone/viewer-dialog.tsx`) is a native modal `<dialog>` that fills the screen, labelled `<Name> screenshots`
   and opened on the picture that was tapped. The pane is a 4px double border with the name set in its top edge on the left and the
   count (`2 of 3`, a polite status) on the right; the picture is shown whole inside it with its caption (the alt text, hidden from

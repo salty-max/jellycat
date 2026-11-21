@@ -46,7 +46,6 @@ export function ProjectReadme({ windowId, slug }: { windowId: string; slug: stri
         const match = /^open (\S+)$/.exec(line);
         if (match) openProject(match[1]);
       },
-      readmes: {},
       settled: () => {},
     }),
     [openProject],

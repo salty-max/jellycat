@@ -60,14 +60,14 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 const Blank = () => <div>{" "}</div>;
 
 /** The project's card: one line per entry, with the project's own links and the README's path, which pages it. */
-function Card({ slug, heading }: { slug: string; heading: boolean }) {
+function Card({ slug }: { slug: string }) {
   const project = projectBySlug(slug);
   if (!project) return null;
   const pictures = project.screenshots.length;
   const address = (url: string) => (url === "-" ? "-" : <ExternalLink href={url}>{host(url)}</ExternalLink>);
   return (
     <>
-      {heading ? <h1 className="sh-h1">{project.name}</h1> : <div>{project.name}</div>}
+      <div>{project.name}</div>
       <div className="text-phosphor-dim">{project.kind}</div>
       <Blank />
       <div>{project.description}</div>
@@ -88,10 +88,9 @@ function Card({ slug, heading }: { slug: string; heading: boolean }) {
 }
 
 function ReadmeLoaded({ slug }: { slug: string }) {
-  const { run, readmes, settled } = useShell();
-  const given = readmes[slug];
-  const loading = given ? undefined : loadReadme(slug);
-  const blocks = given ?? (loading ? use(loading) : undefined);
+  const { run, settled } = useShell();
+  const loading = loadReadme(slug);
+  const blocks = loading ? use(loading) : undefined;
   useLayoutEffect(settled, [settled]);
   // A link to another project runs `open <slug>`, as a pressed name does; the links keep the prompt's focus.
   return blocks ? <ReadmeBlocks blocks={blocks} onOpenProject={(target) => run(`open ${target}`)} linkClassName="sh-lk" onLinkMouseDown={keepFocus} /> : <div>-</div>;
@@ -107,7 +106,7 @@ class Failed extends Component<{ children: ReactNode }, { failed: boolean }> {
   }
 }
 
-/** A project's README: the host's blocks, else the chunk, which suspends until it arrives. */
+/** A project's README: the chunk, which suspends until it arrives. */
 export function Readme({ slug }: { slug: string }) {
   return (
     <Failed>
@@ -118,7 +117,7 @@ export function Readme({ slug }: { slug: string }) {
   );
 }
 
-function SegmentView({ segment, heading }: { segment: Segment; heading: boolean }) {
+function SegmentView({ segment }: { segment: Segment }) {
   switch (segment.kind) {
     case "text":
       return segment.text;
@@ -131,20 +130,20 @@ function SegmentView({ segment, heading }: { segment: Segment; heading: boolean 
     case "link":
       return <ExternalLink href={segment.href}>{segment.text}</ExternalLink>;
     case "card":
-      return <Card slug={segment.slug} heading={heading} />;
+      return <Card slug={segment.slug} />;
     case "readme":
       return <Readme slug={segment.slug} />;
   }
 }
 
 /** One line of output; the project's card and a README stand alone, and fill their own lines. */
-export function LineView({ line, heading = false }: { line: Line; heading?: boolean }) {
-  if (line.length === 1 && (line[0].kind === "card" || line[0].kind === "readme")) return <SegmentView segment={line[0]} heading={heading} />;
+export function LineView({ line }: { line: Line }) {
+  if (line.length === 1 && (line[0].kind === "card" || line[0].kind === "readme")) return <SegmentView segment={line[0]} />;
   return (
     <div>
       {line.length === 0
         ? " "
-        : line.map((segment, index) => <SegmentView key={index} segment={segment} heading={heading} />)}
+        : line.map((segment, index) => <SegmentView key={index} segment={segment} />)}
     </div>
   );
 }

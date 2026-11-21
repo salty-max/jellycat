@@ -4,7 +4,7 @@ import { loadReadme } from "../../core/readme";
 import { Crt } from "../crt";
 import { Shell } from "./shell";
 
-// The shell fills its box: the desktop's Terminal window, or a phone's whole screen. The two frames are the mockup's.
+// The shell fills its box: the desktop's Terminal window.
 const meta = {
   title: "OS/Shell",
   component: Shell,
@@ -32,17 +32,6 @@ export const Fresh: Story = {
     // 16px keeps iOS from zooming in on the field.
     await expect(parseFloat(getComputedStyle(input(canvas)).fontSize)).toBeGreaterThanOrEqual(16);
   },
-};
-
-/** The same, on a phone's screen. */
-export const Phone: Story = {
-  decorators: [
-    (Story) => (
-      <div className="h-[839px] w-[412px]">
-        <Story />
-      </div>
-    ),
-  ],
 };
 
 /** Commands run: a directory listing with names as links, a project's card, and the theme changed. */
@@ -89,7 +78,7 @@ export const Pager: Story = {
   },
 };
 
-/** `browse` and `view` stand in a placeholder until the host plugs its views into the full-screen slot. */
+/** `browse` stands in a placeholder until the host plugs its views into the full-screen slot. */
 export const Browse: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -97,9 +86,4 @@ export const Browse: Story = {
     await userEvent.type(input(canvas), "browse{Enter}");
     await expect(canvas.getByText(/placeholder/)).toBeInTheDocument();
   },
-};
-
-/** A page's first paint: the session with `open` and the README's `cat` already run, as a project's page has it. */
-export const ProjectPage: Story = {
-  args: { initialCommand: ["open hundo", "cat ~/projects/web/hundo/README"] },
 };
