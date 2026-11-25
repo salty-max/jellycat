@@ -1,4 +1,4 @@
-// harness 9f4749846: a copy; edit it in the harness repository instead
+// harness eb9080070: a copy; edit it in the harness repository instead
 /**
  * The project's config, `harness.toml`, and the root it sits in: every tool
  * takes its paths and names from here, never from a folder it assumes.
