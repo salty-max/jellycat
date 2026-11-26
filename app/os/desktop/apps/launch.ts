@@ -1,4 +1,5 @@
 import { projectBySlug } from "../../../core/projects";
+import { useLabRequests } from "../../lab/request";
 import { useWindows } from "../windows/store";
 import { FOLDER_TITLES, type FolderId, type Target } from "./folder-model";
 
@@ -36,7 +37,11 @@ export function openViewer(slug: string) {
 export const openStudioReadme = () => open({ app: "readme", title: "Readme", size: { w: 340, h: 210 } });
 export const openControlPanel = () => open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } });
 export const openTerminal = () => open({ app: "terminal", title: "Terminal", size: { w: 410, h: 240 } });
-export const openLab = () => open({ app: "lab", title: "Lab", size: { w: 532, h: 432 } });
+/** Opens or raises the Lab. With a program (`gero run`), the window picks it, and runs it when `run` says so, however open it is. */
+export function openLab(request?: { program: string; run: boolean }) {
+  useLabRequests.getState().ask(request ?? null);
+  return open({ app: "lab", title: "Lab", size: { w: 532, h: 432 } });
+}
 
 /** The Contact window: the form, 380x370 as the mockup has it. `/contact` opens it too (page-windows.ts). */
 export const openContact = () => open({ id: ids.contact, app: "contact", title: "Contact", size: { w: 380, h: 370 } });

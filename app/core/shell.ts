@@ -40,7 +40,7 @@ export type PageSource = { kind: "readme"; slug: string } | { kind: "lines"; lin
 
 /**
  * What the host does, in order. `clear` empties the log before this line's output is printed (the echo of the line
- * included). `openProject` comes with the card already printed. `page`, `view`, `browse` and `logout` end the line: what
+ * included). `openProject` comes with the card already printed. `page`, `view`, `gero`, `browse` and `logout` end the line: what
  * follows them after a `&&` is not run.
  */
 export type Effect =
@@ -50,6 +50,8 @@ export type Effect =
   | { kind: "theme"; phosphor: Phosphor }
   | { kind: "crt"; on: boolean }
   | { kind: "browse" }
+  /** `gero`: the host opens the Lab, on `program` and running it when `run`; `help` lists the programs. The host knows the programs, so it also answers a name it has none of. */
+  | { kind: "gero"; action: "open" | "run" | "help"; program?: string }
   | { kind: "clear" }
   | { kind: "logout" };
 
@@ -102,6 +104,9 @@ const HELP = [
   "less <file>       open a file",
   "open <project>    show a project",
   "view <project>    screenshot viewer",
+  "gero              open the Lab",
+  "gero run <name>   run a Lab program",
+  "gero help         list the programs",
   "tree              show ~/projects as a tree",
   "browse            two-pane file browser (q to quit)",
   "theme <color>     green, amber or white",
@@ -206,6 +211,15 @@ const COMMANDS: Record<string, Handler> = {
     if (!project) return;
     if (!project.screenshots.length) return say(out, plain(`view: ${project.slug}: no screenshots`));
     out.effects.push({ kind: "viewProject", slug: project.slug });
+    out.stop = true;
+  },
+  gero: (args, out) => {
+    const [sub, name, ...rest] = args;
+    if (!sub) out.effects.push({ kind: "gero", action: "open" });
+    else if (sub === "help" && !name) out.effects.push({ kind: "gero", action: "help" });
+    else if (sub === "run" && name && !rest.length) out.effects.push({ kind: "gero", action: "run", program: name });
+    else if (sub === "run" && !name) return say(out, [text("gero: name a program, see "), command("gero help", "gero help")]);
+    else return say(out, plain("gero: use gero, gero run <program> or gero help"));
     out.stop = true;
   },
   tree: (_args, out) => {

@@ -164,8 +164,12 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   in a listing and a command aren't. Hover is inverse video.
 - The output is `role="log"`. The first paint is the welcome and the prompt; the typed login (banner, `jellycat login: guest`, last
   login, welcome) plays on `logout` and `exit` only, and any key or click skips it, as does `prefers-reduced-motion`.
-- The shell fills its box, the Terminal window on the desktop. The host plugs in through props: `onOpenProject`, `onPage`, `onView`
-  and a full-screen slot for `browse`; without one it shows a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
+- `gero` opens the Lab and prints `opened Lab`; `gero run <program>` opens it on that program and runs it (a run still going is
+  ended first, as Run does); `gero help` lists the programs, each a name that runs it. A name the Lab doesn't have is
+  `gero: no program named <name>`, and the programs' names (fetched the first time `gero` is typed) complete with Tab. A shell
+  with no Lab to open (Storybook, the tests) says `gero: the Lab is not available here`.
+- The shell fills its box, the Terminal window on the desktop. The host plugs in through props: `onOpenProject`, `onPage`, `onView`,
+  `onOpenLab`, `onLabPrograms` and a full-screen slot for `browse`; without one it shows a placeholder that says so. A full-screen view gets every key typed, none reaching the prompt behind it.
 - The status bar's clock is client-only: it is not in the markup the server renders.
 - Messages read like a Unix shell's (`jsh: foo: command not found`), never chatty.
 - `browse` is full screen: two panes in double borders, titles set in the border, a key bar at the bottom. It opens in the
@@ -263,11 +267,11 @@ a chunk of the desktop's loaded when the window first opens; the module it runs,
   output pane, 121px tall.
 - The row: the picker (a button with the program's file, or its name when it is several files (`banks`), and a pixel arrow, 150px wide at least), then Reset and Run, the default
   button. The picker opens a menu drawn as the menu bar's drops: Gero's seven programs, a dashed separator, the five in assembly,
-  the open one marked with the 6px square; ↑ ↓ Enter Esc. Picking one shows its text and clears the last run. Run becomes Stop while the
+  the open one marked with the 6px square; ↑ ↓ Enter Esc. Picking one shows its text and clears the last run. The Terminal's `gero run <program>` does the same and then runs it, with the program's edit if there is one; the window opens on that program instead of `fizzbuzz`, and a run still going is ended first. Run becomes Stop while the
   program runs, and keeps the focus; Reset puts the program's own text back and clears the output and the state.
 - The editor is a `textarea`, the window's 18px VT323, no wrapping, with the 1-bit scroll bars both ways (the Readme's, and a
   box where they meet), labelled `Program`. Spelling, correction and capitals are off. Tab leaves it, so the keyboard can always get out;
-  Ctrl+Enter (⌘+Enter) runs from it; Enter on the window itself runs, since the window has the focus when it opens. An edit lasts while
+  Ctrl+Enter (⌘+Enter) runs from it; Enter on the window itself runs, since the window has the focus when it opens (opened by `gero run`, the focus is on Stop while it runs). An edit lasts while
   the window is open, for each program, whatever page the desktop moves to; nothing is stored.
 - The output pane is a `log` that keeps its end in view, its text bottom-aligned while it fits, with the same scroll bars once it
   doesn't. It is not announced as it fills (`aria-live="off"`). The state at the right of `Output` is a polite `status` that is read

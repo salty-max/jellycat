@@ -1,13 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import { GERO_ASSETS, GERO_VERSION } from "../../lab/gero";
 import { GeroModule, ModuleLoadError } from "../../lab/module";
 import { Runner, type Program } from "../../lab/run";
 import { createSamplesLoader } from "../../lab/samples";
 import { LabWindow } from "./lab-window";
+import { useLabRequests } from "./request";
 
 // The programs' fetch is once a page load, through the samples module's shared loader: each test swaps in a loader of its own.
 let loader: () => Promise<Program[]>;
@@ -182,6 +183,79 @@ describe("the Lab's window", () => {
     await loaded();
     await user.click(screen.getByRole("button", { name: "Run" }));
     await waitFor(() => expect(state()).toBe("could not load gero.wasm"));
+  });
+});
+
+describe("gero run, asked of the window", () => {
+  const ask = (program: string, run: boolean) => act(() => useLabRequests.getState().ask({ program, run }));
+  afterEach(() => act(() => useLabRequests.getState().ask(null)));
+
+  test("a window opening on a request picks that program and runs it once the programs are here", async () => {
+    ask("gcd", true);
+    open();
+    await waitFor(() => expect(state()).toMatch(/^halted, \d+ steps$/));
+    expect(editor().value).toMatch(/^-- gcd\.gr/);
+    expect(useLabRequests.getState().request).toBeNull();
+  });
+
+  test("without run it only picks, and clears the last run", async () => {
+    const { user } = open();
+    await loaded();
+    await user.click(screen.getByRole("button", { name: "Run" }));
+    await waitFor(() => expect(state()).toBe("halted, 1076 steps"));
+    ask("gcd", false);
+    await waitFor(() => expect(editor().value).toMatch(/^-- gcd\.gr/));
+    expect(state()).toBe("");
+    expect(screen.getByRole("log", { name: "Output" })).toHaveTextContent("");
+  });
+
+  test("an open window takes a request at once, and runs the program's edit, not its own text", async () => {
+    open();
+    await loaded();
+    ask("gcd", false);
+    await waitFor(() => expect(editor().value).toMatch(/^-- gcd\.gr/));
+    edit("def main()\nend\n");
+    ask("fizzbuzz", false);
+    await waitFor(() => expect(editor().value).toMatch(/^-- fizzbuzz\.gr/));
+    ask("gcd", true);
+    await waitFor(() => expect(editor().value).toBe("def main()\nend\n"));
+    await waitFor(() => expect(state()).toMatch(/halted|error/));
+  });
+
+  test("a second run of the same program, while it runs, ends the first and starts over", async () => {
+    open(["ok"], SLOW);
+    await loaded();
+    ask("fizzbuzz", true);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Stop" })).toBeInTheDocument());
+    ask("fizzbuzz", true);
+    await waitFor(() => expect(state()).toBe("halted, 1076 steps"));
+    expect(screen.getByRole("button", { name: "Run" })).toBeInTheDocument();
+  });
+
+  test("a request made while the programs failed to load fetches them again, once, and then runs", async () => {
+    open(["fail", "ok"]);
+    await screen.findByText("could not load the programs");
+    ask("gcd", true);
+    await waitFor(() => expect(state()).toMatch(/^halted, \d+ steps$/));
+    expect(editor().value).toMatch(/^-- gcd\.gr/);
+  });
+
+  test("a request that nothing took is dropped by a plain open of the window", async () => {
+    const { useWindows } = await import("../desktop/windows/store");
+    const { openLab } = await import("../desktop/apps/launch");
+    ask("gcd", true);
+    openLab();
+    expect(useLabRequests.getState().request).toBeNull();
+    useWindows.setState({ windows: {} });
+  });
+
+  test("a request for a program the window hasn't is dropped", async () => {
+    ask("nope", true);
+    open();
+    await loaded();
+    expect(editor().value).toMatch(/^-- fizzbuzz\.gr/);
+    expect(state()).toBe("");
+    expect(useLabRequests.getState().request).toBeNull();
   });
 });
 

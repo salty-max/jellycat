@@ -85,6 +85,24 @@ test("the Terminal runs ls, and less opens a README's window", async ({ page }) 
   await expect(terminal.getByText("opened Hundo Readme")).toBeVisible();
 });
 
+test("gero in the Terminal opens the Lab, and gero run runs a program there", async ({ page }) => {
+  await boot(page);
+  await page.getByRole("option", { name: "Terminal" }).dblclick();
+  const terminal = window(page, "Terminal");
+  const input = terminal.getByLabel("Terminal input");
+  await input.fill("gero run foo");
+  await input.press("Enter");
+  await expect(terminal.getByText("gero: no program named foo")).toBeVisible();
+  await expect(window(page, "Lab")).toHaveCount(0);
+
+  await input.fill("gero run gcd");
+  await input.press("Enter");
+  await expect(terminal.getByText("opened Lab")).toBeVisible();
+  const lab = window(page, "Lab");
+  await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- gcd\.gr/);
+  await expect(lab.getByRole("status")).toHaveText(/^halted, \d+ steps$/);
+});
+
 test("browse in the Terminal shows its two panes in the window, and q comes back to the prompt", async ({ page }) => {
   await boot(page);
   await page.getByRole("option", { name: "Terminal" }).dblclick();

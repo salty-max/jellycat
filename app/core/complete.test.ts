@@ -60,3 +60,15 @@ test("history steps up and down, and stops at the ends", () => {
   expect(historyStep(h, 2, "down")).toBeNull();
   expect(historyStep([], 0, "up")).toBeNull();
 });
+
+test("gero takes run or help, then a program's name, once the names are known", () => {
+  const names = ["fib", "fibonacci", "fizzbuzz"];
+  expect(complete("ge", [])).toEqual({ line: "gero ", options: [] });
+  expect(complete("gero r", [], names)).toEqual({ line: "gero run ", options: [] });
+  expect(complete("gero h", [], names)).toEqual({ line: "gero help ", options: [] });
+  expect(complete("gero fi", [], names)).toEqual({ line: "gero fi", options: [] });
+  expect(complete("gero run fiz", [], names)).toEqual({ line: "gero run fizzbuzz ", options: [] });
+  expect(complete("gero run fi", [], names)).toEqual({ line: "gero run fi", options: ["fib", "fibonacci", "fizzbuzz"] });
+  expect(complete("gero run fi", [])).toEqual({ line: "gero run fi", options: [] });
+  expect(complete("gero help x", [], names)).toEqual({ line: "gero help x", options: [] });
+});

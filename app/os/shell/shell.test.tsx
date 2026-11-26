@@ -257,3 +257,65 @@ test("a host's onPage takes a paged file and prints its lines; null leaves it to
   await left.type("less ~/README");
   expect(await screen.findByText(/^\[jellycat\] 0:less\*$/)).toBeInTheDocument();
 });
+
+describe("gero", () => {
+  const names = ["fizzbuzz", "gcd"];
+  const lab = () => ({ onOpenLab: vi.fn(() => [[{ kind: "text" as const, text: "opened Lab" }]]), onLabPrograms: vi.fn(async () => names) });
+
+  test("without a Lab to open it says so", async () => {
+    const { log, type } = setup();
+    await type("gero");
+    expect(await within(log).findByText("gero: the Lab is not available here")).toBeInTheDocument();
+    await type("gero run fizzbuzz");
+    expect(await within(log).findAllByText("gero: the Lab is not available here")).toHaveLength(2);
+  });
+
+  test("gero opens the Lab and prints what the host says", async () => {
+    const props = lab();
+    const { log, type } = setup(props);
+    await type("gero");
+    expect(await within(log).findByText("opened Lab")).toBeInTheDocument();
+    expect(props.onOpenLab).toHaveBeenCalledWith(null, false);
+  });
+
+  test("gero run opens it on a program and runs it; a name it hasn't is an error", async () => {
+    const props = lab();
+    const { log, type } = setup(props);
+    await type("gero run gcd");
+    expect(await within(log).findByText("opened Lab")).toBeInTheDocument();
+    expect(props.onOpenLab).toHaveBeenCalledWith("gcd", true);
+    await type("gero run foo");
+    expect(await within(log).findByText("gero: no program named foo")).toBeInTheDocument();
+    expect(props.onOpenLab).toHaveBeenCalledTimes(1);
+  });
+
+  test("gero help lists the programs as names that run them; Tab completes them once known", async () => {
+    const props = lab();
+    const { user, input, log, type } = setup(props);
+    await type("gero help");
+    await user.click(await within(log).findByRole("button", { name: "gcd" }));
+    expect(props.onOpenLab).toHaveBeenCalledWith("gcd", true);
+    await user.click(input);
+    await user.type(input, "gero run fiz{Tab}");
+    expect(input).toHaveValue("gero run fizzbuzz ");
+  });
+
+  test("an answer that waited for the programs is dropped when the log was cleared meanwhile", async () => {
+    let release: (names: readonly string[]) => void = () => {};
+    const props = { ...lab(), onLabPrograms: vi.fn(() => new Promise<readonly string[]>((done) => (release = done))) };
+    const { log, type } = setup(props);
+    await type("gero run gcd");
+    await type("clear");
+    await act(async () => release(names));
+    expect(props.onOpenLab).not.toHaveBeenCalled();
+    expect(within(log).queryByText("opened Lab")).not.toBeInTheDocument();
+  });
+
+  test("programs that cannot be fetched are said, and the Lab is not opened", async () => {
+    const props = { ...lab(), onLabPrograms: vi.fn(async (): Promise<readonly string[]> => Promise.reject(new Error("no"))) };
+    const { log, type } = setup(props);
+    await type("gero run gcd");
+    expect(await within(log).findByText("gero: could not load the programs")).toBeInTheDocument();
+    expect(props.onOpenLab).not.toHaveBeenCalled();
+  });
+});

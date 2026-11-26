@@ -12,15 +12,19 @@ export interface Completion {
 
 /**
  * Completes the last word of the line. The first word is a command; any later one is a path (a word after `&&` counts as a
- * path too, as in the mockup). One match fills the word in, followed by a space unless it is a directory; several fill in
+ * path too, as in the mockup; after `gero`, `run`, `help` and the Lab's `programs`). One match fills the word in, followed by a space unless it is a directory; several fill in
  * what they share, or, when that adds nothing, come back as `options`.
  */
-export function complete(line: string, cwd: readonly string[]): Completion {
+export function complete(line: string, cwd: readonly string[], programs: readonly string[] = []): Completion {
   const words = line.split(" ");
   const last = words[words.length - 1];
   let matches: string[];
   if (words.length === 1) {
     matches = COMMAND_NAMES.filter((name) => name.startsWith(last));
+  } else if (words[0] === "gero") {
+    // `gero` takes `run` or `help`, and after `run` a Lab program's name (known once `gero` has been typed); nothing else.
+    const choices = words.length === 2 ? ["run", "help"] : words.length === 3 && words[1] === "run" ? programs : [];
+    matches = choices.filter((name) => name.startsWith(last));
   } else {
     const slash = last.lastIndexOf("/");
     const dir = slash >= 0 ? last.slice(0, slash + 1) : "";

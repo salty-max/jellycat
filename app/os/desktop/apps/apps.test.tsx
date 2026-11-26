@@ -251,6 +251,15 @@ describe("the Terminal", () => {
     expect(within(terminal).getByText("opened Hundo Screenshots")).toBeInTheDocument();
   });
 
+  it("opens the Lab with gero, and says it", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    const terminal = await win("Terminal");
+    await type(terminal, "gero");
+    expect(await win("Lab")).toBeInTheDocument();
+    expect(within(terminal).getByText("opened Lab")).toBeInTheDocument();
+  });
+
   it("prints any other file", async () => {
     render(<Desktop />);
     await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));

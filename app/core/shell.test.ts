@@ -8,7 +8,7 @@ const words = (lines: readonly Line[]) => lines.map((l) => l.map((s) => ("text" 
 const at = (...cwd: string[]): Session => ({ cwd, history: [] });
 
 test("the commands, in the order Tab lists them", () => {
-  expect(COMMAND_NAMES).toEqual(["help", "ls", "cd", "pwd", "cat", "less", "more", "open", "view", "tree", "browse", "theme", "crt", "clear", "history", "whoami", "date", "uname", "echo", "logout", "exit"]);
+  expect(COMMAND_NAMES).toEqual(["help", "ls", "cd", "pwd", "cat", "less", "more", "open", "view", "gero", "tree", "browse", "theme", "crt", "clear", "history", "whoami", "date", "uname", "echo", "logout", "exit"]);
 });
 
 test("the prompt, the banner and the welcome", () => {
@@ -29,13 +29,14 @@ test("an unknown command, and the rest of the line still runs", () => {
   expect(words(go("nope").lines)).toEqual(["jsh: nope: command not found"]);
   expect(words(go("nope && whoami").lines)).toEqual(["jsh: nope: command not found", "guest"]);
   expect(words(go("constructor").lines)).toEqual(["jsh: constructor: command not found"]);
-  expect(words(go("gero x").lines)).toEqual(["jsh: gero: command not found"]);
+  expect(words(go("geroo").lines)).toEqual(["jsh: geroo: command not found"]);
 });
 
 test("help lists the commands, view included", () => {
   const out = words(go("help").lines);
   expect(out).toContain("less <file>       open a file");
   expect(out).toContain("view <project>    screenshot viewer");
+  expect(out).toContain("gero run <name>   run a Lab program");
   expect(out.at(-1)).toBe("clear  history  pwd  whoami  date  uname  echo  logout");
 });
 
@@ -140,6 +141,22 @@ test("view says a project has no screenshots, asks for a name, says none matches
   expect(go(`view ${without.slug}`).effects).toEqual([]);
   expect(go("view").lines).toEqual([[{ kind: "text", text: "view: name a project, for example: " }, { kind: "command", text: "view hundo", command: "view hundo" }]]);
   expect(words(go("view zz").lines)).toEqual(["view: no project matches 'zz'"]);
+});
+
+test("gero opens the Lab, runs a program or lists them, as effects that end the line", () => {
+  expect(go("gero").effects).toEqual([{ kind: "gero", action: "open" }]);
+  expect(go("gero run fizzbuzz && whoami")).toMatchObject({ effects: [{ kind: "gero", action: "run", program: "fizzbuzz" }], lines: [] });
+  expect(go("gero help").effects).toEqual([{ kind: "gero", action: "help" }]);
+  expect(go("gero").lines).toEqual([]);
+});
+
+test("gero says what it takes when it is asked wrongly", () => {
+  expect(words(go("gero run").lines)).toEqual(["gero: name a program, see gero help"]);
+  expect(go("gero run").lines[0]).toContainEqual({ kind: "command", text: "gero help", command: "gero help" });
+  expect(words(go("gero x").lines)).toEqual(["gero: use gero, gero run <program> or gero help"]);
+  expect(words(go("gero run a b").lines)).toEqual(["gero: use gero, gero run <program> or gero help"]);
+  expect(go("gero x && whoami").effects).toEqual([]);
+  expect(words(go("gero x && whoami").lines)).toEqual(["gero: use gero, gero run <program> or gero help", "guest"]);
 });
 
 test("tree draws ~/projects with folders and project links", () => {

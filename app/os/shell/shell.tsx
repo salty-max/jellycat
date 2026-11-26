@@ -20,6 +20,13 @@ export interface ShellProps {
   onPage?: (page: { command: "less" | "more"; path: string; source: PageSource }) => readonly Line[] | null;
   /** `view` ran on a project with pictures. The host shows them its own way (the desktop's Terminal opens the viewer's window) and returns the lines to print. */
   onView?: (slug: string) => readonly Line[] | null;
+  /**
+   * `gero` ran: the host opens the Lab (on `program`, running it when `run`) and returns the lines to print. Without it the shell says the
+   * Lab is not here.
+   */
+  onOpenLab?: (program: string | null, run: boolean) => readonly Line[];
+  /** The Lab's programs' names, asked the first time `gero` is typed: for `gero help`, the error for a name it hasn't, and Tab. */
+  onLabPrograms?: () => Promise<readonly string[]>;
   /** The host's full-screen view, `browse`. Without one the shell shows a placeholder saying so. */
   fullScreen?: FullScreenSlot;
   /** Focus the prompt once mounted, on a screen with a pointer and a keyboard; never on a phone, where it would raise the keyboard. */
@@ -52,7 +59,7 @@ const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(pre
  * The terminal over `app/core/shell.ts`: it fills its box, the desktop's Terminal window. The
  * runner is pure; this component prints what it returns, performs its effects and draws the prompt, the pager and the status bar.
  */
-export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = false }: ShellProps) {
+export function Shell({ onOpenProject, onPage, onView, onOpenLab, onLabPrograms, fullScreen, autoFocus = false }: ShellProps) {
   const [first] = useState(() => firstPaint());
   const [items, setItems] = useState(first.items);
   const [session, setSession] = useState(first.session);
@@ -63,6 +70,8 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
   const [full, setFull] = useState<Full | null>(null);
   const [viewPath, setViewPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** The Lab's programs' names, once `gero` has been typed. */
+  const [labPrograms, setLabPrograms] = useState<readonly string[]>([]);
   const [loginRun, setLoginRun] = useState(0);
   const [clock, setClock] = useState("");
   const set = useSettings((state) => state.set);
@@ -74,7 +83,23 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
   const nextId = useRef(first.items.length);
   const keyHandler = useRef<KeyHandler | null>(null);
   const skip = useRef(false);
+  /** Moves on when the log is emptied (`clear`, a logout) or the shell goes: an answer that waited for the programs is dropped. */
+  const generation = useRef(0);
+  useEffect(
+    () => () => {
+      generation.current++;
+    },
+    [],
+  );
   const wake = useRef<(() => void) | null>(null);
+
+  // The programs' names, fetched the first time `gero` is typed, so Tab has them before the line is run.
+  const namesAsked = useRef(false);
+  useEffect(() => {
+    if (!onLabPrograms || namesAsked.current || !/^gero(\s|$)/.test(value)) return;
+    namesAsked.current = true;
+    onLabPrograms().then(setLabPrograms, () => (namesAsked.current = false));
+  }, [value, onLabPrograms]);
 
   const toItems = (lines: readonly Line[]): Item[] => lines.map((line) => ({ id: nextId.current++, line }));
   const print = (lines: readonly Line[]) => {
@@ -110,6 +135,7 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
   };
 
   const logout = () => {
+    generation.current++;
     skip.current = reducedMotion();
     setFull(null);
     setSession(newSession());
@@ -118,6 +144,32 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
     setItems([]);
     setBusy(true);
     setLoginRun((count) => count + 1);
+  };
+
+  // `gero`: the programs' names are fetched the first time (the answer is the host's own cache after that), so a name is checked against
+  // them and the lines come a moment after the command's own.
+  const gero = async (action: "open" | "run" | "help", program: string | undefined) => {
+    if (!onOpenLab || !onLabPrograms) return print([text("gero: the Lab is not available here")]);
+    if (action === "open") {
+      print(onOpenLab(null, false));
+      onLabPrograms().then(setLabPrograms, () => undefined);
+      return;
+    }
+    // What the line printed lands only in the log it was typed in: not after `clear` or a logout, nor once the Terminal is closed.
+    const epoch = generation.current;
+    let names: readonly string[];
+    try {
+      names = await onLabPrograms();
+    } catch {
+      return generation.current === epoch ? print([text("gero: could not load the programs")]) : undefined;
+    }
+    setLabPrograms(names);
+    if (generation.current !== epoch) return;
+    if (action === "help") {
+      return print([names.flatMap((name, index): Line[number][] => [...(index ? [{ kind: "text", text: "  " } as const] : []), { kind: "command", text: name, command: `gero run ${name}` }])]);
+    }
+    if (program === undefined || !names.includes(program)) return print([text(`gero: no program named ${program}`)]);
+    print(onOpenLab(program, true));
   };
 
   const perform = (effect: Effect, cwd: readonly string[]) => {
@@ -133,6 +185,8 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
         const taken = onView?.(effect.slug);
         return taken ? print(taken) : undefined;
       }
+      case "gero":
+        return void gero(effect.action, effect.program);
       case "browse":
         return setFull({ view: { kind: "browse", cwd }, back: null });
       case "page": {
@@ -152,6 +206,7 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
   const exec = (line: string) => {
     const result = run(line, session, { now: new Date() });
     const cleared = result.effects.some((effect) => effect.kind === "clear");
+    if (cleared) generation.current++;
     // `clear` empties the log first, the echo of its own line included.
     const added = toItems(cleared ? result.lines : [text(prompt(session.cwd) + line), ...result.lines]);
     setItems((log) => [...(cleared ? [] : log), ...added].slice(-MAX_LINES));
@@ -281,7 +336,7 @@ export function Shell({ onOpenProject, onPage, onView, fullScreen, autoFocus = f
       // Tab completes the line being typed. On an empty line, and with Shift, it moves the focus as it does anywhere else, so the
       // keyboard can always leave the prompt (for the names above it, or the Terminal window's boxes).
       event.preventDefault();
-      const done = complete(value, session.cwd);
+      const done = complete(value, session.cwd, labPrograms);
       if (done.options.length) print([text(prompt(session.cwd) + value), text(done.options.join("  "))]);
       edit(done.line);
     } else if (key === "ArrowUp" || key === "ArrowDown") {

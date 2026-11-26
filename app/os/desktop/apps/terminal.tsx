@@ -1,15 +1,16 @@
 import { useCallback } from "react";
 import { projectBySlug } from "../../../core/projects";
 import type { Line } from "../../../core/shell";
+import { loadSamples } from "../../../lab/samples";
 import { fullScreenViews } from "../../full-screen-views";
 import { Shell, type ShellProps } from "../../shell/shell";
 import { useDesktop } from "./context";
-import { openProjectReadme, openViewer } from "./launch";
+import { openLab, openProjectReadme, openViewer } from "./launch";
 import "./apps.css";
 
 /**
  * The Terminal: the shell in a window. `open` opens the project's Info window, and `less` (or `more`) on a project's README opens its
- * Readme window; any other file is printed, as `more` prints a file that fits. `view` on a project opens its Screenshots window. `browse` is full screen inside the window.
+ * Readme window; any other file is printed, as `more` prints a file that fits. `view` on a project opens its Screenshots window. `gero` opens the Lab, `gero run <program>` opens it on that program and runs it. `browse` is full screen inside the window.
  */
 export function TerminalApp() {
   const { openProject } = useDesktop();
@@ -26,9 +27,14 @@ export function TerminalApp() {
     openViewer(slug);
     return [[{ kind: "text", text: `opened ${project.name} Screenshots` }]];
   }, []);
+  const onOpenLab = useCallback((program: string | null, run: boolean): readonly Line[] => {
+    openLab(program === null ? undefined : { program, run });
+    return [[{ kind: "text", text: "opened Lab" }]];
+  }, []);
+  const onLabPrograms = useCallback(async () => (await loadSamples()).map((program) => program.name), []);
   return (
     <div className="app-pane">
-      <Shell onOpenProject={openProject} onPage={onPage} onView={onView} fullScreen={fullScreenViews} autoFocus />
+      <Shell onOpenProject={openProject} onPage={onPage} onView={onView} onOpenLab={onOpenLab} onLabPrograms={onLabPrograms} fullScreen={fullScreenViews} autoFocus />
     </div>
   );
 }
