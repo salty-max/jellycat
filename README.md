@@ -11,7 +11,8 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
   sheet; `os/desktop/` the desktop, whose Terminal is the shell, `os/shell/`), `app.css` Tailwind and the phosphor tokens.
 - `app/core/`: what both layouts read. `projects.ts` is the project data (every fact from the project's own repository, its
   README or its code where the README is stale, a link perhaps from its GitHub homepage field, an unknown fact `-`),
-  `studio.ts` the studio's Readme and `contact.txt`, `site.ts` the OS's name and the site's address, `readme.ts` the
+  `studio.ts` the studio's Readme and `contact.txt`, `site.ts` the OS's name and the site's address, `pages.ts` every page with
+  its address, title and description (the routes' meta, the prerender list and the sitemap read it), `readme.ts` the
   projects' READMEs, each a chunk of its own, loaded and parsed on first use.
 - `app/content/readme/`: one README per project, `<slug>.md`, in a small Markdown subset (one `#` title, `##` headings,
   one-line paragraphs, one-level `- ` lists, code spans, links to `https://` or `/projects/<slug>`); `readme.ts` refuses
@@ -80,16 +81,17 @@ with axe failing the run on a violation. The others:
 
 ## Build
 
-`pnpm build` writes a static site to `build/client`: an HTML file for each path listed in `react-router.config.ts`, and `404.html`,
-the not-found route prerendered once and moved there by the config's `buildEnd` (which also deletes React Router's unused SPA
-fallback). Vercel serves `404.html` with a 404 status at any address with no file (except under `/api`, where Vercel's built-in
-error route answers in plain text; the site's only server code is the contact function, `api/contact.ts`, which README
-Hosting has), so a typo is a real 404 and not the app's shell. `build/server` is
+`pnpm build` writes a static site to `build/client`: an HTML file for each page in `app/core/pages.ts`, which
+`react-router.config.ts` prerenders, and `404.html`, the not-found route prerendered once and moved there by the config's
+`buildEnd` (which also deletes React Router's unused SPA fallback). Vercel serves `404.html` with a 404 status at any address with
+no file (except under `/api`, where Vercel's built-in error route answers in plain text; the site's only server code is the
+contact function, `api/contact.ts`, which README Hosting has), so a typo is a real 404 and not the app's shell. `build/server` is
 only used during the build.
 
-The same `buildEnd` writes `sitemap.xml` (the home page and a page for each project in `app/core/projects.ts`, on `SITE_URL`) and
-`robots.txt` (everything allowed, the sitemap named). `/projects/:slug` is prerendered for each project; its loader awaits the
-project's README at build, and a slug with no project throws a 404 that the root `ErrorBoundary` draws as the not-found screen.
+The same `buildEnd` writes `sitemap.xml` (every page in `app/core/pages.ts`, the home page and a page for each project, on
+`SITE_URL`) and `robots.txt` (everything allowed, the sitemap named). `/projects/:slug` is prerendered for each project; its
+loader awaits the project's README at build, and a slug with no project throws a 404 that the root `ErrorBoundary` draws as the
+not-found screen.
 
 Each page carries its Content-Security-Policy in a `<meta http-equiv>`, written by `scripts/csp.ts` as the last step of
 `buildEnd`, so `404.html` gets one too. React Router and React start each page with inline scripts (the hydration data, the module
