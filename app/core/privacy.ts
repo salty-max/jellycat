@@ -11,11 +11,11 @@ export const RETENTION_DAYS = 30;
 
 /**
  * Where Resend sends from: the region picked when jellycat.fr is added there (U1), named as Resend's regions page names it
- * (North Virginia, Ireland, São Paulo or Tokyo). A placeholder until U1 has picked it. The region only decides where the e-mail
+ * (North Virginia, Ireland, São Paulo or Tokyo): Ireland (eu-west-1), the user's pick in U1. The region only decides where the e-mail
  * is sent from: Resend stores what it keeps (the message, its logs) in the United States whatever the region (its regions page,
  * "Data Residency", and its GDPR page, read 22 Nov 2026), so the notice says so.
  */
-export const SENDING_REGION = "[region] (placeholder)";
+export const SENDING_REGION = "Ireland";
 
 const email: Span = { text: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` };
 
