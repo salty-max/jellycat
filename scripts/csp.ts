@@ -13,7 +13,8 @@ import { join } from "node:path";
 export function policy(hashes: readonly string[]): string {
   return [
     "default-src 'self'",
-    ["script-src 'self'", ...hashes.map((hash) => `'${hash}'`)].join(" "),
+    // 'wasm-unsafe-eval' lets the page compile WebAssembly (the Lab's gero.wasm) and nothing else: no eval, no inline script.
+    ["script-src 'self' 'wasm-unsafe-eval'", ...hashes.map((hash) => `'${hash}'`)].join(" "),
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "font-src 'self'",

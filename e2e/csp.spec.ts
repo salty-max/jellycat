@@ -12,7 +12,7 @@ const PER_PAGE = 10_000;
 
 // The policy with its hashes taken out, as scripts/csp.ts writes it.
 const POLICY =
-  /^default-src 'self'; script-src 'self'(?: 'sha256-[A-Za-z0-9+/]{43}=')*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; object-src 'none'; base-uri 'self'$/;
+  /^default-src 'self'; script-src 'self' 'wasm-unsafe-eval'(?: 'sha256-[A-Za-z0-9+/]{43}=')*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; object-src 'none'; base-uri 'self'$/;
 
 // Where Vercel serves a file: index.html at its folder, 404.html at any address with no file (nested, as a typo would be).
 function address(file: string): string {

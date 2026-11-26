@@ -16,8 +16,13 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 - `app/content/readme/`: one README per project, `<slug>.md`, in a small Markdown subset (one `#` title, `##` headings,
   one-line paragraphs, one-level `- ` lists, code spans, links to `https://` or `/projects/<slug>`); `readme.ts` refuses
   anything else, naming the file and line.
+- `app/lab/`: what the Lab runs on, no window yet. `gero.ts` is the pin of the gero release (tag, version, the two assets' names and
+  SHA-256s), `module.ts` the typed binding over `gero.wasm` (ported from gero-lab, its MIT notice kept), `run.ts` the run (built,
+  loaded into a VM, stepped in slices on the main thread, with a cap of steps and of output), `samples.ts` the twelve programs'
+  manifest and its one fetch, `use-gero.ts` the hook the window uses.
 - `public/`: files served as they are: the favicon, and `screenshots/<slug>/`, each project's pictures as AVIF and WebP, which
-  `projects.ts` lists with their alt text and size.
+  `projects.ts` lists with their alt text and size. `public/gero/` is not in git: the build puts gero's module and programs there
+  ([Build](#build)).
 - `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
   screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
   focus seen on screen (`focus.spec.ts`), and reduced motion (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
@@ -25,7 +30,7 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
 - `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side), `csp.ts` (the build step that
-  writes each page's Content-Security-Policy) and `screenshots.mjs` (the projects' pictures: the web apps' live sites opened
+  writes each page's Content-Security-Policy), `gero-assets.mjs` (fetches gero's module and programs from the pinned release) and `screenshots.mjs` (the projects' pictures: the web apps' live sites opened
   logged out in the system Chrome at a desktop and a phone size, or a picture taken by hand with `--from`, written to
   `public/screenshots/`; run by hand, never by the build).
 - `mockups/`: the HTML mockups that settled the look. Not part of the build.
@@ -78,7 +83,8 @@ with axe failing the run on a violation. The others:
 `pnpm build` writes a static site to `build/client`: an HTML file for each path listed in `react-router.config.ts`, and `404.html`,
 the not-found route prerendered once and moved there by the config's `buildEnd` (which also deletes React Router's unused SPA
 fallback). Vercel serves `404.html` with a 404 status at any address with no file (except under `/api`, where Vercel's built-in
-error route answers in plain text; the site has no `/api`), so a typo is a real 404 and not the app's shell. `build/server` is
+error route answers in plain text; the site's only server code is the contact function, `api/contact.ts`, which README
+Hosting has), so a typo is a real 404 and not the app's shell. `build/server` is
 only used during the build.
 
 The same `buildEnd` writes `sitemap.xml` (the home page and a page for each project in `app/core/projects.ts`, on `SITE_URL`) and
@@ -96,6 +102,28 @@ policy allows scripts, fonts, fetches and form posts from the site only, plus th
 `pnpm dev` runs without it. `e2e/csp.spec.ts` opens every page of the build in Chrome and fails on a violation, on a page that
 doesn't hydrate, or on a policy that lets an inline script added after load run; it also feeds the step made-up pages that each of
 its checks has to refuse.
+
+`script-src` also carries `'wasm-unsafe-eval'`, which lets the page compile WebAssembly (the Lab's `gero.wasm`) and nothing else: no
+`eval`, no inline script. It is on every page, since the desktop opens the Lab on any of them. The module itself is fetched from the
+site (`connect-src 'self'`).
+
+**Gero's module and programs.** The Lab runs `gero.wasm` and the twelve programs in `samples.json`, assets of a gero release.
+`app/lab/gero.ts` pins that release: the tag (`v0.5.5`), the version the module reports, the files' names and their SHA-256s.
+`pnpm gero` (`scripts/gero-assets.mjs`) downloads both from
+`https://github.com/salty-max/gero/releases/download/<tag>/` into `.cache/gero/` once, checks each against its hash and copies them to
+`public/gero/` (gitignored) as `gero-0.5.5.wasm` and `samples-0.5.5.json`, where the build serves them and the Lab fetches them from the
+site's own origin. A download that doesn't match its hash fails the build, naming the URL and both hashes, and nothing of it is kept:
+a release asset can be replaced after the pin was written, and a different module must not ship by accident. A cached file is hashed
+again on every run and fetched again only when it no longer matches; a `5xx` or a dropped connection is tried three times, any other refusal (a `404`, say) once.
+The version in the file names makes each one immutable (so a pin that changes a file's bytes must change its version), so `vercel.json` caches `/gero/*` for a year, in the `hit` phase as it does
+`/assets/*`. pnpm runs no `pre` scripts, so `dev`, `build` and `check` call `pnpm gero` first, Vitest's `globalSetup` is the script
+(the Lab's tests run the real module), and `ci.yml` runs it before the check job's steps and caches `.cache/gero/` on the pin. Stories
+don't need it. So CI and Vercel need GitHub reachable at build.
+
+To move to a new gero release: edit the pin (`GERO_TAG`, `GERO_VERSION`, and in `GERO_ASSETS` the two `sha256`s, which `shasum -a 256`
+gives for the release's `gero.wasm` and `samples.json`; the file names follow the version), update `app/lab/expected.json` if gero's
+`.expected` outputs changed, run `pnpm gero` (the older pin's files are removed from `public/gero/`) and `pnpm test`, and look at what
+the Lab shows.
 
 The React Router packages are pinned to one exact version together: pnpm holds back releases under a day old, and the three
 packages have to match.

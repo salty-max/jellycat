@@ -19,6 +19,7 @@
       "continue": true
     },
     { "handle": "hit" },
-    { "src": "/assets/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "continue": true }
+    { "src": "/assets/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "continue": true },
+    { "src": "/gero/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "continue": true }
   ]
 }

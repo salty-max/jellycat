@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "react-router dev",
-    "build": "react-router build",
+    "gero": "node scripts/gero-assets.mjs",
+    "dev": "pnpm gero && react-router dev",
+    "build": "pnpm gero && react-router build",
     "preview": "node scripts/serve.mjs",
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint . --max-warnings 0",
@@ -14,7 +15,7 @@
     "build-storybook": "storybook build",
     "lighthouse": "lhci autorun",
     "lighthouse:desktop": "lhci autorun --config=lighthouserc.desktop.json",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm gero && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

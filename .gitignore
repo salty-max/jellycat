@@ -9,6 +9,9 @@ build/
 storybook-static/
 *.tsbuildinfo
 
+# the Gero module and its programs, fetched at build (scripts/gero-assets.mjs)
+public/gero/
+
 # test output
 test-results/
 playwright-report/

@@ -29,8 +29,11 @@ export default defineConfig({
           name: "unit",
           environment: "jsdom",
           globals: true,
+          // The Lab's tests run the real module, so the unit tests fetch it first (scripts/gero-assets.mjs, once a run); stories draw
+          // the Lab from props and don't need it.
+          globalSetup: ["./scripts/gero-assets.mjs"],
           setupFiles: ["./app/test-setup.ts"],
-          include: ["app/**/*.test.{ts,tsx}"],
+          include: ["app/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
         },
       },
       ...PHOSPHORS.map(storyProject),
