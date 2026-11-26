@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, useSettings } from "../../../core/settings";
 import { settle } from "../../../test-act";
 import type { OsPage } from "../../os-route";
@@ -8,6 +8,12 @@ import { Desktop } from "../desktop";
 import { useWindows } from "../windows/store";
 import { useFolderViews } from "./folder-view";
 import { ids, openFolder } from "./launch";
+
+// The Lab's window is a chunk loaded when it opens: its first import in a run transforms the module and what it pulls in, which on a
+// busy machine takes longer than a test's budget. A hook warms it (with the hook's own budget), so the test waits only for the render.
+beforeAll(async () => {
+  await import("../../lab/lab-window");
+}, 60_000);
 
 beforeEach(() => {
   // jsdom has no matchMedia: no pointer, so the Terminal doesn't focus its prompt itself.
@@ -42,13 +48,13 @@ describe("the desktop's first windows", () => {
     render(<Desktop />);
     await userEvent.dblClick(screen.getByRole("option", { name: "Lab" }));
     const lab = await win("Lab");
-    expect(await within(lab).findByRole("textbox", { name: "Program" })).toBeInTheDocument();
+    expect(await within(lab).findByRole("textbox", { name: "Program" }, { timeout: 4000 })).toBeInTheDocument();
     expect(Object.values(useWindows.getState().windows).filter((window) => window.app === "lab")).toHaveLength(1);
 
     await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
     await userEvent.dblClick(within(await win("Jelly HD")).getByRole("option", { name: "Lab" }));
     expect(Object.values(useWindows.getState().windows).filter((window) => window.app === "lab")).toHaveLength(1);
-  });
+  }, 15_000);
 
   it("opens an empty Trash", async () => {
     render(<Desktop />);
