@@ -14,8 +14,9 @@ for (const reduced of [true, false]) {
     test(`the boot screen ${reduced ? "goes as soon as the desktop is ready" : "stays 1.3s"}`, async ({ page, isMobile }) => {
       test.skip(isMobile, "the boot screen is the desktop's");
       // The page's clock is paused from the start, so no timer of the boot fires on its own; the desktop's code still loads.
+      // `install` starts the clock running from its time, so by the next line it is already past it: pausing at the same instant is a time in the past, and fails now and then. An hour later is always ahead.
       await page.clock.install({ time: new Date("2026-11-20T18:30:00") });
-      await page.clock.pauseAt(new Date("2026-11-20T18:30:00"));
+      await page.clock.pauseAt(new Date("2026-11-20T19:30:00"));
       await page.goto("/");
       await expect(layout(page)).toHaveAttribute("data-layout", "boot");
       await page.waitForLoadState("networkidle");
