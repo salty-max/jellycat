@@ -35,7 +35,9 @@ test("it names the transfer's safeguard and what the host logs, for how long", (
   expect(text).toContain(`in the US, under ${SAFEGUARD}.`);
   expect(SAFEGUARD).toBe("the EU's standard contractual clauses");
   expect([1, 30]).toContain(HOST_LOG_DAYS);
-  expect(text).toContain(`${HOST}, which hosts this site, sees each request's IP address and keeps the site's logs ${HOST_LOG_DAYS} days.`);
+  expect(text).toContain(
+    `${HOST}, which hosts this site, sees each request's IP address and keeps the site's logs ${HOST_LOG_DAYS} days, also under those clauses.`,
+  );
 });
 
 test("the sending region is Resend's real one, Ireland (U1), with no placeholder left", () => {
@@ -60,7 +62,7 @@ test("every link is mailto or https, and no span is empty", () => {
 
 test("the words are the ones put to the user (Q8): a change goes back to the user", () => {
   expect(text).toBe(
-    `Jellycat Studio receives your name, email and message to answer you. The legal basis is the studio's interest in answering messages sent to it. Resend, a US company, sends them from Ireland and keeps them 30 days in the US, under the EU's standard contractual clauses. The studio's inbox keeps them while the exchange lasts. Vercel, which hosts this site, sees each request's IP address and keeps the site's logs 30 days.\n` +
+    `Jellycat Studio receives your name, email and message to answer you. The legal basis is the studio's interest in answering messages sent to it. Resend, a US company, sends them from Ireland and keeps them 30 days in the US, under the EU's standard contractual clauses. The studio's inbox keeps them while the exchange lasts. Vercel, which hosts this site, sees each request's IP address and keeps the site's logs 30 days, also under those clauses.\n` +
       `To see, correct or delete your data, or to object to its use, write to ${CONTACT_EMAIL}. You can also complain to the CNIL, France's data protection authority.`,
   );
 });

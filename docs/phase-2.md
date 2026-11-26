@@ -645,7 +645,9 @@ Given on 22 Nov 2026, through the opener, the recommended option first; the user
    transfer's safeguard (the EU's standard contractual clauses, which Resend's DPA relies on) and Vercel's logs: worded as
    Vercel seeing each request's IP address and keeping the site's logs 30 days (Observability Plus is on for the team and for
    this project, read 26 Nov 2026; Vercel's docs don't say the logs hold the IP, so the notice doesn't either). With the
-   interest as the basis, the rights line names the right to object (GDPR Art. 21).
+   interest as the basis, the rights line names the right to object (GDPR Art. 21). On Vercel's transfer, after F1 read its DPA
+   (the EU's 2021 standard contractual clauses, section 13.3 and Schedule 3): "Add it (Recommended)", so the host's line ends
+   "also under those clauses". The region, once U1 had picked it: Ireland (`eu-west-1`).
 9. **Do the features go live one at a time?** "All at once". Everything ships together from a release branch after F1
    ([the release branch](#the-release-branch)). (Not taken: each feature on `main` as it is done, which was the recommendation.)
 10. **A preview push in C1, before anything calls the function?** "Yes, push for a preview (Recommended)". C1's branch is pushed

@@ -22,7 +22,12 @@ const email: Span = { text: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` };
 /** What covers the transfer to the US: Resend's DPA (section 6) relies on the EU's standard contractual clauses. */
 export const SAFEGUARD = "the EU's standard contractual clauses";
 
-/** The site's host, which sees every request, the form's included (its privacy notice: it collects visitors' IP addresses). */
+/**
+ * The site's host, which sees every request, the form's included (its privacy notice: it collects visitors' IP addresses). Its DPA
+ * (vercel.com/legal/dpa, updated 17 Mar 2026, part of the Pro agreement) covers transfers from the EEA to the US with the same
+ * clauses, the EU's 2021 standard contractual clauses (section 13.3, Schedule 3), so the notice says "also under those clauses"
+ * (the user's answer, 26 Nov 2026).
+ */
 export const HOST = "Vercel";
 
 /**
@@ -48,7 +53,7 @@ export const PRIVACY_NOTICE: TextFile = [
     `${PROCESSOR}, a US company, sends them from ${SENDING_REGION} and keeps them ${RETENTION_DAYS} days in the US, `,
     `under ${SAFEGUARD}. `,
     "The studio's inbox keeps them while the exchange lasts. ",
-    `${HOST}, which hosts this site, sees each request's IP address and keeps the site's logs ${HOST_LOG_DAYS} days.`,
+    `${HOST}, which hosts this site, sees each request's IP address and keeps the site's logs ${HOST_LOG_DAYS} days, also under those clauses.`,
   ],
   ["To see, correct or delete your data, or to object to its use, write to ", email, `. You can also complain to ${AUTHORITY}.`],
 ];
