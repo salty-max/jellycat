@@ -6,6 +6,7 @@ import { closeAllWindows } from "./actions";
 import "./menubar.css";
 import { AboutDialog, ShutDownDialog } from "./system-dialogs";
 import { OS_NAME } from "../../../core/site";
+import { playCue } from "../../sound/sound";
 import { useMenus, type Entry, type Host } from "./use-menus";
 
 const MENU_LABELS = [
@@ -113,6 +114,7 @@ export function SystemMenus({ container, dialogContainer, onRestart, onShutDown 
     about: () => (pending.current = "about"),
     shutDown: () => (pending.current = "shutdown"),
     restart: () => {
+      playCue("up");
       closeAllWindows();
       onRestart?.();
     },
@@ -138,6 +140,7 @@ export function SystemMenus({ container, dialogContainer, onRestart, onShutDown 
         onOpenChange={(open) => !open && setDialog(null)}
         container={dialogContainer}
         onShutDown={() => {
+          playCue("down");
           closeAllWindows();
           onShutDown?.();
         }}

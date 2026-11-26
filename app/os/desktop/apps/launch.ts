@@ -33,7 +33,7 @@ export function openViewer(slug: string) {
 }
 
 export const openStudioReadme = () => open({ app: "readme", title: "Readme", size: { w: 340, h: 210 } });
-export const openControlPanel = () => open({ app: "panel", title: "Control Panel", size: { w: 400, h: 170 } });
+export const openControlPanel = () => open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } });
 export const openTerminal = () => open({ app: "terminal", title: "Terminal", size: { w: 410, h: 240 } });
 
 /** Opens what an item or an icon stands for. `openProject` is the desktop's (it also moves the address). */

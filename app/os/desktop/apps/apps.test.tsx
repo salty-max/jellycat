@@ -167,7 +167,7 @@ describe("the studio's Readme", () => {
 describe("the Control Panel", () => {
   it("sets the phosphor with its radios and the effects with its checkboxes", async () => {
     render(<Desktop />);
-    act(() => void useWindows.getState().open({ app: "panel", title: "Control Panel", size: { w: 400, h: 170 } }));
+    act(() => void useWindows.getState().open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } }));
     const panel = await win("Control Panel");
     expect(within(panel).getByRole("radio", { name: "Green" })).toBeChecked();
     await userEvent.click(within(panel).getByRole("radio", { name: "Amber" }));
@@ -179,6 +179,18 @@ describe("the Control Panel", () => {
     }
     await userEvent.click(within(panel).getByRole("checkbox", { name: "Flicker" }));
     expect(useSettings.getState().flicker).toBe(true);
+  });
+
+  it("has a Sound row with one checkbox, off, that the settings store keeps", async () => {
+    render(<Desktop />);
+    act(() => void useWindows.getState().open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } }));
+    const panel = await win("Control Panel");
+    expect(within(panel).getByRole("group", { name: "Sound" })).toBeInTheDocument();
+    const on = within(panel).getByRole("checkbox", { name: "On" });
+    expect(on).not.toBeChecked();
+    await userEvent.click(on);
+    expect(useSettings.getState().sound).toBe(true);
+    expect(on).toBeChecked();
   });
 
   it("opens from Jelly HD", async () => {

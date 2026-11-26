@@ -4,6 +4,7 @@ import { useDesktop } from "../apps/context";
 import { folderItems, type FolderId, type Target } from "../apps/folder-model";
 import { useFolderViews, type FolderView } from "../apps/folder-view";
 import { ICON_TARGETS, openControlPanel, openTarget } from "../apps/launch";
+import { setSound } from "../../sound/sound";
 import { selectActive, useWindows } from "../windows/store";
 import { useSelection, type Selected } from "./selection";
 
@@ -155,6 +156,7 @@ export function useMenus({ about, restart, shutDown }: Host): {
         checked: settings.dither,
         onToggle: () => settings.set("dither", !settings.dither),
       },
+      { type: "check", label: "Sound", checked: settings.sound, onToggle: () => setSound(!settings.sound) },
       SEPARATOR,
       { type: "item", label: "Restart", onSelect: restart },
       { type: "item", label: "Shut Down...", onSelect: shutDown },

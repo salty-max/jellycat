@@ -10,18 +10,18 @@ beforeEach(() => {
   for (const name of Object.keys(settingsAttributes(DEFAULT_SETTINGS))) root().removeAttribute(name);
 });
 
-test("the defaults are the full tube, with flicker off", () => {
-  expect(DEFAULT_SETTINGS).toEqual({ phosphor: "green", scanlines: true, glow: true, flicker: false, dither: true });
+test("the defaults are the full tube, with flicker and sound off", () => {
+  expect(DEFAULT_SETTINGS).toEqual({ phosphor: "green", scanlines: true, glow: true, flicker: false, dither: true, sound: false });
   expect(useSettings.getState()).toMatchObject(DEFAULT_SETTINGS);
 });
 
 test("the store does not read storage until it is told to", async () => {
-  save({ phosphor: "amber", scanlines: false, glow: true, flicker: true, dither: false });
+  save({ phosphor: "amber", scanlines: false, glow: true, flicker: true, dither: false, sound: true });
   expect(useSettings.getState().phosphor).toBe("green");
   await act(async () => {
     await rehydrateSettings();
   });
-  expect(useSettings.getState()).toMatchObject({ phosphor: "amber", scanlines: false, flicker: true, dither: false });
+  expect(useSettings.getState()).toMatchObject({ phosphor: "amber", scanlines: false, flicker: true, dither: false, sound: true });
 });
 
 test("a change is saved", () => {
@@ -39,7 +39,7 @@ test("a bad saved value falls back to its default", async () => {
 });
 
 test("the head script sets the attributes the store would", () => {
-  const saved = { phosphor: "amber", scanlines: false, glow: false, flicker: true, dither: false } as const;
+  const saved = { phosphor: "amber", scanlines: false, glow: false, flicker: true, dither: false, sound: false } as const;
   save(saved);
   new Function(HEAD_SCRIPT)();
   expect(root()).toHaveAttribute("data-phosphor", "amber");
@@ -73,4 +73,27 @@ test("the head script ignores a saved version the store would drop", () => {
 // The e2e runs React's production build, which logs nothing for an attribute mismatch, so the prop is checked in the source.
 test("<html> is marked to differ between the server's markup and the client's", () => {
   expect(readFileSync("app/root.tsx", "utf8")).toMatch(/<html\b[^>]*suppressHydrationWarning/);
+});
+
+test("sound is saved, and a state saved before it existed reads as off", async () => {
+  act(() => useSettings.getState().set("sound", true));
+  expect(JSON.parse(localStorage.getItem(SETTINGS_KEY)!).state).toMatchObject({ sound: true });
+  act(() => useSettings.setState({ sound: false }));
+  save({ phosphor: "amber", scanlines: true, glow: true, flicker: false, dither: true });
+  await act(async () => {
+    await rehydrateSettings();
+  });
+  expect(useSettings.getState().sound).toBe(false);
+  save({ sound: "yes" });
+  await act(async () => {
+    await rehydrateSettings();
+  });
+  expect(useSettings.getState().sound).toBe(false);
+});
+
+test("sound is no <html> attribute, and the head script leaves it alone", () => {
+  expect(Object.keys(settingsAttributes({ ...DEFAULT_SETTINGS, sound: true }))).not.toContain("data-sound");
+  save({ sound: true });
+  new Function(HEAD_SCRIPT)();
+  expect(root().getAttributeNames().some((name) => name.includes("sound"))).toBe(false);
 });

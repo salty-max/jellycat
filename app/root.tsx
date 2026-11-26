@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useMatches } from "react-router";
 import { DEFAULT_SETTINGS, HEAD_SCRIPT, settingsAttributes, useSettingsSync } from "./core/settings";
 import { Crt } from "./os/crt";
+import { useSoundGesture } from "./os/sound/sound";
 import { NOSCRIPT_CSS, OsLayout } from "./os/layout";
 import { showsOs } from "./os/os-route";
 import { NotFoundScreen } from "./os/not-found-screen";
@@ -44,9 +45,11 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 // The OS lives here, not in the routes, so moving between the home page and a project page never remounts it: those routes only
-// name themselves as the OS's (their `handle`) and give it their data. Any other route, the not-found page, draws its own element.
+// name themselves as the OS's (their `handle`) and give it their data, and on a phone they also draw the page (their element, inside
+// the phone's layout). Any other route, the not-found page, draws its own element.
 export default function App() {
   useSettingsSync();
+  useSoundGesture();
   return showsOs(useMatches()) ? <OsLayout /> : <Outlet />;
 }
 

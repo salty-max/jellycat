@@ -30,14 +30,15 @@ function Header({ onClosed }: { onClosed?: () => void }) {
   );
 }
 
-test("it is a modal dialog named by its title, with the phosphor and the effects and no dither pattern", () => {
+test("it is a modal dialog named by its title, with the phosphor, the effects and the sound and no dither pattern", () => {
   render(<ControlPanelSheet onClose={() => {}} />);
   const panel = within(sheet());
   expect(panel.getByRole("heading", { name: "Control Panel", level: 2 })).toBeInTheDocument();
   expect(panel.getByRole("radiogroup", { name: "Phosphor" })).toBeInTheDocument();
   expect(panel.getAllByRole("radio").map((radio) => radio.getAttribute("aria-checked"))).toEqual(["true", "false", "false"]);
   expect(panel.getByRole("group", { name: "Effects" })).toBeInTheDocument();
-  expect(panel.getAllByRole("checkbox").map((box) => box.parentElement?.textContent)).toEqual(["Scanlines", "Glow", "Flicker"]);
+  expect(panel.getAllByRole("checkbox").map((box) => box.parentElement?.textContent)).toEqual(["Scanlines", "Glow", "Flicker", "On"]);
+  expect(panel.getByRole("group", { name: "Sound" })).toBeInTheDocument();
   expect(panel.queryByText("Dither pattern")).not.toBeInTheDocument();
 });
 

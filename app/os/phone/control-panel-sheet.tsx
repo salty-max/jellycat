@@ -1,11 +1,11 @@
 import { useId } from "react";
-import { EffectsSetting, PhosphorSetting } from "../controls/settings-controls";
+import { EffectsSetting, PhosphorSetting, SoundSetting } from "../controls/settings-controls";
 import { Glyph } from "../icons/icon";
 import { Dialog } from "./dialog";
 
 /**
  * The Control Panel on a phone: a modal dialog showing a window docked at the bottom, its title bar in inverse video with a close box,
- * and the desktop's Phosphor and Effects settings in 44px rows (a phone has no desktop to dither). The page behind is dimmed by a 1-bit
+ * and the desktop's Phosphor, Effects and Sound settings in 44px rows (a phone has no desktop to dither). The page behind is dimmed by a 1-bit
  * dither; a tap on it, Esc, Android's back gesture and the close box call `onClose`, which unmounts it. The choices are the settings
  * store's, so they hold on both layouts. `returnFocus` is the header's button, which takes the focus back. It opens and goes at once, as a window does.
  */
@@ -25,6 +25,7 @@ export function ControlPanelSheet({ onClose, returnFocus }: { onClose: () => voi
         <div className="dlg-cp">
           <PhosphorSetting />
           <EffectsSetting />
+          <SoundSetting />
         </div>
       </div>
     </Dialog>

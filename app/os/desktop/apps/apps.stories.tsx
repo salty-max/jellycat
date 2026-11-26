@@ -102,6 +102,8 @@ export const ControlPanel: Story = {
     await userEvent.click(within(panel).getByRole("radio", { name: "Amber" }));
     await expect(within(panel).getByRole("radio", { name: "Amber" })).toBeChecked();
     await userEvent.click(within(panel).getByRole("radio", { name: "Green" }));
+    // The Sound row, off: switching it on would make an audio context, which the unit and e2e tests cover.
+    await expect(within(within(panel).getByRole("group", { name: "Sound" })).getByRole("checkbox", { name: "On" })).not.toBeChecked();
   },
 };
 

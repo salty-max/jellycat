@@ -106,6 +106,8 @@ export const Sheet: Story = {
     await userEvent.click(within(sheet).getByRole("checkbox", { name: "Flicker" }));
     await expect(within(sheet).getByRole("checkbox", { name: "Flicker" })).toBeChecked();
     await expect(within(sheet).queryByText("Dither pattern")).not.toBeInTheDocument();
+    // The Sound row under Effects, off (switching it on makes an audio context: the unit and e2e tests cover that).
+    await expect(within(within(sheet).getByRole("group", { name: "Sound" })).getByRole("checkbox", { name: "On" })).not.toBeChecked();
     // Put the store back: Storybook's UI doesn't reset it between stories.
     await userEvent.click(within(sheet).getByRole("radio", { name: "Green" }));
     await userEvent.click(within(sheet).getByRole("checkbox", { name: "Flicker" }));

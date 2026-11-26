@@ -3,6 +3,7 @@ import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { useId } from "react";
 import { PHOSPHORS, useSettings, type Phosphor, type Settings } from "../../core/settings";
+import { setSound } from "../sound/sound";
 import "./controls.css";
 
 const PHOSPHOR_NAMES: Record<Phosphor, string> = { green: "Green", amber: "Amber", white: "White" };
@@ -13,7 +14,7 @@ const EFFECTS: readonly { key: "scanlines" | "glow" | "flicker"; label: string }
 ];
 
 /** One setting as a labelled checkbox, bound to the settings store. */
-export function SettingToggle({ setting, label }: { setting: keyof Omit<Settings, "phosphor">; label: string }) {
+export function SettingToggle({ setting, label }: { setting: keyof Omit<Settings, "phosphor" | "sound">; label: string }) {
   const checked = useSettings((state) => state[setting]);
   const set = useSettings((state) => state.set);
   return (
@@ -65,6 +66,30 @@ export function EffectsSetting() {
         {EFFECTS.map((effect) => (
           <SettingToggle key={effect.key} setting={effect.key} label={effect.label} />
         ))}
+      </div>
+    </>
+  );
+}
+
+/**
+ * The Sound setting: its dim label and one checkbox, On. Two grid cells, as `PhosphorSetting`. Turning it on plays a click (the first
+ * sound, and what makes the audio context, in this very click); it is off until then, and saved with the other settings.
+ */
+export function SoundSetting() {
+  const id = useId();
+  const sound = useSettings((state) => state.sound);
+  return (
+    <>
+      <span id={id} className="ctl-label">
+        Sound
+      </span>
+      <div role="group" aria-labelledby={id} className="ctl-opts">
+        <label className="ctl-opt">
+          <Checkbox.Root checked={sound} onCheckedChange={setSound} className="ctl-box">
+            <Checkbox.Indicator />
+          </Checkbox.Root>
+          On
+        </label>
       </div>
     </>
   );

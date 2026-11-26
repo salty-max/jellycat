@@ -53,13 +53,16 @@ component that breaks one of these rules changes this file in the same pull requ
   - The cat menu: About (a dialog naming the OS, its version and the studio) and Control Panel. File: Open and Get Info (the selected
     icon; Get Info for a project only) and Close Window (the front window). Edit is all dim. View: by Icon and by Name, the front folder
     window's view checked, dim when no folder is in front. Special: the three phosphors, CRT effects (scanlines and glow on, or every effect off), Dither
-    pattern, Restart and Shut Down... Window: the open windows in the order they opened, the front one checked.
+    pattern, Sound (a check item, see Sound), Restart and Shut Down... Window: the open windows in the order they opened, the front one checked.
   - A menu opens on a click and while one is open, hover moves between them; ↑ ↓ ← → move, Enter picks, Esc closes. A checked item has a
     6px square at its left.
   - Restart closes every window and shows the boot screen again; Shut Down... asks first (Cancel, Shut Down), then shows the shut-down
     screen, and a click restarts.
 - The desktop is a 1px checker dither of the phosphor at 20% (a Control Panel setting turns it off). Icons stand in a column on
   the right; Trash at the bottom.
+- The Control Panel window is 400×196: four rows on a two-column grid (an 84px dim label, then the controls), 32px apart: Phosphor
+  (radios), Effects (Scanlines, Glow, Flicker), Desktop (Dither pattern) and Sound (one checkbox, `On`). Phosphor, Effects and Sound
+  are the controls the phone's sheet shares (`app/os/controls/settings-controls.tsx`); the dither is the desktop's own.
 - Windows: a 1px phosphor frame, a hard 3px shadow in the dim tone, a 22px title bar. The window in front has an inverse title bar.
   Three boxes on the right: collapse to the title bar, zoom, close. In front, a box's outline melts into the inverse bar, so each
   shows as a 14px dark square, as the mockup draws it. The boxes stand 0.5rem apart, where the mockup has 3px: their centres are
@@ -125,7 +128,7 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 - The footer, on every page: `Jelly-OS 1.0` in the dim tone under a 1px rule.
 - The Control Panel's sheet: a window docked at the bottom, 8px from the screen's edges and at most 640px wide, with the window's
   1px frame, hard shadow and an inverse title bar (`Control Panel`, and a close box: the desktop's glyph in a dark square, a 44×32
-  target). Under it the desktop Control Panel's Phosphor (Green, Amber, White) and Effects (Scanlines, Glow, Flicker) in 44px rows;
+  target). Under it the desktop Control Panel's Phosphor (Green, Amber, White), Effects (Scanlines, Glow, Flicker) and Sound (`On`) in 44px rows;
   the Dither pattern is left out, a phone has no desktop. It is a modal dialog: a 1-bit dither dims the page behind it, and a tap on
   that, Esc, Android's back gesture or the close box closes it; focus goes to the checked phosphor (a frame after it opens, once the
   radio group knows its radios, so the arrows move from the first press) and comes back to the header's button, iOS included,
@@ -188,7 +191,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   (8px from the screen's edges, at most 640px wide, the window's 1px frame and its hard 3px shadow in the dim tone); the dialog's
   background is a 1-bit dither of the tube's black at 72% (a 2px checkerboard), which dims the page behind it. Its title bar is 32px in
   inverse video, with the close box on the right, the desktop's glyph in a 22px dark square inside a 44x32 target. Under it the
-  Phosphor and Effects settings the desktop's Control Panel has, in rows 44px tall with 16px boxes.
+  Phosphor, Effects and Sound settings the desktop's Control Panel has, in rows 44px tall with 16px boxes. The viewer and the sheet
+  click as they open and as they go (see Sound).
 - The Info window and the `open` card list Stack, Link, Source and Screenshots, and the card a README row after them. An unknown
   Link or Source is `-`; a project with no pictures has no Screenshots row.
 
@@ -215,6 +219,29 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
 - `/projects/<slug>` prerenders the phone's page: the project's facts as a list and the README in the pane, with the desktop's boot
   screen beside it. That is the text phones, crawlers and link previews read. The project's name is the page's `h1`, the README's
   title its `h2` and its headings `h3`.
+
+## Sound
+
+- A few system sounds, generated in the browser with Web Audio (`app/os/sound/`): square and triangle oscillators through short gain
+  envelopes, one fixed, moderate level. No audio file, no sample, nothing fetched, no `AudioWorklet`; nothing taken from another
+  system's sounds. The cues are data (`cues.ts`) and the synth that plays them a chunk of its own, fetched once sound is on.
+- Off by default, saved with the other settings (`sound` in the settings store; no `<html>` attribute, since nothing about it shows at
+  first paint). It is switched on in the Control Panel and the phone's sheet (a Sound row, one checkbox `On`) and in Special's `Sound`.
+- The cues, each doubling something on screen, so a sound never carries meaning alone:
+  - the alert's beep when About or Shut Down... appears;
+  - a short high click when a window opens, a lower one when one closes, only when a click or a key came half a second before (the
+    browser's Back between two projects is silent; one click that swaps a project's Info window for another's usually clicks twice); none for
+    the window the desktop opens by itself at start, nor for the windows Restart and Shut Down clear, which have their own tone;
+  - a rising tone on Restart, from the menu or from the shut-down screen's click, a falling one on Shut Down;
+  - on the phone, the high click when the viewer or the sheet opens and the lower one when it goes (not when a turned phone swaps
+    the layout under it);
+  - turning Sound on plays the high click.
+- Never autoplaying. The `AudioContext` is made by a click or a key and by nothing else: by the click that turns sound on, or by the
+  first click or key after a reload with sound saved on (a finger going down, which may be a scroll, and Esc don't count: they
+  don't activate the page for the browser). Until then the page is silent, and nothing a page does by itself (a window
+  opened by its address, say) makes one. It is kept, and suspended when sound goes off. Where Safari has `navigator.audioSession`, its
+  type is `ambient`: the ring/silent switch mutes the page and its sound never stops the visitor's music.
+- Reduced motion doesn't touch it: a sound is not motion.
 
 ## Keyboard and motion
 

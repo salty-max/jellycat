@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { playCue, recentGesture } from "../sound/sound";
 import "./dialogs.css";
 
 // The page behind a modal dialog doesn't scroll: the root is locked while any dialog is open, and gives the scroll bar's width back
@@ -67,16 +68,25 @@ export function Dialog({ onClose, label, labelledBy, initialFocus, returnFocus, 
     const unlock = lockScroll();
     // Whatever closes it (Esc, the back gesture, a script) ends here: the host is told once, by the browser's own close. The event
     // arrives as a task of its own, so one from a previous mount (Strict Mode's, say) reaches a dialog that has opened again: skip it.
+    let closedByBrowser = false;
     const onClosed = () => {
-      if (!dialog.open) close.current();
+      if (dialog.open) return;
+      closedByBrowser = true;
+      close.current();
     };
     dialog.addEventListener("close", onClosed);
-    if (!dialog.open) dialog.showModal();
+    if (!dialog.open) {
+      dialog.showModal();
+      playCue("open");
+    }
     // Until the chosen control takes the focus (below), the dialog holds it, so no other control shows a ring for a frame.
     if (initialFocus) dialog.focus();
     return () => {
       dialog.removeEventListener("close", onClosed);
       if (dialog.open) dialog.close();
+      // Esc and the back gesture close it with no click or key in the page, and still click; a phone turned wide with it open
+      // unmounts it with nothing at all, and that one is silent.
+      if (closedByBrowser || recentGesture()) playCue("close");
       unlock();
       if (opener?.isConnected) opener.focus();
     };

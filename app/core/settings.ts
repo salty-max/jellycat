@@ -13,9 +13,11 @@ export type Settings = {
   flicker: boolean;
   /** The dither pattern on the desktop. */
   dither: boolean;
+  /** The system sounds (app/os/sound/). Off by default: nothing is heard until the visitor turns it on, and never before a click or a key. */
+  sound: boolean;
 };
 
-export const DEFAULT_SETTINGS: Settings = { phosphor: "green", scanlines: true, glow: true, flicker: false, dither: true };
+export const DEFAULT_SETTINGS: Settings = { phosphor: "green", scanlines: true, glow: true, flicker: false, dither: true, sound: false };
 
 /** localStorage key the store persists under, and the head script reads. */
 export const SETTINGS_KEY = "jelly-os:settings";
@@ -40,7 +42,7 @@ export const useSettings = create<Settings & Actions>()(
       name: SETTINGS_KEY,
       version: SETTINGS_VERSION,
       skipHydration: true,
-      partialize: ({ phosphor, scanlines, glow, flicker, dither }) => ({ phosphor, scanlines, glow, flicker, dither }),
+      partialize: ({ phosphor, scanlines, glow, flicker, dither, sound }) => ({ phosphor, scanlines, glow, flicker, dither, sound }),
       // Whatever is in storage is checked: a hand-edited or older value falls back to its default instead of reaching the page.
       merge: (saved, current) => ({ ...current, ...sanitize(saved) }),
     },
@@ -52,7 +54,7 @@ export function sanitize(value: unknown): Partial<Settings> {
   const v = value as Record<string, unknown>;
   const out: Partial<Settings> = {};
   if (PHOSPHORS.includes(v.phosphor as Phosphor)) out.phosphor = v.phosphor as Phosphor;
-  for (const key of ["scanlines", "glow", "flicker", "dither"] as const) if (typeof v[key] === "boolean") out[key] = v[key];
+  for (const key of ["scanlines", "glow", "flicker", "dither", "sound"] as const) if (typeof v[key] === "boolean") out[key] = v[key];
   return out;
 }
 
@@ -61,7 +63,10 @@ export function rehydrateSettings(): void | Promise<void> {
   return useSettings.persist.rehydrate();
 }
 
-/** The `<html data-*>` attributes for a set of settings: the head script's output, and what a story or a test compares it with. */
+/**
+ * The `<html data-*>` attributes for a set of settings: the head script's output, and what a story or a test compares it with.
+ * `sound` has none: nothing about it shows at first paint, so the head script doesn't read it either.
+ */
 export function settingsAttributes(s: Settings): Record<string, string> {
   return {
     "data-phosphor": s.phosphor,
