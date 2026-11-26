@@ -154,3 +154,20 @@ Vercel project `jellycat` on the team `jellycat`, connected to `salty-max/jellyc
 <https://jellycat.fr>, the apex canonical; `www.jellycat.fr` redirects to it. The vercel.app address still serves, with its canonicals
 pointing at jellycat.fr. A push to `main` deploys production; a push to any other
 branch gets a preview. `engines` caps Node at 26 so a new major never arrives by itself.
+
+The contact form's function is `api/contact.ts`, the only file in `api/` (Vercel makes a function of each file there), a wrapper
+around `app/core/contact-handler.ts`; `app/core/contact.ts` holds the fields' limits both the form and the function check. It
+takes a `POST` of JSON up to 16 KB from a page of the host it was sent to (its `Origin` must be `https://` and its own `Host`, so
+the domain, the vercel.app address and a preview each pass), and sends one plain-text e-mail through Resend's HTTP API to
+max@jellycat.fr, from contact@jellycat.fr, with the visitor's address as `Reply-To`: it can write to no one else. It answers `{
+"ok": true }`, or `400` with the fields in error (or a form sent under two seconds after it opened), `403`, `405`, `413`, `415`,
+`500`, `502` when Resend refuses or doesn't answer, and `503` when `RESEND_API_KEY` isn't set. A filled honeypot is answered as
+sent and nothing goes. The key belongs in the Vercel project's environment variables, for Production and for Preview scoped to the
+`phase-2` branch, never in a file; Resend sends only once `jellycat.fr` is verified there (its DKIM record, and a `send`
+subdomain's `MX` and SPF records, at Gandi), and refuses before that, which the function answers with a `502`. The function stores
+nothing; it logs one line a request, the outcome and the status codes, never the name, the address or the message. Resend keeps a
+sent e-mail 30 days on its free plan. The rate limit is to be a Vercel Firewall rule on `/api/contact`, 5 requests per 10 minutes
+per IP, in the project's settings rather than in this repository. The key, the domain and the rule are set by hand in those
+accounts, not by this repository, and none is set yet. The function's relative imports, and those of every file it loads, end in
+`.js`: Vercel compiles them to ES modules that Node loads as they are, and Node resolves no relative import without its extension
+(a test holds that). `scripts/serve.mjs`, `pnpm preview` and `pnpm e2e` serve files only and never run it.

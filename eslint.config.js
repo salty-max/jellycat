@@ -57,6 +57,6 @@ export default tseslint.config(
       ],
     },
   },
-  // Config files and scripts run on Node.
-  { files: ["*.{js,ts}", "e2e/**/*.ts", "scripts/**/*.mjs"], languageOptions: { globals: globals.node } },
+  // Config files, scripts and the functions in api/ run on Node.
+  { files: ["*.{js,ts}", "e2e/**/*.ts", "scripts/**/*.mjs", "api/**/*.ts"], languageOptions: { globals: globals.node } },
 );
