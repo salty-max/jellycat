@@ -1,18 +1,20 @@
 import { expect, test } from "@playwright/test";
+import { PAGES } from "../app/core/pages";
 import { FOLDERS, FOLDER_NAMES, PROJECTS } from "../app/core/projects";
 import { pageUrl } from "../app/core/site";
 import { STUDIO_NAME } from "../app/core/studio";
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 
-for (const project of PROJECTS) {
-  test(`/projects/${project.slug} is prerendered with its meta`, async ({ request }) => {
-    const res = await request.get(`/projects/${project.slug}`);
+// Every page app/core/pages.ts lists, so a page added there is checked here with no change.
+for (const listed of PAGES) {
+  test(`${listed.path} is prerendered with its meta`, async ({ request }) => {
+    const res = await request.get(listed.path);
     expect(res.status()).toBe(200);
     const html = await res.text();
-    const title = escape(`${project.name} · ${STUDIO_NAME}`);
-    const description = escape(project.description);
-    const url = pageUrl(`/projects/${project.slug}`);
+    const title = escape(listed.title);
+    const description = escape(listed.description);
+    const url = pageUrl(listed.path);
     expect(html).toContain(`<title>${title}</title>`);
     expect(html).toContain(`<meta name="description" content="${description}"/>`);
     expect(html).toContain(`<link rel="canonical" href="${url}"/>`);
@@ -27,7 +29,7 @@ test("the sitemap lists every page and robots names it", async ({ request }) => 
   expect(sitemap.status()).toBe(200);
   const xml = await sitemap.text();
   const listed = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-  expect(listed).toEqual([pageUrl("/"), ...PROJECTS.map((project) => pageUrl(`/projects/${project.slug}`))]);
+  expect(listed).toEqual(PAGES.map((page) => pageUrl(page.path)));
 
   const robots = await request.get("/robots.txt");
   expect(robots.status()).toBe(200);
@@ -67,9 +69,11 @@ test.describe("on a phone", () => {
     await expect(main(page).getByRole("link", { name: "github.com/salty-max" })).toHaveAttribute("href", "https://github.com/salty-max");
     const tabs = page.getByRole("navigation", { name: "Folders" }).getByRole("link");
     await expect(tabs).toHaveText(FOLDERS.map((folder) => `${FOLDER_NAMES[folder]} ${PROJECTS.filter((project) => project.folder === folder).length}`));
-    await expect(main(page).getByRole("heading", { level: 2 })).toHaveCount(FOLDERS.length);
+    // The folders' sections, not the sections below them (app/os/phone/home-sections.ts).
+    const folders = main(page).locator(FOLDERS.map((folder) => `section#${folder}`).join(", "));
+    await expect(folders.getByRole("heading", { level: 2 })).toHaveCount(FOLDERS.length);
     // One link a card, named by the project alone.
-    await expect(main(page).getByRole("listitem").getByRole("link")).toHaveText(PROJECTS.map((project) => project.name));
+    await expect(folders.getByRole("listitem").getByRole("link")).toHaveText(PROJECTS.map((project) => project.name));
     await expect(page.getByRole("contentinfo")).toHaveText("Jelly-OS 1.0");
   });
 

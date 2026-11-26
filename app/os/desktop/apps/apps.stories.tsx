@@ -22,7 +22,7 @@ function Apps({ open, slug, byName = false }: { open?: () => void; slug?: string
     if (byName) useFolderViews.getState().setView(ids.folder("projects"), "name");
     open?.();
   });
-  return <Desktop slug={slug} />;
+  return <Desktop route={slug ? { page: "project", params: { slug }, data: { blocks: null } } : undefined} />;
 }
 
 const meta = {

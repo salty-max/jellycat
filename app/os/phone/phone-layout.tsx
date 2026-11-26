@@ -1,10 +1,14 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import type { Project } from "../../core/projects";
-import type { Block } from "../../core/readme";
-import { PhoneHome } from "./home";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Outlet } from "react-router";
+import type { OsPage } from "../os-route";
+import type { PhoneOutletContext } from "./outlet";
 import { PhonePage } from "./page";
-import { PhoneProject } from "./project";
 import { PhoneViewer } from "./viewer-dialog";
+// The README's styles stay in the root's stylesheets, though the project page that uses them comes with its route: that route takes
+// any slug, so 404.html (prerendered for the not-found route) hydrates under it at /projects/no-such, and a stylesheet of the
+// project route's own would be a link in the head that 404.html lacks, a hydration mismatch. A route that matches only its own
+// prerendered addresses can bring its own.
+import "../readme/readme.css";
 
 type ViewerState = { slug: string; start: number; opener: HTMLElement };
 type SheetProps = { onClose: () => void; returnFocus?: HTMLElement | null };
@@ -37,16 +41,17 @@ function SheetUnavailable({ onClose }: SheetProps) {
 }
 
 /**
- * The OS on a phone: the home page, or the project the address names with its route's README (`blocks`, null when its chunk could not
- * be loaded), and the two dialogs. A picture opens the viewer at it, the header's button opens the Control Panel's sheet; each mounts
- * open, unmounts on close, and gives the focus back to what opened it. Nothing here reads the screen, so the prerendered markup and
- * the first client render are the same.
+ * The OS on a phone: the page the address names, which is its route's element (each OS route draws its page for the phone, so a page's
+ * code comes in its route's chunk, not in the root's), and the two dialogs. A picture opens the viewer at it, the header's button
+ * opens the Control Panel's sheet; each mounts open, unmounts on close, and gives the focus back to what opened it. Nothing here
+ * reads the screen, so the prerendered markup and the first client render are the same.
  */
-export function PhoneLayout({ project, blocks }: { project: Project | undefined; blocks: readonly Block[] | null }) {
+export function PhoneLayout({ route }: { route: OsPage | undefined }) {
   const [panel, setPanel] = useState<HTMLElement | null>(null);
   const [viewer, setViewer] = useState<ViewerState | null>(null);
   // A move to another page while the viewer was open (a script, a link): its pictures aren't this page's.
-  if (viewer && viewer.slug !== project?.slug) setViewer(null);
+  if (viewer && viewer.slug !== route?.params.slug) setViewer(null);
+  const outlet = useMemo<PhoneOutletContext>(() => ({ onOpenPicture: (slug, start, opener) => setViewer({ slug, start, opener }) }), []);
 
   useEffect(() => {
     // Safari has no requestIdleCallback: a moment after the page is up does as well.
@@ -61,11 +66,7 @@ export function PhoneLayout({ project, blocks }: { project: Project | undefined;
   return (
     <>
       <PhonePage onOpenPanel={setPanel} panelOpen={panel !== null}>
-        {project ? (
-          <PhoneProject key={project.slug} project={project} blocks={blocks} onOpenPicture={(start, opener) => setViewer({ slug: project.slug, start, opener })} />
-        ) : (
-          <PhoneHome />
-        )}
+        <Outlet context={outlet} />
       </PhonePage>
       {/* Beside the page, not in it: the page's own rules (its buttons' reset) aren't the dialogs'. */}
       {viewer && <PhoneViewer slug={viewer.slug} start={viewer.start} returnFocus={viewer.opener} onClose={() => setViewer(null)} />}

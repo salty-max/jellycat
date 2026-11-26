@@ -130,7 +130,10 @@ test("the home page prerenders the studio, a heading per folder and a link to ev
   const html = await (await request.get("/")).text();
   // The boot screen's name is prerendered too, for the desktop; the CSS shows one of them.
   expect(tags(html, "h1")).toEqual([STUDIO_NAME, "Jelly-OS 1.0"]);
-  expect(tags(html, "h2")).toEqual(FOLDERS.map((folder) => `${FOLDER_NAMES[folder]}${itemCount(PROJECTS.filter((project) => project.folder === folder).length)}`));
+  // The folders' headings come first; the sections below them (app/os/phone/home-sections.ts) bring their own.
+  expect(tags(html, "h2").slice(0, FOLDERS.length)).toEqual(
+    FOLDERS.map((folder) => `${FOLDER_NAMES[folder]}${itemCount(PROJECTS.filter((project) => project.folder === folder).length)}`),
+  );
   for (const project of PROJECTS) expect(html, project.slug).toContain(`href="/projects/${project.slug}"`);
   // The shell's session isn't in the page any more.
   expect(html).not.toContain("Type help for the commands");

@@ -1,9 +1,12 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router";
+import { createMemoryRouter, RouterProvider, useLoaderData, useMatches, useNavigate, useParams } from "react-router";
 import { beforeAll, beforeEach, expect, test } from "vitest";
 import { projectBySlug } from "../../core/projects";
 import type { Block } from "../../core/readme";
+import Home, { handle as homeHandle } from "../../routes/home";
+import Project, { handle as projectHandle } from "../../routes/project";
+import { osPage } from "../os-route";
 import { PhoneLayout } from "./phone-layout";
 import { cancelDialog, stubDialog } from "./test-dialog";
 
@@ -20,10 +23,14 @@ beforeEach(() => {
 const hundo = projectBySlug("hundo")!;
 const blocks: readonly Block[] = [{ kind: "title", text: "Hundo" }];
 
-// The project the address names, as the OS's layout reads it from the route.
-function AtAddress() {
-  const slug = useLocation().pathname.match(/^\/projects\/(.+)$/)?.[1];
-  return <PhoneLayout project={slug ? projectBySlug(slug) : undefined} blocks={slug ? blocks : null} />;
+// The OS's layout as the root draws it: the page the address names, read from the matches.
+function Layout() {
+  return (
+    <>
+      <PhoneLayout route={osPage(useMatches())} />
+      <Mover />
+    </>
+  );
 }
 // A move from outside the page, as a script or the browser's history makes one.
 function Mover() {
@@ -39,15 +46,31 @@ function Mover() {
     </>
   );
 }
+// The project route's element with the props the framework gives it (a plain data router gives none).
+function ProjectElement() {
+  const props = { loaderData: useLoaderData(), params: useParams() } as unknown as Parameters<typeof Project>[0];
+  return <Project {...props} />;
+}
 const move = (name: string) => act(async () => screen.getByRole("button", { name, hidden: true }).click());
+// The two OS routes with their real elements and handles, the README's blocks as their loader's data.
 const at = (slug?: string) =>
   render(
-    <MemoryRouter initialEntries={[slug ? `/projects/${slug}` : "/"]}>
-      <Routes>
-        <Route path="*" element={<AtAddress />} />
-      </Routes>
-      <Mover />
-    </MemoryRouter>,
+    <RouterProvider
+      router={createMemoryRouter(
+        [
+          {
+            id: "root",
+            path: "/",
+            Component: Layout,
+            children: [
+              { id: "home", index: true, handle: homeHandle, Component: Home },
+              { id: "project", path: "projects/:slug", handle: projectHandle, loader: () => ({ blocks }), Component: ProjectElement },
+            ],
+          },
+        ],
+        { initialEntries: [slug ? `/projects/${slug}` : "/"], hydrationData: { loaderData: slug ? { project: { blocks } } : {} } },
+      )}
+    />,
   );
 
 test("the home page without a project, the project's page with its README with one", () => {

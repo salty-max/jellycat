@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useState, useSyncExternalStore, type ComponentType } from "react";
 import { useLocation, useMatches, useNavigate } from "react-router";
-import { projectBySlug } from "../core/projects";
-import type { Block } from "../core/readme";
 import { BootScreen, ShutDownScreen } from "./boot-screen";
 import { Crt } from "./crt";
 import type { DesktopProps } from "./desktop/desktop";
-import { isOsMatch } from "./os-route";
+import { osPage } from "./os-route";
 import { PhoneLayout } from "./phone/phone-layout";
 
 /**
@@ -18,7 +16,6 @@ export const DESKTOP_QUERY = "(min-width: 768px) and (min-height: 520px)";
 type LayoutName = "unknown" | "phone" | "boot" | "desktop" | "off";
 
 type Media = "unknown" | "narrow" | "wide";
-type ProjectData = { blocks: readonly Block[] | null };
 type DesktopComponent = ComponentType<DesktopProps>;
 
 /** The mockup's boot: the boot screen stays at least this long from the first paint, none under reduced motion. */
@@ -97,13 +94,6 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 // paint); one after the window crossed the breakpoint, from the crossing.
 let firstLayout = true;
 
-/** The project the address names, with the README blocks its loader gave (null when the chunk could not be loaded). */
-function useProjectRoute() {
-  const match = useMatches().find((each) => isOsMatch(each) && each.params.slug);
-  const project = match?.params.slug ? projectBySlug(match.params.slug) : undefined;
-  return { project, blocks: (match?.loaderData as ProjectData | undefined)?.blocks ?? null };
-}
-
 /**
  * The OS, drawn by the root so moving between its pages never remounts it. The server renders both the phone's page and the boot
  * screen and the CSS shows one; once hydrated, a wide screen loads the desktop (the boot screen meanwhile, at least `BOOT_MS`) and
@@ -158,17 +148,16 @@ export function OsLayout() {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { project, blocks } = useProjectRoute();
-  // The address follows the project: an `open` (or a pressed name) goes to its page, and back and forward walk the pages.
-  const openProject = useCallback(
-    (slug: string) => {
-      const to = `/projects/${slug}`;
+  const route = osPage(useMatches());
+  // The address follows the windows: opening a page's window (a project's Info) goes to its address, and back and forward walk them.
+  const openPage = useCallback(
+    (to: string) => {
       if (pathname !== to) navigate(to);
     },
     [navigate, pathname],
   );
-  // Closing the Info window the address names (or one an open is waiting on) goes back to the desktop at `/`.
-  const closeProject = useCallback(() => navigate("/"), [navigate]);
+  // Closing the window the address names (or one an open is waiting on) goes back to the desktop at `/`.
+  const closePage = useCallback(() => navigate("/"), [navigate]);
   const Desktop = desktop && desktop !== "failed" ? desktop.Desktop : null;
 
   return (
@@ -179,7 +168,7 @@ export function OsLayout() {
       </style>
       {(layout === "unknown" || layout === "phone") && (
         <div data-os="phone">
-          <PhoneLayout project={project} blocks={blocks} />
+          <PhoneLayout route={route} />
         </div>
       )}
       {layout !== "phone" && (
@@ -188,7 +177,7 @@ export function OsLayout() {
             {(layout === "unknown" || layout === "boot") && <BootScreen />}
             {layout === "off" && <ShutDownScreen onRestart={restart} />}
             {layout === "desktop" && Desktop && (
-              <Desktop slug={project?.slug} onOpenProject={openProject} onCloseProject={closeProject} onRestart={restart} onShutDown={shutDown} />
+              <Desktop route={route} onOpenPage={openPage} onClosePage={closePage} onRestart={restart} onShutDown={shutDown} />
             )}
           </Crt>
         </main>

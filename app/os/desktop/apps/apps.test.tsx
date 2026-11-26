@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, useSettings } from "../../../core/settings";
 import { settle } from "../../../test-act";
+import type { OsPage } from "../../os-route";
 import { Desktop } from "../desktop";
 import { useWindows } from "../windows/store";
 import { useFolderViews } from "./folder-view";
@@ -17,6 +18,8 @@ beforeEach(() => {
 });
 
 const win = (name: string) => screen.findByRole("dialog", { name });
+/** A project's page, as the layout hands it to the desktop. */
+const projectPage = (slug: string): OsPage => ({ page: "project", params: { slug }, data: { blocks: null } });
 const titles = () => Object.values(useWindows.getState().windows).map((window) => window.title);
 
 describe("the desktop's first windows", () => {
@@ -47,13 +50,13 @@ describe("the desktop's first windows", () => {
 describe("folder windows", () => {
   it("a folder opens the folder it names, and a project opens its Info window", async () => {
     const opened: string[] = [];
-    render(<Desktop onOpenProject={(slug) => opened.push(slug)} />);
+    render(<Desktop onOpenPage={(path) => opened.push(path)} />);
     await userEvent.dblClick(await screen.findByRole("option", { name: "Web" }));
     const web = await win("Web");
     expect(within(web).getByRole("option", { name: /Hundo/ })).toBeInTheDocument();
     await userEvent.dblClick(within(web).getByRole("option", { name: /Hundo/ }));
     expect(await win("Hundo Info")).toBeInTheDocument();
-    expect(opened).toEqual(["hundo"]);
+    expect(opened).toEqual(["/projects/hundo"]);
   });
 
   it("every project sits in its folder", async () => {
@@ -95,7 +98,7 @@ describe("folder windows", () => {
 
 describe("the Info window", () => {
   it("lists Stack, Link, Source and Screenshots and opens the README by its default button", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     const info = await win("Hundo Info");
     for (const label of ["Stack", "Link", "Source", "Screenshots"]) expect(within(info).getByText(label)).toBeInTheDocument();
     expect(within(info).getByRole("link", { name: "hundo.quest" })).toHaveAttribute("target", "_blank");
@@ -106,21 +109,21 @@ describe("the Info window", () => {
   });
 
   it("answers Enter with Open Readme", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     await win("Hundo Info");
     await userEvent.keyboard("{Enter}");
     expect(await win("Hundo Readme")).toBeInTheDocument();
   });
 
   it("shows an unknown link as a dash and gives a project with no pictures no Screenshots row", async () => {
-    render(<Desktop slug="harness" />);
+    render(<Desktop route={projectPage("harness")} />);
     const info = await win("harness Info");
     expect(within(info).queryByText("Screenshots")).toBeNull();
     expect(within(info).getByText("Link").nextElementSibling).toHaveTextContent("-");
   });
 
   it("opens the screenshot viewer from View", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     const info = await win("Hundo Info");
     await userEvent.click(within(info).getByRole("button", { name: "View" }));
     const viewer = await win("Hundo Screenshots");
@@ -130,7 +133,7 @@ describe("the Info window", () => {
 
 describe("the README window", () => {
   it("scrolls, takes the focus, and closes with Esc", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     const open = within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" });
     await settle(() => fireEvent.click(open));
     const readme = await win("Hundo Readme");
@@ -141,7 +144,7 @@ describe("the README window", () => {
   });
 
   it("opens a linked project's Info window", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     const open = within(await win("Hundo Info")).getByRole("button", { name: "Open Readme" });
     await settle(() => fireEvent.click(open));
     const readme = await win("Hundo Readme");
@@ -236,7 +239,7 @@ describe("the Terminal", () => {
 
 describe("the address", () => {
   it("opens the Info window over Projects for a deep link", async () => {
-    render(<Desktop slug="hundo" />);
+    render(<Desktop route={projectPage("hundo")} />);
     expect(await win("Projects")).toBeInTheDocument();
     const info = await win("Hundo Info");
     expect(info).toHaveAttribute("data-active");
@@ -244,58 +247,70 @@ describe("the address", () => {
   });
 
   it("closes the Info window when the address goes back to the desktop, and opens it again going forward", async () => {
-    const { rerender } = render(<Desktop slug="hundo" />);
+    const { rerender } = render(<Desktop route={projectPage("hundo")} />);
     await win("Hundo Info");
     rerender(<Desktop />);
     await waitFor(() => expect(titles()).not.toContain("Hundo Info"));
     expect(titles()).toContain("Projects");
-    rerender(<Desktop slug="hundo" />);
+    rerender(<Desktop route={projectPage("hundo")} />);
     expect(await win("Hundo Info")).toBeInTheDocument();
   });
 
   it("tells the host when the Info window it names is closed", async () => {
     const closed: string[] = [];
-    render(<Desktop slug="hundo" onCloseProject={(slug) => closed.push(slug)} />);
+    render(<Desktop route={projectPage("hundo")} onClosePage={(id) => closed.push(id)} />);
     await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Close" }));
-    expect(closed).toEqual(["hundo"]);
+    expect(closed).toEqual([ids.info("hundo")]);
   });
 
   it("takes the address back when the window an open is waiting on is closed before the address arrives", async () => {
     const closed: string[] = [];
-    render(<Desktop onOpenProject={() => {}} onCloseProject={(slug) => closed.push(slug)} />);
+    render(<Desktop onOpenPage={() => {}} onClosePage={(id) => closed.push(id)} />);
     await userEvent.dblClick(await screen.findByRole("option", { name: "Web" }));
     await userEvent.dblClick(within(await win("Web")).getByRole("option", { name: /Hundo/ }));
     await userEvent.click(within(await win("Hundo Info")).getByRole("button", { name: "Close" }));
-    expect(closed).toEqual(["hundo"]);
+    expect(closed).toEqual([ids.info("hundo")]);
   });
 
   it("keeps one Info window as the address walks between projects", async () => {
-    const { rerender } = render(<Desktop slug="hundo" />);
+    const { rerender } = render(<Desktop route={projectPage("hundo")} />);
     await win("Hundo Info");
-    rerender(<Desktop slug="farseer" />);
+    rerender(<Desktop route={projectPage("farseer")} />);
     await win("Farseer Info");
     expect(titles()).not.toContain("Hundo Info");
-    rerender(<Desktop slug="hundo" />);
+    rerender(<Desktop route={projectPage("hundo")} />);
     await win("Hundo Info");
     expect(titles()).not.toContain("Farseer Info");
     rerender(<Desktop />);
     await waitFor(() => expect(titles().filter((title) => title.endsWith("Info"))).toEqual([]));
   });
 
+  it("closes only Info windows on a move: any other window stays open", async () => {
+    const { rerender } = render(<Desktop route={projectPage("hundo")} />);
+    await win("Hundo Info");
+    await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
+    await win("Terminal");
+    rerender(<Desktop route={projectPage("farseer")} />);
+    await win("Farseer Info");
+    rerender(<Desktop />);
+    await waitFor(() => expect(titles()).not.toContain("Farseer Info"));
+    expect(titles()).toEqual(expect.arrayContaining(["Projects", "Terminal"]));
+  });
+
   it("does not tell it of a window the address no longer names", async () => {
     const closed: string[] = [];
-    const { rerender } = render(<Desktop slug="hundo" onCloseProject={(slug) => closed.push(slug)} />);
+    const { rerender } = render(<Desktop route={projectPage("hundo")} onClosePage={(id) => closed.push(id)} />);
     await win("Hundo Info");
-    rerender(<Desktop onCloseProject={(slug) => closed.push(slug)} />);
+    rerender(<Desktop onClosePage={(id) => closed.push(id)} />);
     await waitFor(() => expect(titles()).not.toContain("Hundo Info"));
     expect(closed).toEqual([]);
   });
 
   it("tells the host which project an icon opened", async () => {
     const opened: string[] = [];
-    render(<Desktop onOpenProject={(slug) => opened.push(slug)} />);
+    render(<Desktop onOpenPage={(path) => opened.push(path)} />);
     await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
     await userEvent.type(within(await win("Terminal")).getByLabelText("Terminal input"), "open hundo{Enter}");
-    await waitFor(() => expect(opened).toEqual(["hundo"]));
+    await waitFor(() => expect(opened).toEqual(["/projects/hundo"]));
   });
 });
