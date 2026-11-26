@@ -37,9 +37,13 @@ export function openViewer(slug: string) {
 export const openStudioReadme = () => open({ app: "readme", title: "Readme", size: { w: 340, h: 210 } });
 export const openControlPanel = () => open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } });
 export const openTerminal = () => open({ app: "terminal", title: "Terminal", size: { w: 410, h: 240 } });
-/** Opens or raises the Lab. With a program (`gero run`), the window picks it, and runs it when `run` says so, however open it is. */
+/**
+ * Opens or raises the Lab. With a program (`gero run`), the window picks it, and runs it when `run` says so, however open it is.
+ * A plain open of a closed Lab drops a request nothing took (a window that failed to load); raising a Lab still loading keeps it.
+ */
 export function openLab(request?: { program: string; run: boolean }) {
-  useLabRequests.getState().ask(request ?? null);
+  if (request) useLabRequests.getState().ask(request);
+  else if (!Object.values(useWindows.getState().windows).some((window) => window.app === "lab")) useLabRequests.getState().ask(null);
   return open({ app: "lab", title: "Lab", size: { w: 532, h: 432 } });
 }
 

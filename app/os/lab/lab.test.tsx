@@ -249,6 +249,15 @@ describe("gero run, asked of the window", () => {
     useWindows.setState({ windows: {} });
   });
 
+  test("a plain open of a Lab still loading keeps the request gero run made", async () => {
+    const { useWindows } = await import("../desktop/windows/store");
+    const { openLab } = await import("../desktop/apps/launch");
+    openLab({ program: "gcd", run: true });
+    openLab();
+    expect(useLabRequests.getState().request).toMatchObject({ program: "gcd", run: true });
+    useWindows.setState({ windows: {} });
+  });
+
   test("a request for a program the window hasn't is dropped", async () => {
     ask("nope", true);
     open();
