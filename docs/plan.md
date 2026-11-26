@@ -35,10 +35,25 @@ The mockups that settled the look are in [`mockups/`](../mockups) (`pnpm` isn't 
   checked, every fact from its own repository, in a small Markdown subset. A project is a directory holding it
   ([phase-1.md](phase-1.md#a5-project-write-ups-prose)).
 - **Stack**: hundo's tools in one package: React 19, React Router 8 (framework mode), Vite 8, Tailwind 4, Vitest, Testing Library,
-  Storybook 10, Playwright, Lighthouse CI, ESLint. Base UI and zustand come in with Phase 1's first components. Vitest and its
+  Storybook 10, Playwright, Lighthouse CI, ESLint. Base UI and zustand come in with Phase 1's first components, satori (the link preview images) with Phase 2. Vitest and its
   browser packages move together to one exact version, as the React Router packages do.
 - **Hosting**: Vercel, team `jellycat`, a preview per pull request. The site launches on jellycat.fr, the apex canonical and
-  `www` redirecting to it. The address on the site is max@jellycat.fr; the Phase 1 desktop has no Mail app.
+  `www` redirecting to it. The address on the site is max@jellycat.fr, and the contact form writes to it.
+- **The Lab is a desktop window only** (no address, no phone version): it runs gero's own `gero.wasm` and twelve sample programs,
+  a same-origin copy fetched at build from a pinned gero release and checked against pinned SHA-256s, never vendored. It runs on
+  the main thread in slices, with a cap of steps and of output, and no worker. The phone's home links to Gero Lab
+  (gero-lab.vercel.app) instead. The Terminal's `gero` opens it; there is no `~/lab` directory.
+- **CSP**: `'wasm-unsafe-eval'` joins `script-src` on every page, for the Lab's module; it allows WebAssembly and nothing else.
+- **Every page is listed once**, in `app/core/pages.ts`, with its address, title and description: the meta, the prerender list,
+  the sitemap and the link preview images read it.
+- **Contact**: a prerendered `/contact` page on the phone, which opens the Contact window on the desktop. The form posts to a
+  function in the same Vercel project (`api/contact.ts`), which sends one e-mail through Resend (sending from Ireland) to
+  max@jellycat.fr, with the visitor as `Reply-To`, and keeps nothing. A privacy notice under the form, its words approved by
+  the user. Against spam: a honeypot, two seconds, the server's checks and its `Origin` check, a Vercel Firewall rate limit;
+  Turnstile only if spam gets through.
+- **Link preview images**: one PNG per page, 1200x630, drawn at build with satori and sharp in the phosphor's look.
+- **Sound**: generated in the browser (oscillators, no audio files), a few system sounds, off by default, and no `AudioContext`
+  before a click or a key.
 
 ## Phases
 
@@ -63,8 +78,14 @@ user's go.
 
 ### Phase 2: make it alive
 
-The Lab (a Gero program running on `gero.wasm`, fetched the way gero-lab fetches it), a contact form that relays to an inbox,
-link preview images, sound (generated in the browser, off by default).
+Done. [phase-2.md](phase-2.md) split it into tasks, which landed on a release branch, `phase-2`, and reached `main` in one
+fast-forward.
+
+- The Lab: a Gero program running on `gero.wasm`, fetched the way gero-lab fetches it, plus a pinned hash; the desktop's only.
+- `gero` in the Terminal: it opens the Lab, and `gero run <program>` runs one there.
+- A contact form that relays to an inbox, with a privacy notice; nothing is stored on the site.
+- Link preview images.
+- Sound, generated in the browser, off by default.
 
 ### Phase 3: extras
 
@@ -73,5 +94,6 @@ A log fed from GitHub, gtx-16 carts if it gets a web build, a small original gam
 ## Still to decide
 
 The user answered phase-1.md's questions on 19 Nov 2026 ([the answers](phase-1.md#the-users-answers)). Nothing is left to decide
-for Phase 1. Hundo's Link is hundo.quest, which serves
+for Phase 1. The user answered phase-2.md's on 22 and 26 Nov 2026 ([the answers](phase-2.md#the-users-answers)); nothing is left
+to decide for Phase 2. Hundo's Link is hundo.quest, which serves
 ([checked on 20 Nov 2026](phase-1.md#still-open)).

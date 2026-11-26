@@ -5,7 +5,7 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 
 ## Layout
 
-- `app/`: the site. `root.tsx` is the page shell and draws the OS on the home and project pages (`os/layout.tsx`: the phone's
+- `app/`: the site. `root.tsx` is the page shell and draws the OS on the home, project and contact pages (`os/layout.tsx`: the phone's
   page under 768x520, the desktop from there, held while a text field has the focus), `routes.ts` the routes, `routes/` one
   module per route, `os/` the OS's parts (`os/phone/` the phone's page and its two dialogs, the viewer and the Control Panel's
   sheet; `os/desktop/` the desktop, whose Terminal is the shell, `os/shell/`; `os/contact/` the contact form, one component in
@@ -32,15 +32,16 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
   ([Build](#build)).
 - `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
   screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
-  focus seen on screen (`focus.spec.ts`), the contact form (`contact.spec.ts`, with `/api/contact` stubbed) and reduced motion
-  (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
+  focus seen on screen (`focus.spec.ts`), the contact form (`contact.spec.ts`, with `/api/contact` stubbed), the Lab
+  (`lab.spec.ts`), sound (`sound.spec.ts`) and reduced motion (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
   login) run in the desktop's Terminal; the phone's pages, viewer and sheet run on the phone project, with the real Esc.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.
 - `scripts/`: `serve.mjs` (the preview server), `look.mjs` (a mockup and a story side by side), `csp.ts` (the build step that
-  writes each page's Content-Security-Policy), `gero-assets.mjs` (fetches gero's module and programs from the pinned release) and `screenshots.mjs` (the projects' pictures: the web apps' live sites opened
-  logged out in the system Chrome at a desktop and a phone size, or a picture taken by hand with `--from`, written to
-  `public/screenshots/`; run by hand, never by the build).
+  writes each page's Content-Security-Policy), `og.ts` (the build step that draws each page's link preview image),
+  `gero-assets.mjs` (fetches gero's module and programs from the pinned release) and `screenshots.mjs` (the projects' pictures:
+  the web apps' live sites opened logged out in the system Chrome at a desktop and a phone size, or a picture taken by hand with
+  `--from`, written to `public/screenshots/`; run by hand, never by the build).
 - `mockups/`: the HTML mockups that settled the look. Not part of the build.
 - `docs/`: the plan and the design rules.
 - `harness/`, `harness.toml`, `.claude/`: the git hooks, the task board and the review helpers sessions work under
@@ -184,6 +185,7 @@ subdomain's `MX` and SPF records, at Gandi), and refuses before that, which the 
 nothing; it logs one line a request, the outcome and the status codes, never the name, the address or the message. Resend keeps a
 sent e-mail 30 days on its free plan. The rate limit is to be a Vercel Firewall rule on `/api/contact`, 5 requests per 10 minutes
 per IP, in the project's settings rather than in this repository. The key, the domain and the rule are set by hand in those
-accounts, not by this repository, and none is set yet. The function's relative imports, and those of every file it loads, end in
+accounts, not by this repository. The key has been set since 26 Nov 2026, and the domain is in Resend's Ireland region
+(`eu-west-1`). The rule is not set: the project's Firewall configuration was empty when read on 26 Nov 2026. The function's relative imports, and those of every file it loads, end in
 `.js`: Vercel compiles them to ES modules that Node loads as they are, and Node resolves no relative import without its extension
 (a test holds that). `scripts/serve.mjs`, `pnpm preview` and `pnpm e2e` serve files only and never run it.

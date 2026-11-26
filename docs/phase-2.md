@@ -267,7 +267,8 @@ builds and then fails at run time (`ERR_MODULE_NOT_FOUND`, reported for this set
   `Reply-To` the visitor, subject `jellycat.fr: <name>`;
 - answers `{ "ok": true }`, or `400` with the fields in error, `403`, `413`, `502` when Resend refuses, and `503` when its key
   isn't set (a deployment without it says so instead of pretending);
-- logs the outcome and the status code, never the message, the name or the address.
+- logs one line a request, `{ outcome, status }`, with Resend's own status as `upstream` when it refuses (`0` when it doesn't
+  answer), never the message, the name or the address.
 
 **The provider** (Q1: a Vercel Function and Resend). Free at this volume: 100 e-mails a day, 3,000 a month, 3 domains; Resend keeps
 sent e-mails 30 days on that plan (its pricing page). jellycat.fr's DNS is at Gandi (its `NS`) and so is its mail (`MX 10
@@ -289,16 +290,16 @@ No Turnstile to start with: it is a third-party script and an iframe drawn in it
 needs a Cloudflare account and widget keys, and the CSP would add `script-src` and `frame-src https://challenges.cloudflare.com`.
 It stays the next step if spam gets through.
 
-**Privacy.** Nothing goes to `localStorage`; the function logs the status code only, while Vercel, the host, sees each request's IP
-address and keeps the site's logs 30 days (N1); Resend is the processor and keeps the
-e-mail 30 days; the inbox keeps the message. The notice (Q8, N1's words, approved by the user) says so where the visitor writes:
+**Privacy.** Nothing goes to `localStorage`; the function logs the outcome and the status codes only, while Vercel, the host,
+sees each request's IP address and keeps the site's logs 30 days (N1); Resend is the processor and keeps the e-mail 30 days; the
+inbox keeps the message. The notice (Q8, N1's words, approved by the user) says so where the visitor writes:
 on `/contact` and in the window. (Not legal advice.)
 
 **Lighthouse.** C2 adds `/contact` to both configs. Labels on every field, 44px targets, no third-party script.
 
 **Tests.**
 - Unit: `app/core/contact.ts`'s limits; the handler with a fake `fetch` (each status, the honeypot, the two seconds, the `Origin`
-  against the host, no key, a Resend error, the name's line breaks, nothing logged but the status).
+  against the host, no key, a Resend error, the name's line breaks, nothing logged but the outcome and the status codes).
 - Component tests (the states, the focus on error); stories under each phosphor.
 - e2e on both projects with `/api/contact` stubbed by Playwright (`scripts/serve.mjs` serves files only): send, the sent state,
   a refused field, a network error; the keyboard alone; axe and aria over the window and the page.

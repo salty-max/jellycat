@@ -1,7 +1,8 @@
 # Jelly-OS design rules
 
-What the mockups (`mockups/phosphor-desktop.html`, `mockups/phosphor-shell.html`, `mockups/phosphor-phone.html`) settled. A
-component that breaks one of these rules changes this file in the same pull request.
+What the mockups (`mockups/phosphor-desktop.html`, `mockups/phosphor-shell.html`, `mockups/phosphor-phone.html`, and for Phase 2's
+Lab, contact form, Sound row and link previews `mockups/phase-2.html`) settled. A component that breaks one of these rules changes
+this file in the same pull request.
 
 ## Screen
 
