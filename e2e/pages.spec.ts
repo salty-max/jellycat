@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { PAGES } from "../app/core/pages";
 import { FOLDERS, FOLDER_NAMES, PROJECTS } from "../app/core/projects";
-import { pageUrl } from "../app/core/site";
+import { PREVIEW_IMAGE, pageImagePath, pageUrl } from "../app/core/site";
 import { STUDIO_NAME } from "../app/core/studio";
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
@@ -21,6 +21,26 @@ for (const listed of PAGES) {
     expect(html).toContain(`<meta property="og:title" content="${title}"/>`);
     expect(html).toContain(`<meta property="og:description" content="${description}"/>`);
     expect(html).toContain(`<meta property="og:url" content="${url}"/>`);
+    expect(html).toContain(`<meta property="og:type" content="website"/>`);
+    expect(html).toContain(`<meta property="og:site_name" content="${STUDIO_NAME}"/>`);
+    expect(html).toContain(`<meta property="og:image" content="${pageUrl(pageImagePath(listed.path))}"/>`);
+    expect(html).toContain(`<meta property="og:image:width" content="${PREVIEW_IMAGE.width}"/>`);
+    expect(html).toContain(`<meta property="og:image:height" content="${PREVIEW_IMAGE.height}"/>`);
+    expect(html).toContain(`<meta property="og:image:type" content="${PREVIEW_IMAGE.type}"/>`);
+    expect(html).toContain(`<meta property="og:image:alt" content="${title}"/>`);
+    expect(html).toContain(`<meta name="twitter:card" content="summary_large_image"/>`);
+  });
+
+  // The file the page's og:image names, found in the build: a 1200x630 PNG under 60 KB (scripts/og.ts draws it).
+  test(`${listed.path}'s preview image is a ${PREVIEW_IMAGE.width}x${PREVIEW_IMAGE.height} PNG under 60 KB`, async ({ request }) => {
+    const res = await request.get(pageImagePath(listed.path));
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toBe(PREVIEW_IMAGE.type);
+    const png = await res.body();
+    expect(png.length).toBeLessThan(60 * 1024);
+    // The PNG signature, then the IHDR chunk: width and height are the first two big-endian words of its data.
+    expect(png.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([PREVIEW_IMAGE.width, PREVIEW_IMAGE.height]);
   });
 }
 

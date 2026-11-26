@@ -94,6 +94,15 @@ The same `buildEnd` writes `sitemap.xml` (every page in `app/core/pages.ts`, the
 loader awaits the project's README at build, and a slug with no project throws a 404 that the root `ErrorBoundary` draws as the
 not-found screen.
 
+Each page in `app/core/pages.ts` also gets a link preview image, drawn by `scripts/og.ts` in `buildEnd` before the policy step: a
+1200x630 PNG at `og/index.png` for the home page and `og/<path>.png` for any other (`og/projects/hundo.png`), the file the page's
+`og:image` names (`pageMeta` in `app/core/site.ts` writes it, with its size, type and alt, `og:type`, `og:site_name` and
+`twitter:card`). satori lays the image out from a plain object tree and draws VT323's glyphs as paths, since sharp's own text
+rendering can't load the woff; sharp turns the SVG into a PNG with a 16-colour palette, each under 60 KB. A character VT323 has no
+glyph for fails the build rather than being drawn in another font. The words come from `pages.ts`, `projects.ts` and `studio.ts`,
+so a page added to the list gets its image with no change; the look is in `docs/design.md`, Link previews. `satori` is a
+dev dependency at an exact version.
+
 Each page carries its Content-Security-Policy in a `<meta http-equiv>`, written by `scripts/csp.ts` as the last step of
 `buildEnd`, so `404.html` gets one too. React Router and React start each page with inline scripts (the hydration data, the module
 imports, scroll restoration, React's streaming code), a different set on each page, and a static site has no server to add a

@@ -4,6 +4,7 @@ import type { Config } from "@react-router/dev/config";
 import { PAGES } from "./app/core/pages";
 import { pageUrl } from "./app/core/site";
 import { writePolicies } from "./scripts/csp";
+import { writeImages } from "./scripts/og";
 
 const PATHS = PAGES.map((page) => page.path);
 
@@ -27,6 +28,7 @@ export default {
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PATHS.map((path) => `  <url><loc>${pageUrl(path)}</loc></url>\n`).join("")}</urlset>\n`,
     );
     await writeFile(join(client, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${pageUrl("/sitemap.xml")}\n`);
+    await writeImages(client, PAGES);
     await writePolicies(client);
   },
 } satisfies Config;

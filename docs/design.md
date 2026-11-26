@@ -279,6 +279,27 @@ a chunk of the desktop's loaded when the window first opens; the module it runs,
   output pane scrolls, where the mockup clips its overflow; before the programs arrive the picker and the info line say `-` and the
   editor is empty and read-only.
 
+## Link previews
+
+What a chat or a feed shows when the site's address is shared: one image a page, 1200x630 (the size Open Graph and X's
+`summary_large_image` both take), drawn at build by `scripts/og.ts` from `app/core/pages.ts` (`mockups/phase-2.html`, `#og-hundo` and
+`#og-home`). The image is text drawn as paths, so it follows the type and colour rules above, with these differences: it is always
+the default screen, since a preview has no settings.
+
+- The tube's black, the green phosphor and its dim tone (`#031208`, `#33ff66`, `#1a9c40`, as `app/app.css` has them), VT323 at 48px
+  on 1.15 lines, and the glow, `0 0 4px` in the dim tone (the desktop's is `0 0 2px`: a preview is shown small).
+- Scanlines baked in at twice the screen's pitch, 2px of black at 28% every 6px, so a preview shown at half size still has them. No
+  vignette: it darkens the corners a small preview crops. No rounded corners.
+- A title bar 80px tall with the cat (the title bar's own grid at 3x) and `Jellycat Studio`, over a 2px rule. Under it, at 56px
+  from the edges: the page's name at 128px, shrunk to fit one line when it is longer than 21 characters; its kind dim under it
+  (a project's; a page that is no project has none); its description in up to three lines of 56 characters, broken at spaces and
+  after a hyphen before a letter as a browser does, the last cut with `...`. The home page has the studio's line, in up to two
+  lines, and the four folders as framed tabs with their counts, as the phone's home shows them, in place of a kind.
+- At the bottom, 40px from the edge and 40px type, dim: the address (`jellycat.fr/projects/hundo`) on the left and `Jelly-OS 1.0`
+  on the right.
+- PNG with a 16-colour palette, under 60 KB each (the largest is about 38 KB): one phosphor and its glow need no more, and the
+  text stays sharp. Words come from the data, never from the drawing code, and a character VT323 lacks stops the build.
+
 ## Keyboard and motion
 
 - Everything works with no mouse: each app opens and closes from the keyboard on the desktop, its Terminal and the Lab included (the Lab's
