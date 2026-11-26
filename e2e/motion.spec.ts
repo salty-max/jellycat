@@ -99,6 +99,8 @@ for (const reduced of [true, false]) {
       const hd = page.getByRole("dialog", { name: "Jelly HD" });
       await hd.getByRole("option", { name: "Lab" }).press("Enter");
       const lab = page.getByRole("dialog", { name: "Lab" });
+      // Run does nothing until the programs have come: wait for the editor to hold fizzbuzz, as lab.spec does.
+      await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
       await lab.getByRole("button", { name: "Run" }).press("Enter");
       await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
       await hd.getByRole("option", { name: "Contact" }).press("Enter");

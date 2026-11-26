@@ -183,9 +183,10 @@ sent and nothing goes. The key belongs in the Vercel project's environment varia
 `phase-2` branch, never in a file; Resend sends only once `jellycat.fr` is verified there (its DKIM record, and a `send`
 subdomain's `MX` and SPF records, at Gandi), and refuses before that, which the function answers with a `502`. The function stores
 nothing; it logs one line a request, the outcome and the status codes, never the name, the address or the message. Resend keeps a
-sent e-mail 30 days on its free plan. The rate limit is to be a Vercel Firewall rule on `/api/contact`, 5 requests per 10 minutes
-per IP, in the project's settings rather than in this repository. The key, the domain and the rule are set by hand in those
-accounts, not by this repository. The key has been set since 26 Nov 2026, and the domain is in Resend's Ireland region
-(`eu-west-1`). The rule is not set: the project's Firewall configuration was empty when read on 26 Nov 2026. The function's relative imports, and those of every file it loads, end in
+sent e-mail 30 days on its free plan. The rate limit is a Vercel Firewall rule on `/api/contact`, 5 requests per 10 minutes
+per IP, in the project's settings rather than in this repository. The key, the domain and the rule are set in those accounts (the rule
+through Vercel's CLI), not by this repository. The key has been set since 26 Nov 2026, and the domain is in Resend's Ireland region
+(`eu-west-1`). The rule is set: `contact rate limit`, published 26 Nov 2026 (a path equal to `/api/contact`, a fixed window of 600 seconds, 5
+requests keyed by IP, `429` past them). The function's relative imports, and those of every file it loads, end in
 `.js`: Vercel compiles them to ES modules that Node loads as they are, and Node resolves no relative import without its extension
 (a test holds that). `scripts/serve.mjs`, `pnpm preview` and `pnpm e2e` serve files only and never run it.
