@@ -17,7 +17,8 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 - `app/content/readme/`: one README per project, `<slug>.md`, in a small Markdown subset (one `#` title, `##` headings,
   one-line paragraphs, one-level `- ` lists, code spans, links to `https://` or `/projects/<slug>`); `readme.ts` refuses
   anything else, naming the file and line.
-- `app/lab/`: what the Lab runs on, no window yet. `gero.ts` is the pin of the gero release (tag, version, the two assets' names and
+- `app/lab/`: what the Lab runs on (its window is `app/os/lab/`: the window and its picker, the editor and the output pane, a chunk
+  of the desktop's loaded when it opens). `gero.ts` is the pin of the gero release (tag, version, the two assets' names and
   SHA-256s), `module.ts` the typed binding over `gero.wasm` (ported from gero-lab, its MIT notice kept), `run.ts` the run (built,
   loaded into a VM, stepped in slices on the main thread, with a cap of steps and of output), `samples.ts` the twelve programs'
   manifest and its one fetch, `use-gero.ts` the hook the window uses.

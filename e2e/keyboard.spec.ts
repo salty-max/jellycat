@@ -111,8 +111,34 @@ test.describe("the desktop", () => {
     await page.keyboard.press("Enter");
     await expect(terminal).toHaveCount(0);
 
-    // The Control Panel: the arrows pick a phosphor.
+    // The Lab: Enter on its window runs fizzbuzz and the button becomes Run again with the focus; Tab reaches the picker, whose
+    // menu the arrows and Enter drive; Shift+Tab reaches the Close box.
     await tabTo(page, hd.getByRole("option", { name: "Terminal" }));
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    const lab = win(page, "Lab");
+    await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
+    // The window's own body has the focus, so Enter reaches it (as the Info window's does).
+    await expect(lab.locator(".app-lab")).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+    await expect(lab.getByRole("button", { name: "Run" })).toBeFocused();
+    await tabTo(page, lab.getByRole("button", { name: "fizzbuzz.gr" }), { back: true });
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("menu")).toBeVisible();
+    for (let steps = 0; steps < 14 && (await focused(page)) !== "gcd.gr"; steps++) await step(page, "ArrowDown");
+    expect(await focused(page)).toBe("gcd.gr");
+    await page.keyboard.press("Enter");
+    await expect(lab.getByRole("button", { name: "gcd.gr" })).toBeVisible();
+    await tabTo(page, lab.getByRole("textbox", { name: "Program" }));
+    await page.keyboard.press("Control+Enter");
+    await expect(lab.getByRole("status")).toHaveText(/^halted, \d+ steps$/);
+    await tabTo(page, lab.getByRole("button", { name: "Close" }), { back: true });
+    await page.keyboard.press("Enter");
+    await expect(lab).toHaveCount(0);
+
+    // The Control Panel: the arrows pick a phosphor.
+    await tabTo(page, hd.getByRole("option", { name: "Lab" }));
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Enter");
     const panel = win(page, "Control Panel");

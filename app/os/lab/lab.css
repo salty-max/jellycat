@@ -1,0 +1,119 @@
+/* The Lab's window, from mockups/phase-2.html (.lab, .lrow, .pick, .ed, .ohead, .out, .scr; here every class is prefixed `app-`). The colours are the phosphor's own
+   variables; the buttons and the info line are the apps' (app/os/desktop/apps/apps.css), the menu the menu bar's. */
+
+.app-lab {
+  position: relative;
+  outline: none;
+}
+.app-lab-body {
+  flex: 1;
+  min-height: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.app-lab-row {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.app-lab-gap {
+  flex: 1;
+}
+.app-lab-pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 150px;
+}
+.app-lab .app-button:disabled {
+  color: var(--phosphor-dim);
+  border-color: var(--phosphor-dim);
+}
+.app-lab-menu {
+  max-height: none;
+}
+
+.app-lab-editor {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 2px 6px;
+  border: 1px solid var(--phosphor-fg);
+  border-radius: 0;
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  font: inherit;
+  text-shadow: inherit;
+  caret-color: var(--phosphor-fg);
+  white-space: pre;
+  overflow: auto;
+  resize: none;
+  tab-size: 2;
+  outline: none;
+  user-select: text;
+}
+.app-lab-editor:focus-visible,
+.app-lab-out:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}
+
+.app-lab-ohead {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+}
+.app-lab-state {
+  display: flex;
+}
+.app-lab-out {
+  flex: none;
+  height: 121px;
+  box-sizing: border-box;
+  border: 1px solid var(--phosphor-fg);
+  padding: 0 6px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  user-select: text;
+  outline: none;
+}
+/* Short output sits at the pane's foot, as the mockup draws it; it scrolls once it is longer, kept at its end. */
+.app-lab-out-text {
+  margin-top: auto;
+  white-space: pre;
+}
+
+/* The 1-bit scroll bar, both ways: a track dithered in the dim tone, a hollow thumb, a box where they meet. */
+.app-lab-scroll::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+.app-lab-scroll::-webkit-scrollbar-track {
+  border-left: 1px solid var(--phosphor-fg);
+  background: repeating-conic-gradient(var(--phosphor-dim) 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+}
+.app-lab-scroll::-webkit-scrollbar-track:horizontal {
+  border-left: 0;
+  border-top: 1px solid var(--phosphor-fg);
+}
+.app-lab-scroll::-webkit-scrollbar-thumb {
+  background: var(--phosphor-bg);
+  border: 1px solid var(--phosphor-fg);
+  border-right: 0;
+}
+.app-lab-scroll::-webkit-scrollbar-thumb:horizontal {
+  border: 1px solid var(--phosphor-fg);
+  border-bottom: 0;
+}
+.app-lab-scroll::-webkit-scrollbar-corner {
+  background: var(--phosphor-bg);
+  border-left: 1px solid var(--phosphor-fg);
+  border-top: 1px solid var(--phosphor-fg);
+}

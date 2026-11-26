@@ -4,6 +4,7 @@ import { FolderWindow } from "./apps/folder";
 import { ProjectInfo } from "./apps/project-info";
 import { ProjectReadme, StudioReadme } from "./apps/readme-windows";
 import { TerminalApp } from "./apps/terminal";
+import { LabApp } from "../lab/lab-app";
 import { ViewerWindow } from "../viewer/viewer-window";
 
 /** What every app in a window is given: its window's id, then the `props` it was opened with (typed by the app itself). */
@@ -19,6 +20,7 @@ export type AppComponent = ComponentType<any>;
  */
 export const REGISTRY: Record<string, AppComponent> = {
   folder: FolderWindow,
+  lab: LabApp,
   info: ProjectInfo,
   "project-readme": ProjectReadme,
   readme: StudioReadme,

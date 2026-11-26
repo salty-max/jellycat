@@ -78,6 +78,29 @@ test("every page runs under its Content-Security-Policy", async ({ context }) =>
   }
 });
 
+// 'wasm-unsafe-eval' lets the Lab compile gero.wasm and nothing else: a program runs under the policy, with no violation and no error.
+test("the Lab runs a program under the policy", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the Lab is a desktop window");
+  const violations: string[] = [];
+  const errors: string[] = [];
+  await page.addInitScript(() => document.addEventListener("securitypolicyviolation", (event) => console.error(`csp ${event.effectiveDirective} ${event.blockedURI}`)));
+  page.on("console", (message) => {
+    if (message.type() === "error") (message.text().startsWith("csp ") ? violations : errors).push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("/");
+  await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveAttribute("content", POLICY);
+  await page.getByRole("option", { name: "Lab" }).dblclick();
+  const lab = page.getByRole("dialog", { name: "Lab" });
+  await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
+  await lab.getByRole("button", { name: "Run" }).click();
+  await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+  await expect(lab.getByRole("log", { name: "Output" })).toContainText("FizzBuzz");
+  expect(violations).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 // The step's own checks, on pages made up here. Plain Node, no browser: the unit tests only cover app/. Today's build never hits
 // these, so without this a check could go missing unnoticed until a React or React Router upgrade changes the markup.
 const fixture = (head: string, body = "") => `<!DOCTYPE html><html><head>${head}</head><body>${body}</body></html>`;

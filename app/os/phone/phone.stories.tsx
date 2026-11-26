@@ -38,6 +38,9 @@ export const Home: Story = {
     await expect(canvas.getByRole("heading", { level: 1, name: "Jellycat Studio" })).toBeInTheDocument();
     await expect(canvas.getByRole("heading", { level: 2, name: /^Web/ })).toBeInTheDocument();
     await expect(canvas.getByRole("link", { name: "Hundo" })).toHaveAttribute("href", "/projects/hundo");
+    // The Lab section below the folders: the phone's one card to Gero Lab, which opens in a new tab.
+    await expect(canvas.getByRole("heading", { level: 2, name: "Lab" })).toBeInTheDocument();
+    await expect(canvas.getByRole("link", { name: "Gero Lab" })).toHaveAttribute("target", "_blank");
     await userEvent.click(canvas.getByRole("button", { name: "Control Panel" }));
     await expect(args.onOpenPanel).toHaveBeenCalledOnce();
   },

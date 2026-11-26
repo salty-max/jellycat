@@ -31,11 +31,23 @@ describe("the desktop's first windows", () => {
     for (const name of ["Web", "Addons", "Engines", "Tools"]) expect(within(projects).getByRole("option", { name })).toBeInTheDocument();
   });
 
-  it("opens Jelly HD from its icon, holding Projects, Readme, Terminal and Control Panel", async () => {
+  it("opens Jelly HD from its icon, holding Projects, Readme, Terminal, Lab and Control Panel", async () => {
     render(<Desktop />);
     await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
     const hd = await win("Jelly HD");
-    expect(within(hd).getAllByRole("option").map((option) => option.textContent)).toEqual(["Projects", "Readme", "Terminal", "Control Panel"]);
+    expect(within(hd).getAllByRole("option").map((option) => option.textContent)).toEqual(["Projects", "Readme", "Terminal", "Lab", "Control Panel"]);
+  });
+
+  it("opens the Lab from its icon and from Jelly HD, one window for both", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Lab" }));
+    const lab = await win("Lab");
+    expect(await within(lab).findByRole("textbox", { name: "Program" })).toBeInTheDocument();
+    expect(Object.values(useWindows.getState().windows).filter((window) => window.app === "lab")).toHaveLength(1);
+
+    await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
+    await userEvent.dblClick(within(await win("Jelly HD")).getByRole("option", { name: "Lab" }));
+    expect(Object.values(useWindows.getState().windows).filter((window) => window.app === "lab")).toHaveLength(1);
   });
 
   it("opens an empty Trash", async () => {

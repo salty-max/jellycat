@@ -35,6 +35,7 @@ export function openViewer(slug: string) {
 export const openStudioReadme = () => open({ app: "readme", title: "Readme", size: { w: 340, h: 210 } });
 export const openControlPanel = () => open({ app: "panel", title: "Control Panel", size: { w: 400, h: 196 } });
 export const openTerminal = () => open({ app: "terminal", title: "Terminal", size: { w: 410, h: 240 } });
+export const openLab = () => open({ app: "lab", title: "Lab", size: { w: 532, h: 432 } });
 
 /** Opens what an item or an icon stands for. `openProject` is the desktop's (it also moves the address). */
 export function openTarget(target: Target, openProject: (slug: string) => void) {
@@ -42,6 +43,7 @@ export function openTarget(target: Target, openProject: (slug: string) => void) 
   else if (target.type === "project") openProject(target.slug);
   else if (target.app === "readme") openStudioReadme();
   else if (target.app === "terminal") openTerminal();
+  else if (target.app === "lab") openLab();
   else openControlPanel();
 }
 
@@ -51,5 +53,6 @@ export const ICON_TARGETS: Record<string, Target> = {
   projects: { type: "folder", id: "projects" },
   readme: { type: "app", app: "readme" },
   terminal: { type: "app", app: "terminal" },
+  lab: { type: "app", app: "lab" },
   trash: { type: "folder", id: "trash" },
 };

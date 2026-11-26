@@ -213,3 +213,10 @@
   grid-template-columns: 84px 1fr;
   gap: 12px 10px;
 }
+
+/* The Lab's window when its code could not be loaded: one plain line (here, in the desktop's own stylesheet, since the Lab's is
+   the chunk that failed). */
+.app-lab-failed {
+  margin: 0;
+  padding: 10px;
+}

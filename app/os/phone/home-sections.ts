@@ -19,5 +19,15 @@ export type HomeSection = {
   cards: readonly HomeCard[];
 };
 
-/** The home page's sections below the folders, in order. The Lab's and Contact's come with their tasks (docs/phase-2.md, L2 and C2). */
-export const HOME_SECTIONS: readonly HomeSection[] = [];
+/**
+ * The home page's sections below the folders, in order. The Lab is the desktop's only (docs/phase-2.md, Q6): the phone's section is one
+ * card to Gero Lab, gero's playground in the browser, with the line its README opens on. Contact's comes with its task (C2).
+ */
+export const HOME_SECTIONS: readonly HomeSection[] = [
+  {
+    id: "lab",
+    title: "Lab",
+    icon: "lab",
+    cards: [{ name: "Gero Lab", href: "https://gero-lab.vercel.app", kind: "gero-lab.vercel.app", description: "Browser playground for the Gero VM." }],
+  },
+];

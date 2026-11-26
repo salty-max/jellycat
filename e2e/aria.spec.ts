@@ -147,6 +147,15 @@ test.describe("the phone", () => {
               - heading "harness" [level=3]:
                 - link "harness":
                   - /url: /projects/harness
+        - region "Lab":
+          - heading "Lab" [level=2]
+          - list:
+            - listitem:
+              - heading "Gero Lab" [level=3]:
+                - link "Gero Lab":
+                  - /url: https://gero-lab.vercel.app
+              - paragraph: gero-lab.vercel.app
+              - paragraph: Browser playground for the Gero VM.
       - contentinfo:
         - paragraph: Jelly-OS 1.0
     `);
@@ -262,6 +271,7 @@ test.describe("the desktop", () => {
           - option "Projects"
           - option "Readme"
           - option "Terminal"
+          - option "Lab"
           - option "Trash"
         - dialog "Projects":
           - 'group "Projects: arrows move, Shift and arrows resize"':
@@ -274,6 +284,31 @@ test.describe("the desktop", () => {
             - option "Addons"
             - option "Engines"
             - option "Tools"
+    `);
+  });
+
+  test("the Lab's window", async ({ page }) => {
+    await open(page, "/", "desktop");
+    await page.getByRole("option", { name: "Lab" }).dblclick();
+    const lab = page.getByRole("dialog", { name: "Lab" });
+    await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
+    await lab.getByRole("button", { name: "Run" }).click();
+    await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+    // The program's text is gero's: the editor is named, not read.
+    await expect(lab).toMatchAriaSnapshot(`
+      - dialog "Lab":
+        - 'group "Lab: arrows move, Shift and arrows resize"':
+          - button "Collapse"
+          - button "Zoom"
+          - button "Close"
+        - text: fizzbuzz.gr gero 0.5.5
+        - button "fizzbuzz.gr"
+        - button "Reset"
+        - button "Run"
+        - textbox "Program"
+        - text: Output
+        - status: halted, 1076 steps
+        - log "Output": /Fizz/
     `);
   });
 

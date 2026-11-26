@@ -38,6 +38,21 @@ for (const [name, address] of PAGES) {
   });
 }
 
+test("the desktop with the Lab's window open, and its picker", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the Lab is a desktop window");
+  await page.goto("/");
+  await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
+  await page.getByRole("option", { name: "Lab" }).dblclick();
+  const lab = page.getByRole("dialog", { name: "Lab" });
+  await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
+  await lab.getByRole("button", { name: "Run" }).click();
+  await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+  await expectNoViolations(page);
+  await lab.getByRole("button", { name: "fizzbuzz.gr" }).click();
+  await expect(page.getByRole("menuitemradio")).toHaveCount(12);
+  await expectNoViolations(page);
+});
+
 for (const [name, open] of [
   ["the viewer", (page: Page) => page.getByRole("region", { name: /Screenshots/ }).getByRole("button").first().tap()],
   ["the Control Panel's sheet", (page: Page) => page.getByRole("button", { name: "Control Panel" }).tap()],

@@ -109,7 +109,13 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   dim label and an underlined link. Then the folders as tabs that jump to each (`Web 4`, `Addons 11`, `Engines 1`, `Tools 3`: a 36px
   framed link, the count dim; `Link to="#<folder>"`, so back after a tab works as after any move). Each folder is a section with an
   `h2` title bar in inverse video (the folder icon inverted, its name, `11 items` as the folder window's info line says it), 32px
-  tall and sticky under the header while its projects scroll by, then the projects as cards in the data's order.
+  tall and sticky under the header while its projects scroll by, then the projects as cards in the data's order. Below the folders come
+  the sections of `app/os/phone/home-sections.ts`, drawn the same way (a title bar in inverse video with its icon, then cards, without
+  an item count): the Lab's is `Lab` (the flask inverted) with one card, `Gero Lab`, its kind line `gero-lab.vercel.app` (dim) and its
+  line `Browser playground for the Gero VM.`, the first line of gero-lab's README. The card's name links to `https://gero-lab.vercel.app`
+  in a new tab, as every https link does, its hit area the whole card. The Lab itself is the desktop's only. The section's icon is
+  drawn at 32px as the folders' are; the phase 2 mockup draws the three at 16px, where `mockups/phosphor-phone.html` and the shipped
+  folder bars have 32px.
 - A card is a window's frame (1px, the hard 3px shadow in the dim tone): the name (24px) with a pixel arrow, the kind (dim), the
   description, and `3 pictures` (dim) when it has some. The name is the card's one link, its hit area the whole card; the description
   is text outside it. Pressed, the card is inverse video; keyboard focus draws the dashed ring around the card.
@@ -243,9 +249,40 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   type is `ambient`: the ring/silent switch mutes the page and its sound never stops the visitor's music.
 - Reduced motion doesn't touch it: a sound is not motion.
 
+## Lab
+
+Gero's programs run in the browser (`mockups/phase-2.html`, `#d-lab`; the decisions are in `docs/phase-2.md`). A desktop window
+only: it has no address and no phone version, where the home page has one card to Gero Lab (see Phone). Its code is `app/os/lab/`,
+a chunk of the desktop's loaded when the window first opens; the module it runs, `gero.wasm`, loads on the first Run (`app/lab/`).
+
+- The icon is a flask (the 16×16 grid the mockup draws), in the icon column under Terminal, and `Lab` in Jelly HD is an
+  Application. One window, 532×432, titled `Lab`; opening it again brings it to the front.
+- The info line holds the file the editor shows (`fizzbuzz.gr`, or `-` until the programs have come) on the left and
+  `gero 0.5.5` on the right. Under it, in the body's 10px padding and 8px gaps: a row, the editor, `Output` with the run's state, and the
+  output pane, 121px tall.
+- The row: the picker (a button with the program's file, or its name when it is several files (`banks`), and a pixel arrow, 150px wide at least), then Reset and Run, the default
+  button. The picker opens a menu drawn as the menu bar's drops: Gero's seven programs, a dashed separator, the five in assembly,
+  the open one marked with the 6px square; ↑ ↓ Enter Esc. Picking one shows its text and clears the last run. Run becomes Stop while the
+  program runs, and keeps the focus; Reset puts the program's own text back and clears the output and the state.
+- The editor is a `textarea`, the window's 18px VT323, no wrapping, with the 1-bit scroll bars both ways (the Readme's, and a
+  box where they meet), labelled `Program`. Spelling, correction and capitals are off. Tab leaves it, so the keyboard can always get out;
+  Ctrl+Enter (⌘+Enter) runs from it; Enter on the window itself runs, since the window has the focus when it opens. An edit lasts while
+  the window is open, for each program, whatever page the desktop moves to; nothing is stored.
+- The output pane is a `log` that keeps its end in view, its text bottom-aligned while it fits, with the same scroll bars once it
+  doesn't. It is not announced as it fills (`aria-live="off"`). The state at the right of `Output` is a polite `status` that is read
+  once the run has ended (`halted, 1076 steps`, `stopped after 10000000 steps`, `faulted at $0123`, `build failed`, `gero.wasm stopped`,
+  `could not load gero.wasm`, `could not load the programs`); while it loads or runs it is drawn only.
+- A build that fails prints its diagnostics in the pane as `gero check` words them: `error: <message> [<code>]`, then
+  `  --> <file>:<line>:<column>`. A fetch that failed is tried again by the next Run. The window's own code, if its download fails, leaves one line in it,
+  `could not load the Lab`, and the next window to open tries again.
+- Differences from the mockup, which is a static frame: the editor opens at its first line, where the mockup shows it scrolled; the
+  output pane scrolls, where the mockup clips its overflow; before the programs arrive the picker and the info line say `-` and the
+  editor is empty and read-only.
+
 ## Keyboard and motion
 
-- Everything works with no mouse: each app opens and closes from the keyboard on the desktop, its Terminal included, and on the
+- Everything works with no mouse: each app opens and closes from the keyboard on the desktop, its Terminal and the Lab included (the Lab's
+  picker, Enter and Ctrl+Enter run), and on the
   phone a project, the viewer and the sheet do too, Esc closing a dialog (`e2e/keyboard.spec.ts`).
 - Every tab stop shows its focus, on keyboard focus only (`:focus-visible`): a 1px dashed ring in the phosphor on the desktop,
   dotted in the shell, dashed on the phone. The shell's input is the exception: its cursor shows any focus, a tap's too, solid when focused and hollow
