@@ -168,8 +168,9 @@ doesn't move and the end is a fast-forward.
   3. the release packet over `origin/main..HEAD`, the reviewer, `review.ts --again` (after step 1's verdict was recorded);
   4. F1 reports the new sha, and the push to `main` above.
 - CI runs on `main`'s push (the same tree the pull request checked); Vercel deploys production. F1 then probes production: the
-  headers (CSP with `'wasm-unsafe-eval'`, `frame-ancestors`), `/contact`, `/api/contact` (a `403` from another origin), the
-  sitemap, `/og/*.png`, and the link-preview debuggers.
+  headers (CSP with `'wasm-unsafe-eval'`, `frame-ancestors`), `/contact`, `/api/contact` (a `403` from another origin, and one
+  real message from the site's own origin: `200 { "ok": true }` and the e-mail in the inbox, since a missing or wrong `Host` would
+  answer every visitor `403` too), the sitemap, `/og/*.png`, and the link-preview debuggers.
 - `phase-2` is deleted on origin afterwards, on the user's go.
 
 ## The four features
@@ -424,7 +425,9 @@ Done by the user, in this order:
   send;
 - a Resend account; `jellycat.fr` added as a domain there, in the sending region the user picks (Ireland, `eu-west-1`, if the
   plan offers it, keeps the sending in the EU; the region can't be changed later without adding the domain again);
-- the records Resend shows, added in Gandi's DNS (a DKIM `TXT`, the `send` subdomain's `MX` and SPF `TXT`); verified in Resend;
+- the records Resend shows, added in Gandi's DNS (a DKIM `TXT`, the `send` subdomain's `MX` and SPF `TXT`); verified in Resend
+  (what its dashboard showed on 26 Nov 2026 in place of the `MX` and SPF: two `CNAME`s, `send` and `rsend`, the second to an
+  `euw1` host);
 - an API key with sending access to that domain only, set in the Vercel project as `RESEND_API_KEY` for Preview, scoped to the
   `phase-2` branch, and for Production;
 - whether previews are behind deployment protection, and if so a Protection Bypass for Automation secret for the probes.

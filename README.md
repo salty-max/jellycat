@@ -180,8 +180,8 @@ max@jellycat.fr, from contact@jellycat.fr, with the visitor's address as `Reply-
 "ok": true }`, or `400` with the fields in error (or a form sent under two seconds after it opened), `403`, `405`, `413`, `415`,
 `500`, `502` when Resend refuses or doesn't answer, and `503` when `RESEND_API_KEY` isn't set. A filled honeypot is answered as
 sent and nothing goes. The key belongs in the Vercel project's environment variables, for Production and for Preview scoped to the
-`phase-2` branch, never in a file; Resend sends only once `jellycat.fr` is verified there (its DKIM record, and a `send`
-subdomain's `MX` and SPF records, at Gandi), and refuses before that, which the function answers with a `502`. The function stores
+`phase-2` branch, never in a file; Resend sends only once `jellycat.fr` is verified there (the records Resend's dashboard
+shows, at Gandi: a DKIM `TXT` on `resend._domainkey`, and two `CNAME`s, `send` and `rsend`), and refuses before that, which the function answers with a `502`. The function stores
 nothing; it logs one line a request, the outcome and the status codes, never the name, the address or the message. Resend keeps a
 sent e-mail 30 days on its free plan. The rate limit is a Vercel Firewall rule on `/api/contact`, 5 requests per 10 minutes
 per IP, in the project's settings rather than in this repository. The key, the domain and the rule are set in those accounts (the rule
