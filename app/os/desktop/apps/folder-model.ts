@@ -8,7 +8,7 @@ export type FolderId = "hd" | "projects" | "trash" | Folder;
 export const FOLDER_TITLES: Record<FolderId, string> = { hd: "Jelly HD", projects: "Projects", trash: "Trash", ...FOLDER_NAMES };
 
 /** What opening an item does. */
-export type Target = { type: "folder"; id: FolderId } | { type: "app"; app: "readme" | "terminal" | "lab" | "panel" } | { type: "project"; slug: string };
+export type Target = { type: "folder"; id: FolderId } | { type: "app"; app: "readme" | "terminal" | "lab" | "panel" | "contact" } | { type: "project"; slug: string };
 
 export type FolderItem = { key: string; name: string; icon: IconName; kind: string; target: Target };
 
@@ -17,6 +17,7 @@ const HD: readonly FolderItem[] = [
   { key: "readme", name: "Readme", icon: "doc", kind: "Text", target: { type: "app", app: "readme" } },
   { key: "terminal", name: "Terminal", icon: "term", kind: "Application", target: { type: "app", app: "terminal" } },
   { key: "lab", name: "Lab", icon: "lab", kind: "Application", target: { type: "app", app: "lab" } },
+  { key: "contact", name: "Contact", icon: "mail", kind: "Application", target: { type: "app", app: "contact" } },
   { key: "panel", name: "Control Panel", icon: "panel", kind: "Application", target: { type: "app", app: "panel" } },
 ];
 

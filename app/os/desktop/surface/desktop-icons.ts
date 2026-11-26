@@ -9,5 +9,6 @@ export const DESKTOP_ICONS: readonly DesktopIcon[] = [
   { id: "readme", label: "Readme", icon: "doc" },
   { id: "terminal", label: "Terminal", icon: "term" },
   { id: "lab", label: "Lab", icon: "lab" },
+  { id: "contact", label: "Contact", icon: "mail" },
   { id: "trash", label: "Trash", icon: "trash" },
 ];

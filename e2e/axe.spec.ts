@@ -10,6 +10,7 @@ const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-prac
 const PAGES = [
   ["the home page", "/"],
   ["a project page", "/projects/hundo"],
+  ["the contact page", "/contact"],
   ["404.html at a nested address", "/no/such/page"],
 ] as const;
 
@@ -63,6 +64,30 @@ for (const [name, open] of [
     await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
     await open(page);
     await expect(page.getByRole("dialog")).toBeVisible();
+    await expectNoViolations(page);
+  });
+}
+
+// The contact form in each layout (the phone's page, the desktop's window at the same address), at rest and with a field refused and
+// the state shown. /api/contact is stubbed: serve.mjs serves files only.
+for (const [name, answer] of [
+  ["at rest", null],
+  ["with a field refused", { status: 400, json: { ok: false, error: "invalid", fields: ["email"] } }],
+  ["with the failure shown", { status: 503, json: { ok: false, error: "unconfigured" } }],
+] as const) {
+  test(`the contact form ${name}`, async ({ page, isMobile }) => {
+    await page.route("**/api/contact", (route) => route.fulfill(answer ?? { json: { ok: true } }));
+    await page.goto("/contact");
+    const form = isMobile ? page.getByRole("main") : page.getByRole("dialog", { name: "Contact" });
+    await expect(form.getByLabel("Name")).toBeVisible();
+    if (answer) {
+      await form.getByLabel("Name").fill("Ada");
+      await form.getByLabel("Email").fill("ada@example.com");
+      await form.getByLabel("Message").fill("Hi");
+      await form.getByRole("button", { name: "Send" }).click();
+      if (answer.json.error === "invalid") await expect(form.getByLabel("Email")).toHaveAttribute("aria-invalid", "true");
+      else await expect(form.getByRole("status")).not.toBeEmpty();
+    }
     await expectNoViolations(page);
   });
 }

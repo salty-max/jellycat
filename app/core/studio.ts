@@ -8,7 +8,7 @@ export type TextFile = readonly (readonly Span[])[];
 
 export const STUDIO_NAME = "Jellycat Studio";
 
-/** The address the site shows. Mail goes there; the site has no form until Phase 2. */
+/** The address the site shows, and the one the contact form's message goes to (app/core/contact-handler.ts). */
 export const CONTACT_EMAIL = "max@jellycat.fr";
 
 export const GITHUB_URL = "https://github.com/salty-max";

@@ -1,6 +1,6 @@
-import { HOME_PAGE, PAGES, pageByPath } from "./pages";
+import { CONTACT_PAGE, HOME_PAGE, PAGES, pageByPath } from "./pages";
 import { PROJECTS } from "./projects";
-import { STUDIO_NAME } from "./studio";
+import { CONTACT_EMAIL, STUDIO_NAME } from "./studio";
 
 test("the home page comes first, at /", () => {
   expect(PAGES[0]).toBe(HOME_PAGE);
@@ -22,6 +22,16 @@ test("every project has its page, at its address, named and described as in the 
   expect(PAGES.filter((page) => page.kind === "project").map((page) => page.kind === "project" && page.slug)).toEqual(
     PROJECTS.map((project) => project.slug),
   );
+});
+
+test("the contact page comes last, at /contact, described by the line the form carries", () => {
+  expect(PAGES.at(-1)).toBe(CONTACT_PAGE);
+  expect(pageByPath("/contact")).toEqual({
+    kind: "contact",
+    path: "/contact",
+    title: `Contact · ${STUDIO_NAME}`,
+    description: `A message from this page goes by email to ${CONTACT_EMAIL}.`,
+  });
 });
 
 test("paths are unique and start at the root", () => {

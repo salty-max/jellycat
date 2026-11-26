@@ -1,5 +1,5 @@
 import type { PageKind } from "../../../core/pages";
-import { ids, openInfo } from "./launch";
+import { ids, openContact, openInfo } from "./launch";
 
 /** The window an address opens on the desktop. */
 export type PageWindow = {
@@ -16,6 +16,7 @@ type Params = Readonly<Record<string, string | undefined>>;
 const PAGE_WINDOWS: Record<PageKind, (params: Params) => PageWindow | undefined> = {
   home: () => undefined,
   project: ({ slug }) => (slug ? { id: ids.info(slug), open: () => openInfo(slug) } : undefined),
+  contact: () => ({ id: ids.contact, open: openContact }),
 };
 
 /** The window this page opens, if any. */

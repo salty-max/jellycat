@@ -26,6 +26,7 @@ beforeEach(() => {
 const win = (name: string) => screen.findByRole("dialog", { name });
 /** A project's page, as the layout hands it to the desktop. */
 const projectPage = (slug: string): OsPage => ({ page: "project", params: { slug }, data: { blocks: null } });
+const contactPage: OsPage = { page: "contact", params: {}, data: undefined };
 const titles = () => Object.values(useWindows.getState().windows).map((window) => window.title);
 
 describe("the desktop's first windows", () => {
@@ -37,11 +38,11 @@ describe("the desktop's first windows", () => {
     for (const name of ["Web", "Addons", "Engines", "Tools"]) expect(within(projects).getByRole("option", { name })).toBeInTheDocument();
   });
 
-  it("opens Jelly HD from its icon, holding Projects, Readme, Terminal, Lab and Control Panel", async () => {
+  it("opens Jelly HD from its icon, holding Projects, Readme, Terminal, Lab, Contact and Control Panel", async () => {
     render(<Desktop />);
     await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
     const hd = await win("Jelly HD");
-    expect(within(hd).getAllByRole("option").map((option) => option.textContent)).toEqual(["Projects", "Readme", "Terminal", "Lab", "Control Panel"]);
+    expect(within(hd).getAllByRole("option").map((option) => option.textContent)).toEqual(["Projects", "Readme", "Terminal", "Lab", "Contact", "Control Panel"]);
   });
 
   it("opens the Lab from its icon and from Jelly HD, one window for both", async () => {
@@ -342,5 +343,50 @@ describe("the address", () => {
     await userEvent.dblClick(screen.getByRole("option", { name: "Terminal" }));
     await userEvent.type(within(await win("Terminal")).getByLabelText("Terminal input"), "open hundo{Enter}");
     await waitFor(() => expect(opened).toEqual(["/projects/hundo"]));
+  });
+});
+
+describe("the Contact window", () => {
+  beforeEach(() => vi.stubGlobal("fetch", vi.fn()));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("opens from its icon with the focus in Name, and leaves the address where it is", async () => {
+    const opened: string[] = [];
+    render(<Desktop onOpenPage={(path) => opened.push(path)} />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Contact" }));
+    const contact = await win("Contact");
+    expect(within(contact).getByText("To").nextElementSibling).toHaveTextContent("max@jellycat.fr");
+    await waitFor(() => expect(within(contact).getByLabelText("Name")).toHaveFocus());
+    expect(opened).toEqual([]);
+  });
+
+  it("opens from Jelly HD, and a second open brings the same window forward", async () => {
+    render(<Desktop />);
+    await userEvent.dblClick(screen.getByRole("option", { name: "Jelly HD" }));
+    await userEvent.dblClick(within(await win("Jelly HD")).getByRole("option", { name: "Contact" }));
+    await win("Contact");
+    await userEvent.dblClick(within(await win("Jelly HD")).getByRole("option", { name: "Contact" }));
+    expect(titles().filter((title) => title === "Contact")).toHaveLength(1);
+  });
+
+  it("opens over Projects for the /contact address, and tells the host when it is closed", async () => {
+    const closed: string[] = [];
+    render(<Desktop route={contactPage} onClosePage={(id) => closed.push(id)} />);
+    expect(await win("Projects")).toBeInTheDocument();
+    const contact = await win("Contact");
+    expect(contact).toHaveAttribute("data-active");
+    await userEvent.click(within(contact).getByRole("button", { name: "Close" }));
+    expect(closed).toEqual([ids.contact]);
+  });
+
+  it("stays open, with what was typed, when the address moves to a project and back", async () => {
+    const { rerender } = render(<Desktop route={contactPage} />);
+    await userEvent.type(within(await win("Contact")).getByLabelText("Message"), "Half a message");
+    rerender(<Desktop route={projectPage("hundo")} />);
+    await win("Hundo Info");
+    expect(within(await win("Contact")).getByLabelText("Message")).toHaveValue("Half a message");
+    rerender(<Desktop />);
+    await waitFor(() => expect(titles()).not.toContain("Hundo Info"));
+    expect(within(await win("Contact")).getByLabelText("Message")).toHaveValue("Half a message");
   });
 });

@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "../../core/studio";
 import type { IconName } from "../icons/names";
 
 /** A card in a section below the folders, drawn as a project's is: its name (the one link), a dim line, and a line of text. */
@@ -21,7 +22,7 @@ export type HomeSection = {
 
 /**
  * The home page's sections below the folders, in order. The Lab is the desktop's only (docs/phase-2.md, Q6): the phone's section is one
- * card to Gero Lab, gero's playground in the browser, with the line its README opens on. Contact's comes with its task (C2).
+ * card to Gero Lab, gero's playground in the browser, with the line its README opens on. Contact's is one card to the /contact page.
  */
 export const HOME_SECTIONS: readonly HomeSection[] = [
   {
@@ -29,5 +30,11 @@ export const HOME_SECTIONS: readonly HomeSection[] = [
     title: "Lab",
     icon: "lab",
     cards: [{ name: "Gero Lab", href: "https://gero-lab.vercel.app", kind: "gero-lab.vercel.app", description: "Browser playground for the Gero VM." }],
+  },
+  {
+    id: "contact",
+    title: "Contact",
+    icon: "mail",
+    cards: [{ name: "Contact", href: "/contact", kind: "Email", description: `A message from this page goes by email to ${CONTACT_EMAIL}.` }],
   },
 ];

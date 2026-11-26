@@ -141,7 +141,8 @@ position. Nothing on it needs a keyboard. Its code is `app/os/phone/`; the READM
   where a tap doesn't focus the button. It appears and goes at once, as a window does: no slide. The settings are the desktop's, so a choice holds on both.
 - Pressed, a folder tab, a card, the back link, Previous and Next and the Control Panel's button are inverse video (the dim tone
   inside them turns with it); the other links and the pictures' buttons show nothing. Every tab stop shows its focus on keyboard
-  focus only: the desktop's 1px dashed ring, 2px off its edge (a card's, 4px off, around the card). The phone has no text field.
+  focus only: the desktop's 1px dashed ring, 2px off its edge (a card's, 4px off, around the card). The phone's only text fields are
+  the contact page's (see Contact).
 - Landmarks: the header, `main`, the footer, a `nav` for the folder tabs and one for Previous and Next. One `h1` a page; an `h2` per
   folder and for Screenshots; the README's own title is an `h2` and its headings `h3`.
 - No smooth scrolling, and no motion but the flicker, which is off by default and never runs under `prefers-reduced-motion`.
@@ -299,6 +300,50 @@ the default screen, since a preview has no settings.
   on the right.
 - PNG with a 16-colour palette, under 60 KB each (the largest is about 38 KB): one phosphor and its glow need no more, and the
   text stays sharp. Words come from the data, never from the drawing code, and a character VT323 lacks stops the build.
+
+## Contact
+
+The contact form (`app/os/contact/`): one component, two looks (`data-look`), from `mockups/phase-2.html` (`#d-contact`, `#p-contact`).
+Its words are the project's: the notice is `app/core/privacy.ts`'s, the user's approved text, rendered and never reworded; the
+rest is below.
+
+- Fields: Name (up to 100), Email (`type="email"`, up to 254) and Message (up to 5,000), all required, each with a visible label, the
+  limits from `app/core/contact.ts` (which the function checks again). The browser's own validation comes first.
+- A honeypot, `jc_trap`: an input off screen (`left: -10000px`), `tabindex="-1"`, `autocomplete="off"`, its wrapper
+  `aria-hidden`. The form sends it as it is (empty from a visitor) with `elapsed`, the milliseconds since it opened.
+- The state is a polite `status` that exists from the first render, beside Send on the desktop and under it on the phone:
+  `Sending...` (Send is `aria-disabled`, a second press does nothing), `Message sent.` (the fields empty), `Could not send the message.
+  Try again.` (the form went under two seconds after it opened; the text stays) and `Could not send the message. Write to
+  max@jellycat.fr.` with the address a link, for every other failure: a function that isn't configured, a provider that refused,
+  a network that dropped, an answer the form doesn't know. A success needs both the 200 and `{ ok: true }`.
+- A field the function refuses (`400 invalid`, with `fields`) gets `aria-invalid`, a mark of its own (a second 1px frame inside
+  its border: no other colour exists), and its message under it, linked with `aria-describedby`: `Enter a name.`, `Enter a valid
+  email address.`, `Enter a message.` The focus goes to the first, in the form's order; editing a field takes its mark away.
+- The notice sits under the fields in the dim tone, each of its two lines a paragraph with 8px between, the address a link.
+  It is a `section` labelled `Privacy notice`.
+- The form needs script (it posts with `fetch`): Send is disabled until the first effect has run, so a native submit never puts a
+  message in the address; without script the address is on the page as a link (the phone's rows, the Readme). While a send is on
+  its way the fields are read-only.
+- Nothing is stored: the fields live in the component, so they stay while the window is open (a move to another address closes
+  only Info windows) and go with it.
+
+**Desktop.** A `Contact` icon (a 1-bit envelope, `mail`) under Lab in the icon column and in Jelly HD, and the address
+`/contact`, which opens the window over Projects as a project's address opens its Info window; closing the window the address
+names goes back to `/`, a window opened from its icon leaves the address as it is. The window is 380x370, the body's 10px padding
+around: `To` and `max@jellycat.fr` (text, not a field), Name, Email and Message on a grid of a 64px dim label and the control (24px
+fields, Message 104px, 8px apart, a field's message in the control's column), the notice in a box at most 80px tall that scrolls
+with the 1-bit scroll bar (a tab stop, so a keyboard can scroll it), and Send, the default button, at the bottom right with the state
+at its left. When the messages or a wrapped state outgrow the window the notice gives way (24px at least), then the form scrolls.
+The focus goes to Name when the window opens, which shows the 1px dashed ring a text field always shows (the mockup has none), and
+Enter in Name or Email sends (in Message it adds a line).
+
+**Phone.** The `/contact` page: `Contact` as the `h1`, the Email and GitHub rows 14px under it as the home page lists them, then the
+form: each label above its field (a 14px step between), fields 44px tall at 20px with a 1px frame and 8px 10px of padding (iOS zooms
+into less than 16px), Message six lines (160px), the line `A message from this page goes by email to max@jellycat.fr.` (dim), the
+notice, Send the column's width less its shadow (56px tall, 1px frame, the hard 3px shadow in the dim tone, inverse video while pressed)
+and the state under it (24px tall at least, so the page doesn't jump). The home page ends with a Contact section: a title bar like a
+folder's with the envelope inverted, one card (`Contact`, `Email`, the line) linking to `/contact`. `/contact` is prerendered, in the
+sitemap and has a preview image like every page.
 
 ## Keyboard and motion
 

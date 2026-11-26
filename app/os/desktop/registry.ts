@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { ContactWindow } from "../contact/contact-window";
 import { ControlPanel } from "./apps/control-panel";
 import { FolderWindow } from "./apps/folder";
 import { ProjectInfo } from "./apps/project-info";
@@ -25,6 +26,7 @@ export const REGISTRY: Record<string, AppComponent> = {
   "project-readme": ProjectReadme,
   readme: StudioReadme,
   panel: ControlPanel,
+  contact: ContactWindow,
   terminal: TerminalApp,
   viewer: ViewerWindow,
 };

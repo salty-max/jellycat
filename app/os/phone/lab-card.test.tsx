@@ -12,7 +12,7 @@ test("the home page's Lab section holds one card, a link to Gero Lab that opens 
     </MemoryRouter>,
   );
   const headings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-  expect(headings.slice(FOLDERS.length)).toEqual(["Lab"]);
+  expect(headings.slice(FOLDERS.length)).toEqual(["Lab", "Contact"]);
 
   const lab = screen.getByRole("region", { name: "Lab" });
   const link = within(lab).getByRole("link", { name: "Gero Lab" });

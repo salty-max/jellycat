@@ -1,0 +1,215 @@
+/* The contact form, in the two looks of mockups/phase-2.html (#d-contact, #p-contact; docs/design.md Contact). `data-look` on the form
+   picks one. The colours are the phosphor's own variables. The window's body pads by 10px and is a flex column; the phone's page is
+   the `.ph` document, so its rules (`.ph button`'s reset, its dashed focus ring) are the page's. */
+
+.ct {
+  margin: 0;
+  min-width: 0;
+}
+.ct p {
+  margin: 0;
+}
+/* The phone's page strips links of their underline (`.ph a`); these are addresses, so they keep it. */
+.ct p a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* The honeypot: off screen, a person never sees it. */
+.ct-trap {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ct-input {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  border: 1px solid var(--phosphor-fg);
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  font: inherit;
+  caret-color: var(--phosphor-fg);
+  user-select: text;
+  overflow-wrap: anywhere;
+}
+textarea.ct-input {
+  white-space: pre-wrap;
+  overflow-y: auto;
+}
+/* A field the function refused: its frame doubles, inside (there are no other colours), and its message stands under it. */
+.ct-input[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 1px var(--phosphor-fg);
+}
+
+/* The notice, in the dim tone; a second paragraph stands 8px under the first. */
+.ct-notice p + p {
+  margin-top: 8px;
+}
+
+.ct .ct-send {
+  box-sizing: border-box;
+  border: 1px solid var(--phosphor-fg);
+  background: var(--phosphor-bg);
+  color: var(--phosphor-fg);
+  font: inherit;
+  text-shadow: inherit;
+  cursor: default;
+}
+.ct .ct-send:active {
+  background: var(--phosphor-fg);
+  color: var(--phosphor-bg);
+  text-shadow: none;
+}
+.ct .ct-send[aria-disabled="true"],
+.ct .ct-send:disabled {
+  color: var(--phosphor-dim);
+}
+.ct .ct-send[aria-disabled="true"]:active,
+.ct .ct-send:disabled:active {
+  background: var(--phosphor-bg);
+  color: var(--phosphor-dim);
+}
+
+/* ---- The desktop's window: 380x370, the mockup's .kvf (a 64px label column), the notice in a box of 80px at most, Send last. ---- */
+.ct[data-look="desktop"] {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Should the fields' messages and the state outgrow the window even with the notice at its smallest, the form scrolls. The 3px
+     around it keep the focus rings (2px off their edge) from being cut by that scroll box. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: -3px;
+  padding: 3px;
+}
+.ct[data-look="desktop"] .ct-fields {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+/* A field is a row of the grid: its label, its control, and under the control its message. */
+.ct[data-look="desktop"] .ct-field {
+  display: contents;
+}
+.ct[data-look="desktop"] .ct-input {
+  height: 24px;
+  padding: 2px 6px;
+}
+.ct[data-look="desktop"] textarea.ct-input {
+  height: 104px;
+}
+.ct[data-look="desktop"] label[data-field="message"] {
+  align-self: start;
+  padding-top: 3px;
+}
+.ct[data-look="desktop"] .ct-error {
+  grid-column: 2;
+}
+.ct[data-look="desktop"] :focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+  outline-offset: 2px;
+}
+/* The notice gives way when a message stands under a field or the state wraps, and scrolls with the 1-bit scroll bar (the Readme's). */
+.ct[data-look="desktop"] .ct-notice {
+  flex: 0 1 auto;
+  min-height: 24px;
+  max-height: 80px;
+  overflow-y: auto;
+  padding-right: 4px;
+  user-select: text;
+}
+.ct-notice::-webkit-scrollbar,
+.ct[data-look="desktop"]::-webkit-scrollbar {
+  width: 14px;
+}
+.ct-notice::-webkit-scrollbar-track,
+.ct[data-look="desktop"]::-webkit-scrollbar-track {
+  border-left: 1px solid var(--phosphor-fg);
+  background: repeating-conic-gradient(var(--phosphor-dim) 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+}
+.ct-notice::-webkit-scrollbar-thumb,
+.ct[data-look="desktop"]::-webkit-scrollbar-thumb {
+  background: var(--phosphor-bg);
+  border: 1px solid var(--phosphor-fg);
+  border-right: 0;
+}
+.ct-notice::-webkit-scrollbar-button:end:increment,
+.ct[data-look="desktop"]::-webkit-scrollbar-button:end:increment {
+  height: 14px;
+  display: block;
+  background: var(--phosphor-bg);
+  border-left: 1px solid var(--phosphor-fg);
+}
+.ct[data-look="desktop"] .ct-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.ct[data-look="desktop"] .ct-status {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ct[data-look="desktop"] .ct-send {
+  flex: none;
+  min-width: 72px;
+  height: 24px;
+  padding: 0 12px;
+  line-height: 22px;
+  white-space: nowrap;
+  /* The default button's second outline, as the Readme's Open Readme has it. */
+  outline: 1px solid var(--phosphor-fg);
+  outline-offset: 2px;
+}
+.ct[data-look="desktop"] .ct-send:focus-visible {
+  outline: 1px dashed var(--phosphor-fg);
+}
+
+/* ---- The phone's page: the rows 14px under the name, as the mockup's intro has them; each label above its field, fields 44px tall at 20px (iOS zooms into less than 16px), Message six lines. ---- */
+.ct-intro .ph-kv {
+  margin-top: 14px;
+}
+.ct[data-look="phone"] {
+  margin-top: 12px;
+}
+.ct[data-look="phone"] .ct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+}
+.ct[data-look="phone"] .ct-input {
+  min-height: 44px;
+  padding: 8px 10px;
+}
+.ct[data-look="phone"] textarea.ct-input {
+  height: 160px;
+}
+.ct[data-look="phone"] .ct-line,
+.ct[data-look="phone"] .ct-notice {
+  margin-top: 14px;
+}
+.ct[data-look="phone"] .ct-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 3px);
+  min-height: 56px;
+  margin-top: 24px;
+  box-shadow: 3px 3px 0 var(--phosphor-dim);
+}
+.ct[data-look="phone"] .ct-status {
+  min-height: 24px;
+  margin-top: 14px;
+}

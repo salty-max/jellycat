@@ -43,6 +43,8 @@ test.describe("the desktop", () => {
   test.skip(({ isMobile }) => isMobile, "the desktop is for computers");
 
   test("every app opens and closes with no mouse", async ({ page }) => {
+    // The function isn't served here (scripts/serve.mjs serves files): Contact's send is answered by a stub.
+    await page.route("**/api/contact", (route) => route.fulfill({ json: { ok: true } }));
     await page.goto("/");
     await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
 
@@ -137,8 +139,26 @@ test.describe("the desktop", () => {
     await page.keyboard.press("Enter");
     await expect(lab).toHaveCount(0);
 
-    // The Control Panel: the arrows pick a phosphor.
+    // Contact opens with the focus in Name; Tab walks the fields, the notice (it scrolls) and Send; Enter sends.
     await tabTo(page, hd.getByRole("option", { name: "Lab" }));
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    const contact = win(page, "Contact");
+    await expect(contact.getByLabel("Name")).toBeFocused();
+    await page.keyboard.type("Ada");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("ada@example.com");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("Hello by keyboard.");
+    await tabTo(page, contact.getByRole("button", { name: "Send" }));
+    await page.keyboard.press("Enter");
+    await expect(contact.getByRole("status")).toHaveText("Message sent.");
+    await tabTo(page, contact.getByRole("button", { name: "Close" }), { back: true });
+    await page.keyboard.press("Enter");
+    await expect(contact).toHaveCount(0);
+
+    // The Control Panel: the arrows pick a phosphor.
+    await tabTo(page, hd.getByRole("option", { name: "Contact" }));
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Enter");
     const panel = win(page, "Control Panel");
@@ -249,6 +269,28 @@ test.describe("the phone", () => {
     await page.keyboard.press("Enter");
     await expect(sheet).toHaveCount(0);
     await expect(button).toBeFocused();
+  });
+});
+
+test.describe("the contact form on the phone", () => {
+  test.skip(({ isMobile }) => !isMobile, "the phone's page");
+
+  test("is reached from the home page, filled and sent with no pointer", async ({ page }) => {
+    await page.route("**/api/contact", (route) => route.fulfill({ json: { ok: true } }));
+    await page.goto("/");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    await tabTo(page, page.getByRole("region", { name: "Contact" }).getByRole("link", { name: "Contact" }));
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/contact$/);
+    await tabTo(page, page.getByLabel("Name"));
+    await page.keyboard.type("Ada");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("ada@example.com");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("Hello by keyboard.");
+    await tabTo(page, page.getByRole("button", { name: "Send" }));
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("status")).toHaveText("Message sent.");
   });
 });
 

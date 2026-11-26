@@ -8,12 +8,17 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 - `app/`: the site. `root.tsx` is the page shell and draws the OS on the home and project pages (`os/layout.tsx`: the phone's
   page under 768x520, the desktop from there, held while a text field has the focus), `routes.ts` the routes, `routes/` one
   module per route, `os/` the OS's parts (`os/phone/` the phone's page and its two dialogs, the viewer and the Control Panel's
-  sheet; `os/desktop/` the desktop, whose Terminal is the shell, `os/shell/`), `app.css` Tailwind and the phosphor tokens.
+  sheet; `os/desktop/` the desktop, whose Terminal is the shell, `os/shell/`; `os/contact/` the contact form, one component in
+  the Contact window and on the `/contact` page), `app.css` Tailwind and the phosphor tokens.
 - `app/core/`: what both layouts read. `projects.ts` is the project data (every fact from the project's own repository, its
   README or its code where the README is stale, a link perhaps from its GitHub homepage field, an unknown fact `-`),
   `studio.ts` the studio's Readme and `contact.txt`, `site.ts` the OS's name and the site's address, `pages.ts` every page with
   its address, title and description (the routes' meta, the prerender list and the sitemap read it), `readme.ts` the
-  projects' READMEs, each a chunk of its own, loaded and parsed on first use.
+  projects' READMEs, each a chunk of its own, loaded and parsed on first use, `contact.ts` the contact form's fields, limits and
+  validation (the form and the function both read it), `contact-handler.ts` the function's handler and `privacy.ts` the form's
+  privacy notice.
+- `api/`: `contact.ts`, the Vercel Function the contact form posts to, a thin wrapper around `app/core/contact-handler.ts`
+  ([Hosting](#hosting)). `scripts/serve.mjs` and `pnpm e2e` don't run it: `e2e/contact.spec.ts` stubs it.
 - `app/content/readme/`: one README per project, `<slug>.md`, in a small Markdown subset (one `#` title, `##` headings,
   one-line paragraphs, one-level `- ` lists, code spans, links to `https://` or `/projects/<slug>`); `readme.ts` refuses
   anything else, naming the file and line.
@@ -27,7 +32,8 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
   ([Build](#build)).
 - `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
   screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
-  focus seen on screen (`focus.spec.ts`), and reduced motion (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
+  focus seen on screen (`focus.spec.ts`), the contact form (`contact.spec.ts`, with `/api/contact` stubbed) and reduced motion
+  (`motion.spec.ts`). The shell's tests (`browse.spec.ts`, the typed
   login) run in the desktop's Terminal; the phone's pages, viewer and sheet run on the phone project, with the real Esc.
 - `.storybook/`: Storybook, with a phosphor switch in its toolbar.
 - `__mocks__/`: Vitest's mock of zustand, which puts every store back to its first state after each test and story.

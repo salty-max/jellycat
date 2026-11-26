@@ -64,6 +64,13 @@ test.describe("the phone", () => {
     await expectEveryStopShown(page, 10);
   });
 
+  test("the contact page", async ({ page }) => {
+    await page.goto("/contact");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
+    // The header's two, the two addresses, the three fields, the notice's address and Send.
+    await expectEveryStopShown(page, 9);
+  });
+
   test("the viewer and the Control Panel's sheet", async ({ page }) => {
     await page.goto("/projects/hundo");
     await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "phone");
@@ -94,6 +101,14 @@ test.describe("the desktop", () => {
     await page.getByRole("dialog", { name: "Hundo Info" }).getByRole("button", { name: "View" }).press("Enter");
     await expect(page.getByRole("dialog", { name: "Hundo Screenshots" })).toBeVisible();
     await expectEveryStopShown(page, 20);
+  });
+
+  test("the Contact window", async ({ page }) => {
+    await page.goto("/contact");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await expect(page.getByRole("dialog", { name: "Contact" }).getByLabel("Name")).toBeFocused();
+    // The window's bar and boxes, the three fields, the notice and its address, Send; then the Projects window and the icons.
+    await expectEveryStopShown(page, 17);
   });
 
   test("the Control Panel, the Terminal and the folders by name", async ({ page }) => {

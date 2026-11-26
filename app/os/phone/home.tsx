@@ -1,17 +1,13 @@
-import { Fragment } from "react";
 import { Link } from "react-router";
 import { FOLDERS, FOLDER_NAMES, PROJECTS } from "../../core/projects";
-import { CONTACT, STUDIO_NAME, type Span } from "../../core/studio";
+import { STUDIO_NAME } from "../../core/studio";
 import { FOLDER_ICONS } from "../icons/names";
 import { Glyph, Icon } from "../icons/icon";
-import { Address } from "./address";
 import { PhoneCard } from "./card";
+import { ContactRows } from "./contact-rows";
 import { HOME_SECTIONS, type HomeCard } from "./home-sections";
 import { itemCount, STUDIO_LINE } from "./text";
 import "./phone.css";
-
-const label = (row: readonly Span[]) => (typeof row[0] === "string" ? row[0].trim() : "");
-const link = (row: readonly Span[]) => row.find((span) => typeof span !== "string");
 
 /** A card of a section below the folders, a project's card's frame: an https address opens in a new tab, a page of the site in place. */
 function SectionCard({ card }: { card: HomeCard }) {
@@ -46,17 +42,7 @@ export function PhoneHome() {
           {STUDIO_NAME}
         </h1>
         <p>{STUDIO_LINE}</p>
-        <dl className="ph-kv">
-          {CONTACT.map((row) => {
-            const target = link(row);
-            return (
-              <Fragment key={label(row)}>
-                <dt className="text-phosphor-dim">{label(row)}</dt>
-                <dd>{target && typeof target !== "string" ? <Address href={target.href} text={target.text} /> : "-"}</dd>
-              </Fragment>
-            );
-          })}
-        </dl>
+        <ContactRows />
       </section>
       <nav aria-label="Folders" className="ph-tabs">
         {FOLDERS.map((folder) => (

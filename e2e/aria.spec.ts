@@ -161,6 +161,60 @@ test.describe("the phone", () => {
     `);
   });
 
+  test("the contact page", async ({ page }) => {
+    await open(page, "/contact", "phone");
+    await expect(page.locator("[data-os=phone]")).toMatchAriaSnapshot(`
+      - banner:
+        - link "Jellycat Studio":
+          - /url: /
+        - button "Control Panel"
+      - main:
+        - region "Contact":
+          - heading "Contact" [level=1]
+          - term: Email
+          - definition:
+            - link "max@jellycat.fr":
+              - /url: mailto:max@jellycat.fr
+          - term: GitHub
+          - definition:
+            - link "github.com/salty-max":
+              - /url: https://github.com/salty-max
+        - text: Name
+        - textbox "Name"
+        - text: Email
+        - textbox "Email"
+        - text: Message
+        - textbox "Message"
+        - paragraph: A message from this page goes by email to max@jellycat.fr.
+        - region "Privacy notice":
+          - paragraph: /Jellycat Studio receives your name, email and message to answer you\\./
+          - paragraph:
+            - text: To see, correct or delete your data, or to object to its use, write to
+            - link "max@jellycat.fr":
+              - /url: mailto:max@jellycat.fr
+            - text: . You can also complain to the CNIL, France's data protection authority.
+        - button "Send"
+        - status
+      - contentinfo:
+        - paragraph: Jelly-OS 1.0
+    `);
+  });
+
+  test("the home page's Contact section", async ({ page }) => {
+    await open(page, "/", "phone");
+    await expect(page.getByRole("region", { name: "Contact" })).toMatchAriaSnapshot(`
+      - region "Contact":
+        - heading "Contact" [level=2]
+        - list:
+          - listitem:
+            - heading "Contact" [level=3]:
+              - link "Contact":
+                - /url: /contact
+            - paragraph: Email
+            - paragraph: A message from this page goes by email to max@jellycat.fr.
+    `);
+  });
+
   test("a project page", async ({ page }) => {
     // The README by its headings: its text is A5's, and changes with it. A snapshot matches what it lists, so the rest can change.
     await open(page, "/projects/hundo", "phone");
@@ -272,6 +326,7 @@ test.describe("the desktop", () => {
           - option "Readme"
           - option "Terminal"
           - option "Lab"
+          - option "Contact"
           - option "Trash"
         - dialog "Projects":
           - 'group "Projects: arrows move, Shift and arrows resize"':
@@ -333,6 +388,33 @@ test.describe("the desktop", () => {
         - button "View"
         - paragraph: "Spoiler-aware, installable completion guides for single-player games: one app per game, all built on one shared core."
         - button "Open Readme"
+    `);
+  });
+
+  test("the Contact window", async ({ page }) => {
+    await open(page, "/contact", "desktop");
+    await expect(page.getByRole("dialog", { name: "Contact" })).toMatchAriaSnapshot(`
+      - dialog "Contact":
+        - 'group "Contact: arrows move, Shift and arrows resize"':
+          - text: ""
+          - button "Collapse"
+          - button "Zoom"
+          - button "Close"
+        - text: To max@jellycat.fr Name
+        - textbox "Name"
+        - text: Email
+        - textbox "Email"
+        - text: Message
+        - textbox "Message"
+        - region "Privacy notice":
+          - paragraph: /Jellycat Studio receives your name, email and message to answer you\\./
+          - paragraph:
+            - text: To see, correct or delete your data, or to object to its use, write to
+            - link "max@jellycat.fr":
+              - /url: mailto:max@jellycat.fr
+            - text: . You can also complain to the CNIL, France's data protection authority.
+        - status
+        - button "Send"
     `);
   });
 

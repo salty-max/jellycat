@@ -52,6 +52,7 @@ export default tseslint.config(
             "^ph(-|$)",
             "^ctl(-|$)",
             "^dlg(-|$)",
+            "^ct(-|$)",
           ],
         },
       ],

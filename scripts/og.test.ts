@@ -4,7 +4,7 @@ import { inflateSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { describe, expect, test } from "vitest";
-import { HOME_PAGE, PAGES, type Page } from "../app/core/pages";
+import { CONTACT_PAGE, HOME_PAGE, PAGES, type Page } from "../app/core/pages";
 import { FOLDERS, PROJECTS } from "../app/core/projects";
 import { PREVIEW_IMAGE } from "../app/core/site";
 import { ADVANCE, cardFor, columns, drawImage, fitSize, wrap } from "./og";
@@ -111,9 +111,7 @@ describe("cardFor", () => {
   });
 
   test("a page that is no project has its name from its title, no kind and no tabs", () => {
-    // The contact page's kind (C2 adds it) isn't in Page yet.
-    const page = { kind: "contact", path: "/contact", title: "Contact · Jellycat Studio", description: "Write to the studio." } as unknown as Page;
-    expect(cardFor(page)).toEqual({ name: "Contact", description: "Write to the studio.", address: "jellycat.fr/contact" });
+    expect(cardFor(CONTACT_PAGE)).toEqual({ name: "Contact", description: CONTACT_PAGE.description, address: "jellycat.fr/contact" });
   });
 });
 
