@@ -71,3 +71,54 @@ for (const reduced of [true, false]) {
     });
   });
 }
+
+// Phase 2's additions bring no motion of their own, with reduced motion or without (the flicker, off by default, is the CRT's):
+// the Lab running a program, the Contact window and the Control Panel's Sound row, or on the phone the contact page and the
+// sheet, start no CSS animation or transition. An init script counts each one that starts, so a short transition that is over
+// by the time the test looks still counts.
+for (const reduced of [true, false]) {
+  test.describe(`Phase 2's windows ${reduced ? "with" : "without"} reduced motion`, () => {
+    test.use({ reducedMotion: reduced ? "reduce" : "no-preference" });
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(() => {
+        const seen: string[] = [];
+        (window as unknown as { motionSeen: string[] }).motionSeen = seen;
+        for (const type of ["animationstart", "transitionrun"])
+          document.addEventListener(type, (event) => seen.push(`${type} ${(event.target as Element).className}`), true);
+      });
+    });
+    const started = (page: Page) => page.evaluate(() => (window as unknown as { motionSeen: string[] }).motionSeen);
+
+    test("the desktop's Lab, Contact and Control Panel start none", async ({ page, isMobile }) => {
+      test.skip(isMobile, "the desktop's windows");
+      await page.goto("/");
+      await expect(layout(page)).toHaveAttribute("data-layout", "desktop");
+      // The boot screen's own wait is the desktop's (see above): counted from here.
+      await page.evaluate(() => ((window as unknown as { motionSeen: string[] }).motionSeen.length = 0));
+      await page.getByRole("option", { name: "Jelly HD" }).press("Enter");
+      const hd = page.getByRole("dialog", { name: "Jelly HD" });
+      await hd.getByRole("option", { name: "Lab" }).press("Enter");
+      const lab = page.getByRole("dialog", { name: "Lab" });
+      await lab.getByRole("button", { name: "Run" }).press("Enter");
+      await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+      await hd.getByRole("option", { name: "Contact" }).press("Enter");
+      await expect(page.getByRole("dialog", { name: "Contact" }).getByLabel("Name")).toBeFocused();
+      await hd.getByRole("option", { name: "Control Panel" }).press("Enter");
+      const sound = page.getByRole("dialog", { name: "Control Panel" }).getByRole("checkbox", { name: "On" });
+      await sound.press("Space");
+      await expect(sound).toBeChecked();
+      expect(await started(page)).toEqual([]);
+    });
+
+    test("the phone's contact page and sheet start none", async ({ page, isMobile }) => {
+      test.skip(!isMobile, "the phone's page");
+      await page.goto("/contact");
+      await expect(layout(page)).toHaveAttribute("data-layout", "phone");
+      await page.getByRole("button", { name: "Control Panel" }).press("Enter");
+      const sound = page.getByRole("dialog", { name: "Control Panel" }).getByRole("checkbox", { name: "On" });
+      await sound.press("Space");
+      await expect(sound).toBeChecked();
+      expect(await started(page)).toEqual([]);
+    });
+  });
+}

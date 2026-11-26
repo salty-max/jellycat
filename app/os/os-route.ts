@@ -16,7 +16,7 @@ export type OsPage = { page: PageKind; params: Params; data: unknown };
 /** Whether this match is one of the OS's pages. */
 export const isOsMatch = (match: UIMatch) => (match.handle as OsHandle | undefined)?.os === true;
 
-/** Whether the root draws the OS for these matches: the home page and the project pages do, the not-found page doesn't. */
+/** Whether the root draws the OS for these matches: the home, project and contact pages do, the not-found page doesn't. */
 export const showsOs = (matches: readonly UIMatch[]) => matches.some(isOsMatch);
 
 /** The OS page these matches name, if any. */

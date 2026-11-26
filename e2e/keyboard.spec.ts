@@ -109,6 +109,15 @@ test.describe("the desktop", () => {
     await page.keyboard.type("ls");
     await page.keyboard.press("Enter");
     await expect(terminal.getByRole("button", { name: /^projects/ })).toBeVisible();
+    // `gero run fizzbuzz` opens the Lab on that program and runs it; the Lab's Close box, reached with Shift+Tab, closes it.
+    await page.keyboard.type("gero run fizzbuzz");
+    await page.keyboard.press("Enter");
+    const fromTerminal = win(page, "Lab");
+    await expect(fromTerminal.getByRole("status")).toHaveText("halted, 1076 steps");
+    await expect(fromTerminal.getByRole("log")).toContainText("FizzBuzz");
+    await tabTo(page, fromTerminal.getByRole("button", { name: "Close" }), { back: true });
+    await page.keyboard.press("Enter");
+    await expect(fromTerminal).toHaveCount(0);
     await tabTo(page, terminal.getByRole("button", { name: "Close" }), { back: true });
     await page.keyboard.press("Enter");
     await expect(terminal).toHaveCount(0);
@@ -167,6 +176,13 @@ test.describe("the desktop", () => {
     await expect(page.locator("html")).toHaveAttribute("data-phosphor", "amber");
     await page.keyboard.press("ArrowUp");
     await expect(page.locator("html")).toHaveAttribute("data-phosphor", "green");
+    // Sound: Space turns it on in the Control Panel, Special's Sound turns it off again.
+    const sound = panel.getByRole("checkbox", { name: "On" });
+    await tabTo(page, sound);
+    await page.keyboard.press("Space");
+    await expect(sound).toBeChecked();
+    await pick(page, "Special", "Sound");
+    await expect(sound).not.toBeChecked();
     await tabTo(page, panel.getByRole("button", { name: "Close" }), { back: true });
     await page.keyboard.press("Enter");
     await expect(panel).toHaveCount(0);
@@ -258,6 +274,13 @@ test.describe("the phone", () => {
     await tabTo(page, sheet.getByRole("checkbox", { name: "Glow" }));
     await page.keyboard.press("Space");
     await expect(page.locator("html")).toHaveAttribute("data-glow", "false");
+    // Sound's On, the sheet's last row: Space turns it on and off.
+    const sound = sheet.getByRole("checkbox", { name: "On" });
+    await tabTo(page, sound);
+    await page.keyboard.press("Space");
+    await expect(sound).toBeChecked();
+    await page.keyboard.press("Space");
+    await expect(sound).not.toBeChecked();
     await page.keyboard.press("Escape");
     await expect(sheet).toHaveCount(0);
     await expect(button).toBeFocused();

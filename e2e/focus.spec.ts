@@ -111,6 +111,45 @@ test.describe("the desktop", () => {
     await expectEveryStopShown(page, 17);
   });
 
+  test("the Lab window", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    await page.getByRole("option", { name: "Jelly HD" }).press("Enter");
+    await page.getByRole("dialog", { name: "Jelly HD" }).getByRole("option", { name: "Lab" }).press("Enter");
+    const lab = page.getByRole("dialog", { name: "Lab" });
+    await expect(lab.getByRole("textbox", { name: "Program" })).toHaveValue(/^-- fizzbuzz\.gr/);
+    await lab.getByRole("button", { name: "Run" }).press("Enter");
+    await expect(lab.getByRole("status")).toHaveText("halted, 1076 steps");
+    // The window's bar and boxes, the picker, Reset, Run, the editor and the output; then Jelly HD, Projects and the icons.
+    await expectEveryStopShown(page, 20);
+  });
+
+  test("Special's items, Sound included", async ({ page }) => {
+    // A menu's item shows its focus as inverse video; blurring one would close the menu, so each item is shot focused, then with
+    // the focus moved on to the next one.
+    await page.goto("/");
+    await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
+    // ArrowDown on the bar's Special opens it with the focus on its first item, as the keyboard walk does.
+    await page.getByRole("menubar").getByRole("menuitem", { name: "Special", exact: true }).press("ArrowDown");
+    const items = page.getByRole("menu").locator('[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]');
+    await expect(items.first()).toBeFocused();
+    const names = (await items.allTextContents()).map((name) => name.trim());
+    expect(names).toContain("Sound");
+    for (const [index, name] of names.entries()) {
+      const item = items.nth(index);
+      await expect(item, name).toBeFocused();
+      const box = (await item.boundingBox())!;
+      const clip = { x: box.x, y: box.y, width: box.width, height: box.height };
+      const focused = await page.screenshot({ clip });
+      // The focus moves on to the next item, or back up from the last one.
+      const last = index === names.length - 1;
+      await page.keyboard.press(last ? "ArrowUp" : "ArrowDown");
+      await expect(items.nth(last ? index - 1 : index + 1)).toBeFocused();
+      expect((await page.screenshot({ clip })).equals(focused), `${name}'s focus shows`).toBe(false);
+    }
+    await page.keyboard.press("Escape");
+  });
+
   test("the Control Panel, the Terminal and the folders by name", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("[data-layout]")).toHaveAttribute("data-layout", "desktop");
