@@ -1,6 +1,6 @@
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { CUES, CUE_NAMES } from "./cues";
+import { CUES, CUE_NAMES, type Cue } from "./cues";
 import { installFakeAudio } from "./fake-audio";
 
 // The module keeps the engine it loaded, so each test starts from a fresh copy of the sound code and of the settings it reads.
@@ -14,8 +14,18 @@ async function fresh() {
   }
   return { settings, sound, Gesture };
 }
-/** The chunk loads on a later tick. */
-const loaded = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 20)));
+// No fixed sleeps. What the fake context does after a call (resume, suspend) settles in microtasks, so `settle` runs those out; what
+// needs the sound chunk (a cue scheduled once it is fetched) is waited for by its result, `vi.waitFor`, polling for up to 4 s (the
+// default is 1 s, and a test's own limit is 5 s), however slow a busy machine is. A "nothing happened" check needs no wait: nothing
+// here can make a context but a gesture, synchronously.
+const WAIT = { timeout: 4000 };
+const settle = () =>
+  act(async () => {
+    for (let turn = 0; turn < 10; turn++) await Promise.resolve();
+  });
+const running = () => vi.waitFor(() => expect(audio.contexts[0]?.state).toBe("running"), WAIT);
+const notes = (cue: Cue) => CUES[cue].map((note) => note.freq);
+const played = () => audio.played.map((note) => note.freq);
 
 let audio: ReturnType<typeof installFakeAudio>;
 beforeEach(() => void (audio = installFakeAudio()));
@@ -25,10 +35,10 @@ describe("a page that never gets a click or a key", () => {
   test("makes no audio context at load, with sound off or saved on", async () => {
     const { settings, Gesture } = await fresh();
     const view = render(<Gesture />);
-    await loaded();
+    await settle();
     expect(audio.contexts).toHaveLength(0);
     act(() => settings.useSettings.setState({ sound: true }));
-    await loaded();
+    await settle();
     expect(audio.contexts).toHaveLength(0);
     view.unmount();
   });
@@ -37,9 +47,8 @@ describe("a page that never gets a click or a key", () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     for (const cue of CUE_NAMES) sound.playCue(cue);
-    await loaded();
+    await settle();
     expect(audio.contexts).toHaveLength(0);
     expect(audio.played).toHaveLength(0);
   });
@@ -51,7 +60,7 @@ describe("with sound off", () => {
     render(<Gesture />);
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
     for (const cue of CUE_NAMES) sound.playCue(cue);
-    await loaded();
+    await settle();
     expect(audio.contexts).toHaveLength(0);
     expect(audio.played).toHaveLength(0);
   });
@@ -62,12 +71,10 @@ describe("with sound saved on", () => {
     const { settings, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
     expect(audio.contexts[0]!.state).toBe("suspended");
-    await loaded();
+    await running();
     expect(audio.contexts).toHaveLength(1);
-    expect(audio.contexts[0]!.state).toBe("running");
     expect(audio.session.type).toBe("ambient");
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     document.body.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "a" }));
@@ -78,7 +85,6 @@ describe("with sound saved on", () => {
     const { settings, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" }));
     document.body.dispatchEvent(new PointerEvent("pointercancel", { bubbles: true, pointerType: "touch" }));
     document.body.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
@@ -91,7 +97,6 @@ describe("with sound saved on", () => {
     const { settings, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Tab" }));
     expect(audio.contexts).toHaveLength(1);
   });
@@ -100,13 +105,12 @@ describe("with sound saved on", () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
-    await loaded();
+    await running();
     for (const cue of CUE_NAMES) {
       audio.played.length = 0;
       sound.playCue(cue);
-      expect(audio.played.map((note) => note.freq)).toEqual(CUES[cue].map((note) => note.freq));
+      await vi.waitFor(() => expect(played()).toEqual(notes(cue)), WAIT);
     }
     expect(audio.contexts).toHaveLength(1);
   });
@@ -115,24 +119,24 @@ describe("with sound saved on", () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
+    // The chunk is in before the click, so the cue takes the path that holds it for the resume (not the one that waits for the chunk).
+    await import("./synth");
+    await settle();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
     // The context is made and resuming, not yet running: the cue is held until the resume settles.
     sound.playCue("open");
     expect(audio.contexts[0]!.state).toBe("suspended");
     expect(audio.played).toHaveLength(0);
-    await loaded();
-    expect(audio.played.map((note) => note.freq)).toEqual(CUES.open.map((note) => note.freq));
+    await vi.waitFor(() => expect(played()).toEqual(notes("open")), WAIT);
   });
 
   test("turning it off while the first resume is still settling still ends suspended", async () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
     act(() => sound.setSound(false));
-    await loaded();
+    await settle();
     expect(audio.contexts[0]!.state).toBe("suspended");
   });
 
@@ -140,18 +144,18 @@ describe("with sound saved on", () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
-    await loaded();
+    await running();
     act(() => sound.setSound(false));
-    await loaded();
+    await settle();
     expect(audio.contexts[0]!.state).toBe("suspended");
     audio.played.length = 0;
     sound.playCue("alert");
+    await settle();
     expect(audio.played).toHaveLength(0);
     // And a click while it is off wakes nothing.
     document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
-    await loaded();
+    await settle();
     expect(audio.contexts[0]!.state).toBe("suspended");
   });
 });
@@ -161,7 +165,6 @@ describe("a click or a key a moment ago", () => {
     const { settings, sound, Gesture } = await fresh();
     settings.useSettings.setState({ sound: true });
     render(<Gesture />);
-    await loaded();
     expect(sound.recentGesture()).toBe(false);
     const now = vi.spyOn(performance, "now");
     now.mockReturnValue(10_000);
@@ -179,11 +182,10 @@ describe("the switch", () => {
     const { settings, sound, Gesture } = await fresh();
     render(<Gesture />);
     act(() => sound.setSound(true));
-    await loaded();
+    await running();
     expect(settings.useSettings.getState().sound).toBe(true);
     expect(audio.contexts).toHaveLength(1);
-    expect(audio.contexts[0]!.state).toBe("running");
-    expect(audio.played.map((note) => note.freq)).toEqual(CUES.open.map((note) => note.freq));
+    await vi.waitFor(() => expect(played()).toEqual(notes("open")), WAIT);
     expect(JSON.parse(localStorage.getItem(settings.SETTINGS_KEY)!).state.sound).toBe(true);
   });
 
@@ -191,10 +193,10 @@ describe("the switch", () => {
     const { sound, Gesture } = await fresh();
     render(<Gesture />);
     act(() => sound.setSound(true));
-    await loaded();
+    await running();
     act(() => sound.setSound(false));
     act(() => sound.setSound(true));
-    await loaded();
+    await settle();
     expect(audio.contexts).toHaveLength(1);
     expect(audio.contexts[0]!.state).toBe("running");
   });
