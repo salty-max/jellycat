@@ -69,21 +69,31 @@ test("viewer: Next shows the next picture at once: on the frame after the tap it
   await viewer.getByRole("button", { name: "Next" }).tap();
   const stepped = await viewer.getByRole("img").evaluate(
     (img: HTMLImageElement) =>
-      new Promise<{ complete: boolean; width: number; src: string; decode: number }>((resolve) =>
+      new Promise<{ complete: boolean; width: number; src: string; decode: number; control: number }>((resolve) =>
         requestAnimationFrame(async () => {
           // Read before the decode, which only settles once the image has loaded.
           const seen = { complete: img.complete, width: img.naturalWidth, src: img.currentSrc };
           const start = performance.now();
           await img.decode();
-          resolve({ ...seen, decode: performance.now() - start });
+          const decode = performance.now() - start;
+          // The control, on this runner, in this page, at this throttle: the same picture in a new image that nothing decoded ahead.
+          // Cache-busted, so it is fetched again, and loaded before the timing starts: what is timed is the decode alone, not the network.
+          const fresh = new Image();
+          const loaded = new Promise((done) => ((fresh.onload = done), (fresh.onerror = done)));
+          fresh.src = `${seen.src}?control=${Math.random()}`;
+          await loaded;
+          const control = performance.now();
+          await fresh.decode();
+          resolve({ ...seen, decode, control: performance.now() - control });
         }),
       ),
   );
   expect(stepped.src).toMatch(/\/screenshots\/hundo\/.*phone.*\.(avif|webp)$/);
   expect(stepped.complete).toBe(true);
   expect(stepped.width).toBeGreaterThan(0);
-  // A decode that has nothing left to do settles at once; one that has the work still to do takes longer (6ms against 0.4ms here, on a throttled CPU).
-  expect(stepped.decode).toBeLessThan(3);
+  // A decode with nothing left to do settles at once; the same picture undecoded takes the full decode. Compared on the same runner, so a slow one slows both: the stepped picture takes under half of the control's time.
+  expect(stepped.control).toBeGreaterThan(0);
+  expect(stepped.decode).toBeLessThan(stepped.control / 2);
   await expect(shotCount(page)).toHaveText("3 of 3");
 });
 
