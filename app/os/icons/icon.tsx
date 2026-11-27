@@ -1,4 +1,5 @@
 import { GLYPH_GRIDS, ICON_GRIDS } from "./grids";
+import { BrandMark } from "../../brand/mark";
 
 import type { GlyphName, IconName } from "./names";
 
@@ -46,8 +47,9 @@ function Pixels({ grid, size, cells: side, inverted = false, className }: PixelP
 
 type IconProps = { inverted?: boolean; className?: string };
 
-/** A 16×16 icon. `scale` 2 (32px) on the desktop and in folders, 1 (16px) in lists and menus. Decorative: the label next to it names it. */
+/** A 16px icon slot: 32px at scale 2. The cat uses the shared brand art; other icons use their 16×16 grids. */
 export function Icon({ name, scale = 2, ...rest }: IconProps & { name: IconName; scale?: 1 | 2 }) {
+  if (name === "cat") return <BrandMark size={16 * scale} {...rest} />;
   return <Pixels grid={ICON_GRIDS[name]} size={16 * scale} cells={16} {...rest} />;
 }
 

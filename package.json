@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "branding": "node scripts/branding.mjs",
     "gero": "node scripts/gero-assets.mjs",
     "dev": "pnpm gero && react-router dev",
     "build": "pnpm gero && react-router build",

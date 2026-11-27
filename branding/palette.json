@@ -1,0 +1,23 @@
+{
+  "black": {
+    "ink": "#000000",
+    "paper": "#ffffff"
+  },
+  "white": {
+    "ink": "#ffffff",
+    "paper": "#000000"
+  },
+  "green": {
+    "ink": "#33ff66",
+    "paper": "#031208"
+  },
+  "amber": {
+    "ink": "#ffb000",
+    "paper": "#140b00"
+  },
+  "phosphor-white": {
+    "ink": "#e8eef8",
+    "paper": "#0b0d12"
+  },
+  "description": "Phosphor colours come from app/app.css; black and white are the single-ink print masters."
+}

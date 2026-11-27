@@ -1,0 +1,86 @@
+{
+  "approved": "2026-11-27",
+  "typeface": "VT323",
+  "assets": [
+    {
+      "shape": "mark",
+      "color": "black",
+      "svg": "svg/mark-black.svg"
+    },
+    {
+      "shape": "horizontal",
+      "color": "black",
+      "svg": "svg/horizontal-black.svg"
+    },
+    {
+      "shape": "stacked",
+      "color": "black",
+      "svg": "svg/stacked-black.svg"
+    },
+    {
+      "shape": "mark",
+      "color": "white",
+      "svg": "svg/mark-white.svg"
+    },
+    {
+      "shape": "horizontal",
+      "color": "white",
+      "svg": "svg/horizontal-white.svg"
+    },
+    {
+      "shape": "stacked",
+      "color": "white",
+      "svg": "svg/stacked-white.svg"
+    },
+    {
+      "shape": "mark",
+      "color": "green",
+      "svg": "svg/mark-green.svg"
+    },
+    {
+      "shape": "horizontal",
+      "color": "green",
+      "svg": "svg/horizontal-green.svg"
+    },
+    {
+      "shape": "stacked",
+      "color": "green",
+      "svg": "svg/stacked-green.svg"
+    },
+    {
+      "shape": "mark",
+      "color": "amber",
+      "svg": "svg/mark-amber.svg"
+    },
+    {
+      "shape": "horizontal",
+      "color": "amber",
+      "svg": "svg/horizontal-amber.svg"
+    },
+    {
+      "shape": "stacked",
+      "color": "amber",
+      "svg": "svg/stacked-amber.svg"
+    },
+    {
+      "shape": "mark",
+      "color": "phosphor-white",
+      "svg": "svg/mark-phosphor-white.svg"
+    },
+    {
+      "shape": "horizontal",
+      "color": "phosphor-white",
+      "svg": "svg/horizontal-phosphor-white.svg"
+    },
+    {
+      "shape": "stacked",
+      "color": "phosphor-white",
+      "svg": "svg/stacked-phosphor-white.svg"
+    }
+  ],
+  "pngWidths": [
+    512,
+    2400
+  ],
+  "source": "source/mark.json"
+}

@@ -97,22 +97,6 @@ export const ICON_GRIDS = {
     "#oooooooooooooo#",
     "################",
   ],
-  cat: [
-    "",
-    "..#..........#..",
-    ".#o#........#o#.",
-    ".#oo########oo#.",
-    ".#oooooooooooo#.",
-    "#oooooooooooooo#",
-    "#oo##oooooo##oo#",
-    "#oo##oooooo##oo#",
-    "#oooooo##oooooo#",
-    "#oooooooooooooo#",
-    ".#ooo#oooo#ooo#.",
-    "..#ooo####ooo#..",
-    "...##oooooo##...",
-    ".....######.....",
-  ],
   // Contact's envelope, from mockups/phase-2.html.
   mail: [
     "",

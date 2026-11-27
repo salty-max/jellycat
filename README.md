@@ -30,6 +30,8 @@ phosphor on phones, one page per project. [docs/plan.md](docs/plan.md) has the d
 - `public/`: files served as they are: the favicon, and `screenshots/<slug>/`, each project's pictures as AVIF and WebP, which
   `projects.ts` lists with their alt text and size. `public/gero/` is not in git: the build puts gero's module and programs there
   ([Build](#build)).
+- `branding/`: the approved cat's canonical vector paths, mark and wordmark SVGs, print and screen PNGs, browser icons, typeface
+  and visual guide. `app/brand/` renders those paths in the site; `pnpm branding` rebuilds the exports and public browser icons.
 - `e2e/`: Playwright tests against the production build, accessibility included: axe on whole pages (`axe.spec.ts`), the main
   screens' accessibility trees (`aria.spec.ts`), every app opened and closed with no mouse (`keyboard.spec.ts`), every tab stop's
   focus seen on screen (`focus.spec.ts`), the contact form (`contact.spec.ts`, with `/api/contact` stubbed), the Lab
@@ -86,6 +88,8 @@ with axe failing the run on a violation. The others:
   of the build instead of a story (after `pnpm build`), and `--type 'ls\n'` and `--wait-for` bring the story or the page to a state.
   Chrome keeps its scroll bars (Playwright's `--hide-scrollbars` is dropped), so a look shows the 1-bit ones (on a system that always draws scroll bars, unstyled areas show Chrome's own too).
 - `pnpm build-storybook`: the static Storybook, which CI builds too.
+- `pnpm branding`: regenerate the approved logo kit and browser icons from `branding/source/mark.json`; see
+  [the branding notes](branding/README.md). Run it after changing that source or the phosphor palette.
 
 ## Build
 

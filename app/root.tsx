@@ -12,7 +12,10 @@ import vt323Latin from "@fontsource/vt323/files/vt323-latin-400-normal.woff2?url
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+  { rel: "icon", href: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+  { rel: "icon", href: "/brand/favicon.svg", type: "image/svg+xml", sizes: "any" },
+  { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+  { rel: "manifest", href: "/site.webmanifest" },
   // The latin subset is the one every page uses; fonts are fetched anonymously, so the preload must be too or it is fetched twice.
   { rel: "preload", href: vt323Latin, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
 ];

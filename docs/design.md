@@ -36,7 +36,11 @@ this file in the same pull request.
 
 ## Icons
 
-- 1-bit pixel art, drawn on a 16×16 grid and shown at 2× (32px) on the desktop and in folders, 1× in lists and menus. The title-bar
+- The cat is the approved filled brand mark, with stepped-circle pupils and one square reflection per eye. Its canonical paths
+  live in `branding/source/mark.json`, rendered by `app/brand/mark.tsx`; it replaces the mockups' placeholder cat. It occupies
+  the existing 16px and 32px icon slots, and the 64px boot slot, with its proportions preserved. Its foreground follows the
+  selected phosphor, its counters are opaque tube black, and both swap for inverse video. No new features or smoothing.
+- Other icons are 1-bit pixel art, drawn on a 16×16 grid and shown at 2× (32px) on the desktop and in folders, 1× in lists and menus. The title-bar
   glyphs (close, collapse, zoom, previous, next) are 8×8, shown at 1×.
 - Two tones: the outline in the phosphor colour (`currentColor`), the inside in the tube's black (so the dithered desktop doesn't show
   through).
@@ -46,6 +50,18 @@ this file in the same pull request.
 - All four project folders (web, addons, engines, tools) use the folder icon.
 - The Control Panel's icon is the one icon with no label beside it: in the phone's header it is a 44px button named Control Panel
   (`aria-label`), the 32px icon centred in it, and inverse video (its inside turned with it) while pressed and while its sheet is open.
+
+## Brand assets
+
+`pnpm branding` exports the approved mark, horizontal and stacked lockups, transparent PNGs, and browser icons into `branding/`
+and `public/`. `branding/README.md` lists their use and `branding/index.html` is the visual guide. The mark's geometry is shared
+by the live site, the asset exporter and the link-preview renderer; the non-cat icon grids stay separate.
+
+- SVG masters are single-colour vector paths with transparent counters, for black print, reversed white, or a phosphor colour.
+- Wordmarks use the existing VT323 in outlined form; the live site's studio name remains DOM text with its bundled font.
+- The preferred favicon is `/brand/favicon.svg`, with an ICO fallback, an Apple touch icon and 192px/512px browser bookmark icons.
+  The favicon has a dark plate so the green mark is legible on either browser-bar background. Amber and white SVG variants are
+  also exported. The web manifest uses `display: browser`; it adds bookmark artwork, not an app shell or offline behaviour.
 
 ## Desktop
 
@@ -296,7 +312,7 @@ the default screen, since a preview has no settings.
   on 1.15 lines, and the glow, `0 0 4px` in the dim tone (the desktop's is `0 0 2px`: a preview is shown small).
 - Scanlines baked in at twice the screen's pitch, 2px of black at 28% every 6px, so a preview shown at half size still has them. No
   vignette: it darkens the corners a small preview crops. No rounded corners.
-- A title bar 80px tall with the cat (the title bar's own grid at 3x) and `Jellycat Studio`, over a 2px rule. Under it, at 56px
+- A title bar 80px tall with the approved cat mark in a 48px slot and `Jellycat Studio`, over a 2px rule. Under it, at 56px
   from the edges: the page's name at 128px, shrunk to fit one line when it is longer than 21 characters; its kind dim under it
   (a project's; a page that is no project has none); its description in up to three lines of 56 characters, broken at spaces and
   after a hyphen before a letter as a browser does, the last cut with `...`. The home page has the studio's line, in up to two

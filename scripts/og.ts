@@ -16,7 +16,7 @@ import { FOLDERS, FOLDER_NAMES, PROJECTS } from "../app/core/projects";
 import type { Page } from "../app/core/pages";
 import { OS_NAME, OS_VERSION, PREVIEW_IMAGE, SITE_URL, pageImagePath } from "../app/core/site";
 import { README, STUDIO_NAME, plainText } from "../app/core/studio";
-import { ICON_GRIDS } from "../app/os/icons/grids";
+import { brandSvg } from "../app/brand/art";
 
 const { width: WIDTH, height: HEIGHT } = PREVIEW_IMAGE;
 
@@ -122,14 +122,10 @@ const el = (type: string, style: Style, children?: Node | string | (Node | strin
   props: { ...props, style, children },
 });
 
-// The cat, as the title bar draws it: the 16x16 grid at 3x, the outline in the phosphor and the inside in the tube's black.
-function icon(name: keyof typeof ICON_GRIDS, scale: number): Node {
-  let cells = "";
-  ICON_GRIDS[name].forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) if (row[x] !== ".") cells += `<rect x="${x}" y="${y}" width="1" height="1" fill="${row[x] === "#" ? FG : BG}"/>`;
-  });
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="${16 * scale}" height="${16 * scale}" shape-rendering="crispEdges">${cells}</svg>`;
-  return el("img", { width: 16 * scale, height: 16 * scale }, undefined, { src: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`, width: 16 * scale, height: 16 * scale });
+// The approved mark, with opaque counters as in the live menu bar.
+function icon(size: number): Node {
+  const svg = brandSvg({ ink: FG, counter: BG, width: size });
+  return el("img", { width: size, height: size }, undefined, { src: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`, width: size, height: size });
 }
 
 const GLOW = `0 0 4px ${DIM}`;
@@ -163,7 +159,7 @@ export function layout(card: Card): Node {
     { display: "flex", flexDirection: "column", width: WIDTH, height: HEIGHT, background: BG, color: FG, fontFamily: "VT323", fontSize: TEXT_SIZE, lineHeight: 1.15, position: "relative" },
     [
       el("div", { display: "flex", alignItems: "center", height: 80, padding: `0 ${MARGIN}px`, borderBottom: `2px solid ${FG}` }, [
-        icon("cat", 3),
+        icon(48),
         line(STUDIO_NAME, { marginLeft: 18 }),
       ]),
       el("div", { display: "flex", flexDirection: "column", padding: `44px ${MARGIN}px 0` }, body),
